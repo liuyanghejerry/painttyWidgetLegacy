@@ -1,0 +1,106 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Qt: qmake",
+      "type": "shell",
+      "command": "qmake",
+      "args": [
+        "-o",
+        "Makefile",
+        "painttyWidget.pro"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/painttyWidget"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Qt: make",
+      "type": "shell",
+      "command": "make",
+      "args": [
+        "-j4"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/painttyWidget"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "dependsOn": "Qt: qmake",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": [
+        "$gcc"
+      ]
+    },
+    {
+      "label": "Qt: clean",
+      "type": "shell",
+      "command": "make",
+      "args": [
+        "clean"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/painttyWidget"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Qt: distclean",
+      "type": "shell",
+      "command": "make",
+      "args": [
+        "distclean"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/painttyWidget"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Qt: run",
+      "type": "shell",
+      "command": "./MrPaint.app/Contents/MacOS/MrPaint",
+      "options": {
+        "cwd": "${workspaceFolder}/painttyWidget/build"
+      },
+      "group": "test",
+      "dependsOn": "Qt: make",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    }
+  ]
+} 

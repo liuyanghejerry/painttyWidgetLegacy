@@ -3,8 +3,6 @@
 
 #include <QDialog>
 
-#include "../misc/errortable.h"
-
 namespace Ui {
 class NewRoomWindow;
 }
@@ -17,6 +15,7 @@ public:
     explicit NewRoomWindow(QWidget *parent = 0);
     ~NewRoomWindow();
     QString roomName() const;
+    QString password() const;
     void complete();
     void failed();
 signals:

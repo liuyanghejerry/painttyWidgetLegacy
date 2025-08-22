@@ -33,6 +33,8 @@ template <class Function>
 
     #if QT_VERSION < 0x050000
     int protectFlag = flag.fetchAndStoreAcquire(flag);
+    #elif QT_VERSION >= 0x060000
+    int protectFlag = flag.fetchAndStoreAcquire(flag.loadRelaxed());
     #elif QT_VERSION >= 0x050000
     int protectFlag = flag.fetchAndStoreAcquire(flag.load());
     #endif

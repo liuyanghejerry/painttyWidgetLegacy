@@ -2,7 +2,8 @@
 
 #include <QPainter>
 #include <QApplication>
-#include <QDesktopWidget>
+#include <QGuiApplication>
+#include <QScreen>
 #include <QPropertyAnimation>
 
 GradualBox::GradualBox(QWidget *p)
@@ -127,12 +128,12 @@ void GradualBox::prepare()
     QMargins margins = contentsMargins();
     int mSide = (margins.left()+margins.right())/2;
     int mAround = (margins.top()+margins.bottom())/2;
-    int mWidth = fm.width(content_)+mSide;
+    int mWidth = fm.horizontalAdvance(content_)+mSide;
     int mHeight = fm.height()+mAround;
     resize( mWidth, mHeight);
 
     if(autoPosition_){
-        QPoint src_center = QApplication::desktop()->screenGeometry().center();
+        QPoint src_center = QGuiApplication::primaryScreen()->geometry().center();
 
         int mX = (src_center - QPoint((mWidth-mAround)/2,0)).x();
         int mY = (src_center - QPoint((mHeight-mSide)/2,0)).y();
@@ -164,7 +165,7 @@ void GradualBox::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
     QPen pen(Qt::transparent);
-    QBrush brush(Qt::black);
+    QBrush brush(QColor(99, 99, 99));
     pen.setWidth(5);
     painter.setRenderHint(QPainter::Antialiasing, true);
 

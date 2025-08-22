@@ -1,0 +1,71 @@
+# SIMD Brush Test Makefile
+# 用于编译和测试SIMD优化的笔刷实现
+
+CXX = g++
+CXXFLAGS = -std=c++17 -Wall -Wextra -O3 -march=native -msse2 -mavx -mavx2 -mavx512f -mavx512dq -ffast-math -funroll-loops -ftree-vectorize -fopt-info-vec
+QT_FLAGS = $(shell pkg-config --cflags --libs Qt5Core Qt5Gui Qt5Widgets)
+
+SRCDIR = src/painttyDesktop
+OBJDIR = build/simd-test
+
+# 源文件
+SOURCES = \
+	$(SRCDIR)/brush-benchmark.cpp \
+	$(SRCDIR)/paintingTools/brush/abstractbrushv3.cpp \
+	$(SRCDIR)/paintingTools/brush/basicbrushv3.cpp \
+	$(SRCDIR)/paintingTools/brush/basicbrushv3-simd.cpp \
+	$(SRCDIR)/paintingTools/brush/basic-stamp.cpp \
+	$(SRCDIR)/paintingTools/brush/basic-stamp-simd.cpp \
+	$(SRCDIR)/paintingTools/brush/basic-trail.cpp \
+	$(SRCDIR)/paintingTools/brush/basic-color-system.cpp
+
+# 对象文件
+OBJECTS = $(SOURCES:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
+
+# 目标可执行文件
+TARGET = brush-simd-benchmark
+
+# 默认目标
+all: $(TARGET)
+
+# 创建目录
+$(OBJDIR):
+	mkdir -p $(OBJDIR)
+	mkdir -p $(OBJDIR)/paintingTools/brush
+
+# 编译规则
+$(OBJDIR)/%.o: $(SRCDIR)/%.cpp | $(OBJDIR)
+	$(CXX) $(CXXFLAGS) $(QT_FLAGS) -I$(SRCDIR) -c $< -o $@
+
+# 链接可执行文件
+$(TARGET): $(OBJECTS)
+	$(CXX) $(CXXFLAGS) $^ $(QT_FLAGS) -o $@
+
+# 运行基准测试
+test: $(TARGET)
+	@echo "Running SIMD brush benchmark..."
+	./$(TARGET)
+
+# 检查SIMD支持
+check-simd:
+	@echo "Checking SIMD support on this system:"
+	@echo "CPU Info:"
+	@cat /proc/cpuinfo | grep -E "flags|model name" | head -2
+	@echo ""
+	@echo "GCC SIMD flags test:"
+	@$(CXX) -march=native -dM -E - < /dev/null | grep -E "__SSE|__AVX|__FMA" | head -10
+
+# 清理
+clean:
+	rm -rf $(OBJDIR) $(TARGET)
+
+# 显示帮助
+help:
+	@echo "Available targets:"
+	@echo "  all        - Build the benchmark program"
+	@echo "  test       - Build and run the benchmark"
+	@echo "  check-simd - Check SIMD support on this system"
+	@echo "  clean      - Clean build files"
+	@echo "  help       - Show this help"
+
+.PHONY: all test check-simd clean help

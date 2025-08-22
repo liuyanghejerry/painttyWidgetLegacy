@@ -13,3 +13,5 @@ INCLUDEPATH += $$PWD/src/common \
                $$PWD/src/painttyDesktop/paintingTools/brush \
                $$PWD/src/painttyDesktop/widgets \
                $$UI_DIR
+
+include(./simd.pri)

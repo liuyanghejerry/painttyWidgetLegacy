@@ -5,9 +5,10 @@
 #include <QCryptographicHash>
 #include <QSettings>
 #include <QJsonObject>
+#include <QIntValidator>
 
 #include <QDebug>
-#include "../../common/common.h"
+#include "../common/common.h"
 
 NewRoomWindow::NewRoomWindow(QWidget *parent) :
     QDialog(parent),
@@ -46,6 +47,7 @@ QString NewRoomWindow::roomName() const
 void NewRoomWindow::complete()
 {
     ui->progressBar->setValue(100);
+    this->accept();
 }
 
 void NewRoomWindow::failed()
@@ -108,6 +110,14 @@ void NewRoomWindow::onOk()
 
     ui->progressBar->setValue(30);
     emit newRoom(map);
+}
+
+QString NewRoomWindow::password() const
+{
+    if (!ui->checkBox->isChecked()) {
+        return QString();
+    }
+    return ui->lineEdit_2->text();
 }
 
 void NewRoomWindow::onCancel()

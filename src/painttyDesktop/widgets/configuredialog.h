@@ -4,10 +4,16 @@
 #include <QDialog>
 #include <QAbstractItemModel>
 #include <QItemDelegate>
+#include <QTableWidget>
+#include <QTableWidgetItem>
+#include <QHash>
+#include <QJsonObject>
 
 class ShortcutModel;
 class QTreeWidgetItem;
 class ShortcutDelegate;
+class SSEClientSocket;
+struct RoomInfo;
 
 namespace Ui {
 class ConfigureDialog;
@@ -24,24 +30,29 @@ public:
 private:
     Ui::ConfigureDialog *ui;
     QString selectedLanguage;
-    bool tryIpv6;
     bool msg_notify;
     bool auto_disable_ime;
     bool enable_tablet;
+    bool skip_replay;
+    bool use_droid_font;
 
-    bool use_defalut_server;
-    QString IPv4_addr;
-    QString IPv6_addr;
-    quint16 server_port;
+    bool use_default_server;
+    QString addr;
+
+    // 我的房间相关
+    QList<QSharedPointer<RoomInfo>> myRoomsInfo;
 
     void readSettings();
     void initLanguageList();
     void initShortcutList();
     void initServerSettings();
     void initUi();
+    void initMyRoomsTab();
+    void updateMyRoomsTable();
 
 private slots:
     void acceptConfigure();
+    void refreshMyRooms();
 };
 
 

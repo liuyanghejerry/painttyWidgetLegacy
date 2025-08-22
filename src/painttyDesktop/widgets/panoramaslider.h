@@ -2,7 +2,7 @@
 #define PANORAMASLIDER_H
 
 #include <QWidget>
-#include <QRegExp>
+#include <QRegularExpression>
 
 class QSlider;
 class QLineEdit;
@@ -20,7 +20,7 @@ private:
     QSlider *slider;
     QLineEdit *input;
     qreal internalFactor;
-    QRegExp inputReg;
+    QRegularExpression inputReg;
 private slots:
     void calculateScale(int sliderValue);
     void inputScaleConfirmed();

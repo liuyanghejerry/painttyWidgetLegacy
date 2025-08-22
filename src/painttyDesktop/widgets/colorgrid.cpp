@@ -1,6 +1,7 @@
 #include "colorgrid.h"
 
 #include <QDataStream>
+#include <QIODevice>
 #include <QScrollArea>
 #include <QList>
 #include "colorgriditem.h"

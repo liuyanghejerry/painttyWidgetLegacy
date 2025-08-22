@@ -1,0 +1,689 @@
+{
+  "metadata": {
+    "description": "Tablet事件数据，从painttyWidget的run.log中提取",
+    "source": "painttyWidget/run.log",
+    "extraction_time": "2025-01-23",
+    "total_strokes": 2,
+    "total_events": 35
+  },
+  "strokes": [
+    {
+      "stroke_id": 1,
+      "start_time": "23:18:34.441",
+      "end_time": "23:18:34.635",
+      "duration_ms": 194,
+      "total_points": 15,
+      "events": [
+        {
+          "timestamp": "23:18:34.441",
+          "event_type": "TabletPress",
+          "device_type": "Stylus",
+          "pressure": 0.0666667,
+          "position": {
+            "x": 156,
+            "y": 481
+          },
+          "buttons": "LeftButton",
+          "modifiers": "NoModifier",
+          "pointer_type": "Pen",
+          "tilt": {
+            "x": 16,
+            "y": 8
+          },
+          "rotation": 0,
+          "tangential_pressure": 0,
+          "z": 0
+        },
+        {
+          "timestamp": "23:18:34.452",
+          "event_type": "TabletMove",
+          "device_type": "Stylus",
+          "pressure": 0.152941,
+          "position": {
+            "x": 156,
+            "y": 480
+          },
+          "buttons": "LeftButton",
+          "modifiers": "NoModifier",
+          "pointer_type": "Pen",
+          "tilt": {
+            "x": 16,
+            "y": 9
+          },
+          "rotation": 0,
+          "tangential_pressure": 0,
+          "z": 0
+        },
+        {
+          "timestamp": "23:18:34.452",
+          "event_type": "TabletMove",
+          "device_type": "Stylus",
+          "pressure": 0.239216,
+          "position": {
+            "x": 155,
+            "y": 478
+          },
+          "buttons": "LeftButton",
+          "modifiers": "NoModifier",
+          "pointer_type": "Pen",
+          "tilt": {
+            "x": 16,
+            "y": 9
+          },
+          "rotation": 0,
+          "tangential_pressure": 0,
+          "z": 0
+        },
+        {
+          "timestamp": "23:18:34.474",
+          "event_type": "TabletMove",
+          "device_type": "Stylus",
+          "pressure": 0.329412,
+          "position": {
+            "x": 154,
+            "y": 474
+          },
+          "buttons": "LeftButton",
+          "modifiers": "NoModifier",
+          "pointer_type": "Pen",
+          "tilt": {
+            "x": 16,
+            "y": 10
+          },
+          "rotation": 0,
+          "tangential_pressure": 0,
+          "z": 0
+        },
+        {
+          "timestamp": "23:18:34.474",
+          "event_type": "TabletMove",
+          "device_type": "Stylus",
+          "pressure": 0.443137,
+          "position": {
+            "x": 155,
+            "y": 468
+          },
+          "buttons": "LeftButton",
+          "modifiers": "NoModifier",
+          "pointer_type": "Pen",
+          "tilt": {
+            "x": 18,
+            "y": 11
+          },
+          "rotation": 0,
+          "tangential_pressure": 0,
+          "z": 0
+        },
+        {
+          "timestamp": "23:18:34.495",
+          "event_type": "TabletMove",
+          "device_type": "Stylus",
+          "pressure": 0.470588,
+          "position": {
+            "x": 158,
+            "y": 458
+          },
+          "buttons": "LeftButton",
+          "modifiers": "NoModifier",
+          "pointer_type": "Pen",
+          "tilt": {
+            "x": 18,
+            "y": 13
+          },
+          "rotation": 0,
+          "tangential_pressure": 0,
+          "z": 0
+        },
+        {
+          "timestamp": "23:18:34.508",
+          "event_type": "TabletMove",
+          "device_type": "Stylus",
+          "pressure": 0.498039,
+          "position": {
+            "x": 167,
+            "y": 443
+          },
+          "buttons": "LeftButton",
+          "modifiers": "NoModifier",
+          "pointer_type": "Pen",
+          "tilt": {
+            "x": 20,
+            "y": 14
+          },
+          "rotation": 0,
+          "tangential_pressure": 0,
+          "z": 0
+        },
+        {
+          "timestamp": "23:18:34.517",
+          "event_type": "TabletMove",
+          "device_type": "Stylus",
+          "pressure": 0.533333,
+          "position": {
+            "x": 184,
+            "y": 423
+          },
+          "buttons": "LeftButton",
+          "modifiers": "NoModifier",
+          "pointer_type": "Pen",
+          "tilt": {
+            "x": 22,
+            "y": 17
+          },
+          "rotation": 0,
+          "tangential_pressure": 0,
+          "z": 0
+        },
+        {
+          "timestamp": "23:18:34.561",
+          "event_type": "TabletMove",
+          "device_type": "Stylus",
+          "pressure": 0.560784,
+          "position": {
+            "x": 238,
+            "y": 374
+          },
+          "buttons": "LeftButton",
+          "modifiers": "NoModifier",
+          "pointer_type": "Pen",
+          "tilt": {
+            "x": 24,
+            "y": 18
+          },
+          "rotation": 0,
+          "tangential_pressure": 0,
+          "z": 0
+        },
+        {
+          "timestamp": "23:18:34.582",
+          "event_type": "TabletMove",
+          "device_type": "Stylus",
+          "pressure": 0.580392,
+          "position": {
+            "x": 268,
+            "y": 356
+          },
+          "buttons": "LeftButton",
+          "modifiers": "NoModifier",
+          "pointer_type": "Pen",
+          "tilt": {
+            "x": 27,
+            "y": 21
+          },
+          "rotation": 0,
+          "tangential_pressure": 0,
+          "z": 0
+        },
+        {
+          "timestamp": "23:18:34.582",
+          "event_type": "TabletMove",
+          "device_type": "Stylus",
+          "pressure": 0.560784,
+          "position": {
+            "x": 290,
+            "y": 348
+          },
+          "buttons": "LeftButton",
+          "modifiers": "NoModifier",
+          "pointer_type": "Pen",
+          "tilt": {
+            "x": 27,
+            "y": 23
+          },
+          "rotation": 0,
+          "tangential_pressure": 0,
+          "z": 0
+        },
+        {
+          "timestamp": "23:18:34.604",
+          "event_type": "TabletMove",
+          "device_type": "Stylus",
+          "pressure": 0.407843,
+          "position": {
+            "x": 305,
+            "y": 349
+          },
+          "buttons": "LeftButton",
+          "modifiers": "NoModifier",
+          "pointer_type": "Pen",
+          "tilt": {
+            "x": 28,
+            "y": 24
+          },
+          "rotation": 0,
+          "tangential_pressure": 0,
+          "z": 0
+        },
+        {
+          "timestamp": "23:18:34.613",
+          "event_type": "TabletMove",
+          "device_type": "Stylus",
+          "pressure": 0.109804,
+          "position": {
+            "x": 312,
+            "y": 351
+          },
+          "buttons": "LeftButton",
+          "modifiers": "NoModifier",
+          "pointer_type": "Pen",
+          "tilt": {
+            "x": 29,
+            "y": 27
+          },
+          "rotation": 0,
+          "tangential_pressure": 0,
+          "z": 0
+        },
+        {
+          "timestamp": "23:18:34.613",
+          "event_type": "TabletMove",
+          "device_type": "Stylus",
+          "pressure": 0.0,
+          "position": {
+            "x": 315,
+            "y": 352
+          },
+          "buttons": "LeftButton",
+          "modifiers": "NoModifier",
+          "pointer_type": "Pen",
+          "tilt": {
+            "x": 29,
+            "y": 29
+          },
+          "rotation": 0,
+          "tangential_pressure": 0,
+          "z": 0
+        },
+        {
+          "timestamp": "23:18:34.635",
+          "event_type": "TabletRelease",
+          "device_type": "Stylus",
+          "pressure": 0.0,
+          "position": {
+            "x": 318,
+            "y": 353
+          },
+          "buttons": "NoButton",
+          "modifiers": "NoModifier",
+          "pointer_type": "Pen",
+          "tilt": {
+            "x": 28,
+            "y": 29
+          },
+          "rotation": 0,
+          "tangential_pressure": 0,
+          "z": 0
+        }
+      ]
+    },
+    {
+      "stroke_id": 2,
+      "start_time": "23:18:38.241",
+      "end_time": "23:18:38.447",
+      "duration_ms": 206,
+      "total_points": 20,
+      "events": [
+        {
+          "timestamp": "23:18:38.241",
+          "event_type": "TabletPress",
+          "device_type": "Stylus",
+          "pressure": 0.0392157,
+          "position": {
+            "x": 146,
+            "y": 274
+          },
+          "buttons": "LeftButton",
+          "modifiers": "NoModifier",
+          "pointer_type": "Pen",
+          "tilt": {
+            "x": 12,
+            "y": 29
+          },
+          "rotation": 0,
+          "tangential_pressure": 0,
+          "z": 0
+        },
+        {
+          "timestamp": "23:18:38.241",
+          "event_type": "TabletMove",
+          "device_type": "Stylus",
+          "pressure": 0.101961,
+          "position": {
+            "x": 146,
+            "y": 276
+          },
+          "buttons": "LeftButton",
+          "modifiers": "NoModifier",
+          "pointer_type": "Pen",
+          "tilt": {
+            "x": 13,
+            "y": 29
+          },
+          "rotation": 0,
+          "tangential_pressure": 0,
+          "z": 0
+        },
+        {
+          "timestamp": "23:18:38.272",
+          "event_type": "TabletMove",
+          "device_type": "Stylus",
+          "pressure": 0.231373,
+          "position": {
+            "x": 146,
+            "y": 278
+          },
+          "buttons": "LeftButton",
+          "modifiers": "NoModifier",
+          "pointer_type": "Pen",
+          "tilt": {
+            "x": 13,
+            "y": 31
+          },
+          "rotation": 0,
+          "tangential_pressure": 0,
+          "z": 0
+        },
+        {
+          "timestamp": "23:18:38.272",
+          "event_type": "TabletMove",
+          "device_type": "Stylus",
+          "pressure": 0.278431,
+          "position": {
+            "x": 143,
+            "y": 292
+          },
+          "buttons": "LeftButton",
+          "modifiers": "NoModifier",
+          "pointer_type": "Pen",
+          "tilt": {
+            "x": 13,
+            "y": 32
+          },
+          "rotation": 0,
+          "tangential_pressure": 0,
+          "z": 0
+        },
+        {
+          "timestamp": "23:18:38.298",
+          "event_type": "TabletMove",
+          "device_type": "Stylus",
+          "pressure": 0.356863,
+          "position": {
+            "x": 139,
+            "y": 309
+          },
+          "buttons": "LeftButton",
+          "modifiers": "NoModifier",
+          "pointer_type": "Pen",
+          "tilt": {
+            "x": 15,
+            "y": 35
+          },
+          "rotation": 0,
+          "tangential_pressure": 0,
+          "z": 0
+        },
+        {
+          "timestamp": "23:18:38.298",
+          "event_type": "TabletMove",
+          "device_type": "Stylus",
+          "pressure": 0.403922,
+          "position": {
+            "x": 135,
+            "y": 331
+          },
+          "buttons": "LeftButton",
+          "modifiers": "NoModifier",
+          "pointer_type": "Pen",
+          "tilt": {
+            "x": 16,
+            "y": 36
+          },
+          "rotation": 0,
+          "tangential_pressure": 0,
+          "z": 0
+        },
+        {
+          "timestamp": "23:18:38.321",
+          "event_type": "TabletMove",
+          "device_type": "Stylus",
+          "pressure": 0.454902,
+          "position": {
+            "x": 133,
+            "y": 354
+          },
+          "buttons": "LeftButton",
+          "modifiers": "NoModifier",
+          "pointer_type": "Pen",
+          "tilt": {
+            "x": 17,
+            "y": 38
+          },
+          "rotation": 0,
+          "tangential_pressure": 0,
+          "z": 0
+        },
+        {
+          "timestamp": "23:18:38.331",
+          "event_type": "TabletMove",
+          "device_type": "Stylus",
+          "pressure": 0.490196,
+          "position": {
+            "x": 134,
+            "y": 371
+          },
+          "buttons": "LeftButton",
+          "modifiers": "NoModifier",
+          "pointer_type": "Pen",
+          "tilt": {
+            "x": 19,
+            "y": 39
+          },
+          "rotation": 0,
+          "tangential_pressure": 0,
+          "z": 0
+        },
+        {
+          "timestamp": "23:18:38.341",
+          "event_type": "TabletMove",
+          "device_type": "Stylus",
+          "pressure": 0.517647,
+          "position": {
+            "x": 142,
+            "y": 380
+          },
+          "buttons": "LeftButton",
+          "modifiers": "NoModifier",
+          "pointer_type": "Pen",
+          "tilt": {
+            "x": 19,
+            "y": 41
+          },
+          "rotation": 0,
+          "tangential_pressure": 0,
+          "z": 0
+        },
+        {
+          "timestamp": "23:18:38.356",
+          "event_type": "TabletMove",
+          "device_type": "Stylus",
+          "pressure": 0.564706,
+          "position": {
+            "x": 147,
+            "y": 380
+          },
+          "buttons": "LeftButton",
+          "modifiers": "NoModifier",
+          "pointer_type": "Pen",
+          "tilt": {
+            "x": 21,
+            "y": 42
+          },
+          "rotation": 0,
+          "tangential_pressure": 0,
+          "z": 0
+        },
+        {
+          "timestamp": "23:18:38.366",
+          "event_type": "TabletMove",
+          "device_type": "Stylus",
+          "pressure": 0.580392,
+          "position": {
+            "x": 163,
+            "y": 375
+          },
+          "buttons": "LeftButton",
+          "modifiers": "NoModifier",
+          "pointer_type": "Pen",
+          "tilt": {
+            "x": 21,
+            "y": 42
+          },
+          "rotation": 0,
+          "tangential_pressure": 0,
+          "z": 0
+        },
+        {
+          "timestamp": "23:18:38.375",
+          "event_type": "TabletMove",
+          "device_type": "Stylus",
+          "pressure": 0.6,
+          "position": {
+            "x": 188,
+            "y": 363
+          },
+          "buttons": "LeftButton",
+          "modifiers": "NoModifier",
+          "pointer_type": "Pen",
+          "tilt": {
+            "x": 21,
+            "y": 42
+          },
+          "rotation": 0,
+          "tangential_pressure": 0,
+          "z": 0
+        },
+        {
+          "timestamp": "23:18:38.387",
+          "event_type": "TabletMove",
+          "device_type": "Stylus",
+          "pressure": 0.607843,
+          "position": {
+            "x": 230,
+            "y": 337
+          },
+          "buttons": "LeftButton",
+          "modifiers": "NoModifier",
+          "pointer_type": "Pen",
+          "tilt": {
+            "x": 22,
+            "y": 43
+          },
+          "rotation": 0,
+          "tangential_pressure": 0,
+          "z": 0
+        },
+        {
+          "timestamp": "23:18:38.401",
+          "event_type": "TabletMove",
+          "device_type": "Stylus",
+          "pressure": 0.580392,
+          "position": {
+            "x": 242,
+            "y": 329
+          },
+          "buttons": "LeftButton",
+          "modifiers": "NoModifier",
+          "pointer_type": "Pen",
+          "tilt": {
+            "x": 23,
+            "y": 43
+          },
+          "rotation": 0,
+          "tangential_pressure": 0,
+          "z": 0
+        },
+        {
+          "timestamp": "23:18:38.410",
+          "event_type": "TabletMove",
+          "device_type": "Stylus",
+          "pressure": 0.545098,
+          "position": {
+            "x": 259,
+            "y": 314
+          },
+          "buttons": "LeftButton",
+          "modifiers": "NoModifier",
+          "pointer_type": "Pen",
+          "tilt": {
+            "x": 23,
+            "y": 43
+          },
+          "rotation": 0,
+          "tangential_pressure": 0,
+          "z": 0
+        },
+        {
+          "timestamp": "23:18:38.424",
+          "event_type": "TabletMove",
+          "device_type": "Stylus",
+          "pressure": 0.439216,
+          "position": {
+            "x": 274,
+            "y": 297
+          },
+          "buttons": "LeftButton",
+          "modifiers": "NoModifier",
+          "pointer_type": "Pen",
+          "tilt": {
+            "x": 24,
+            "y": 44
+          },
+          "rotation": 0,
+          "tangential_pressure": 0,
+          "z": 0
+        },
+        {
+          "timestamp": "23:18:38.434",
+          "event_type": "TabletMove",
+          "device_type": "Stylus",
+          "pressure": 0.168627,
+          "position": {
+            "x": 281,
+            "y": 284
+          },
+          "buttons": "LeftButton",
+          "modifiers": "NoModifier",
+          "pointer_type": "Pen",
+          "tilt": {
+            "x": 24,
+            "y": 44
+          },
+          "rotation": 0,
+          "tangential_pressure": 0,
+          "z": 0
+        },
+        {
+          "timestamp": "23:18:38.447",
+          "event_type": "TabletRelease",
+          "device_type": "Stylus",
+          "pressure": 0.0,
+          "position": {
+            "x": 282,
+            "y": 281
+          },
+          "buttons": "NoButton",
+          "modifiers": "NoModifier",
+          "pointer_type": "Pen",
+          "tilt": {
+            "x": 24,
+            "y": 44
+          },
+          "rotation": 0,
+          "tangential_pressure": 0,
+          "z": 0
+        }
+      ]
+    }
+  ]
+} 

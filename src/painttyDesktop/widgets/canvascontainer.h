@@ -18,21 +18,24 @@ public:
     QRectF visualRect() const;
     void centerOn(const QPointF &pos);
     void centerOn(qreal x, qreal y);
+    void moveBy(const QPoint &p);
     
 signals:
     void scaled(qreal factor);
+    void rotated(int deg);
     void rectChanged(const QRect&);
 
 public slots:
     void setScaleFactor(qreal factor);
     void setSmoothScale(bool smooth);
+    void scaleBy(qreal factor);
+    void setRotation(int degree);
+    void rotateBy(int deg);
 
 private:
     QGraphicsScene *scene;
     QGraphicsProxyWidget *proxy;
     QPoint moveStartPoint;
-    int horizontalScrollValue;
-    int verticalScrollValue;
     bool smoothScaleFlag;
     qreal calculateFactor(qreal current, bool zoomIn);
     void setScaleFactorInternal(qreal factor, const QPoint scaleCenter = QPoint());

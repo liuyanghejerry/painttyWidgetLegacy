@@ -1,67 +1,104 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include <QCloseEvent>
-#include <QScrollBar>
-#include <QToolBar>
-#include <QToolButton>
 #include <QCheckBox>
-#include <QTableWidgetItem>
-#include <QShortcut>
-#include <QFile>
 #include <QClipboard>
+#include <QCloseEvent>
+#include <QCryptographicHash>
+#include <QDateTime>
+#include <QEventLoop>
+#include <QFile>
+#include <QFileDialog>
+#include <QHostAddress>
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
-#include <QSettings>
-#include <QCryptographicHash>
-#include <QHostAddress>
-#include <QFileDialog>
+#include <QLineEdit>
 #include <QMessageBox>
-#include <QRegularExpression>
 #include <QProcess>
+#include <QProcessEnvironment>
+#include <QProgressDialog>
+#include <QRegularExpression>
+#include <QScrollBar>
+#include <QActionGroup>
+#include <QSettings>
+#include <QShortcut>
+#include <QTableWidgetItem>
 #include <QTimer>
-#include <QScriptEngine>
+#include <QToolBar>
+#include <QToolButton>
+#include <QtConcurrent>
+#include <QThread>
+#include <QApplication>
+#include <QTextStream>
+#include <QTextCursor>
+#include <QTextEdit>
+#include <QPushButton>
 
-#include "../misc/singleshortcut.h"
-#include "layerwidget.h"
-#include "layeritem.h"
-#include "colorgrid.h"
-#include "aboutdialog.h"
-#include "configuredialog.h"
-#include "brushsettingswidget.h"
-#include "gradualbox.h"
-#include "roomsharebar.h"
-#include "developerconsole.h"
-#include "../../common/network/clientsocket.h"
-#include "../../common/network/localnetworkinterface.h"
-#include "../paintingTools/brush/brushmanager.h"
-#include "../../common/common.h"
+#include "../common/common.h"
+#include "../common/network/sse-clientsocket.h"
+#include "../misc/archivefile.h"
+#include "../common/network/known-error.h"
 #include "../misc/platformextend.h"
-#include "../misc/singleton.h"
+#include "../misc/psdexport.h"
 #include "../misc/shortcutmanager.h"
-#include "../misc/errortable.h"
+#include "../misc/singleshortcut.h"
+#include "../misc/singleton.h"
+#include "../paintingTools/brush/brushmanager.h"
+#include "canvas.h"
+#include "canvascontainer.h"
+#include "panoramawidget.h"
+#include "aboutdialog.h"
+#include "brushsettingswidget.h"
+#include "colorgrid.h"
+#include "configuredialog.h"
+#include "gradualbox.h"
+#include "layeritem.h"
+#include "layerwidget.h"
+#include "networkindicator.h"
+#include "roomsharebar.h"
+#include "colorbox.h"
+#include "memberlistwidget.h"
+#include "../common/room-info-manager.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
+    roomInfoManager_(nullptr),
+    clientSocket_(nullptr),
     lastBrushAction(nullptr),
     brushSettingControl_(nullptr),
     toolbar_(nullptr),
     brushActionGroup_(nullptr),
     colorPickerButton_(nullptr),
-    scriptEngine_(nullptr),
-    console_(nullptr)
+    moveToolButton_(nullptr),
+    networkIndicator_(nullptr),
+    onlineListTimer_(nullptr)
 {
     ui->setupUi(this);
-    defaultView = saveState();
+
+    // 使用全局单例的房间信息管理器
+    roomInfoManager_ = &RoomInfoManager::instance();
     init();
 }
 
 MainWindow::~MainWindow()
 {
-    Singleton<ClientSocket>::instance().reset();
-    Singleton<ClientSocket>::instance().close();
+    qDebug() << "MainWindow::~MainWindow";
+
+    // 停止定时器
+    if (onlineListTimer_) {
+        onlineListTimer_->stop();
+    }
+
+    // 先断开网络连接，避免在对象销毁过程中产生错误
+    if (clientSocket_) {
+        clientSocket_->disconnect();
+    }
+
+    // 等待一小段时间，确保网络操作完成
+    QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
     delete ui;
 }
 
@@ -78,18 +115,27 @@ void MainWindow::stylize()
 
 void MainWindow::init()
 {
-    auto& client_socket = Singleton<ClientSocket>::instance();
-    auto&& roomName = client_socket.roomName();
-    setWindowTitle(roomName+tr(" - Mr.Paint"));
-    ui->canvas->resize(client_socket.canvasSize());
+    // 设置初始窗口标题，房间名将在加入房间后更新
+    setWindowTitle(tr("Mr.Paint"));
+
+    // 创建快捷键管理器
+    shortcutManager_ = new ShortcutManager(this);
 
     ui->centralWidget->setBackgroundRole(QPalette::Dark);
-    ui->centralWidget->setCanvas(ui->canvas);
+
+    connect(ui->canvas, &Canvas::contentMovedBy,
+            [this](const QPoint& p){
+        ui->centralWidget->moveBy(p * ui->centralWidget->currentScaleFactor());
+    });
 
     connect(ui->panorama, &PanoramaWidget::scaled,
             ui->centralWidget, &CanvasContainer::setScaleFactor);
     connect(ui->centralWidget, &CanvasContainer::scaled,
             ui->panorama, &PanoramaWidget::setScaled);
+    connect(ui->panorama, &PanoramaWidget::rotated,
+            ui->centralWidget, &CanvasContainer::setRotation);
+    connect(ui->centralWidget, &CanvasContainer::rotated,
+            ui->panorama, &PanoramaWidget::setRotation);
 
     connect(ui->lineEdit,&QLineEdit::returnPressed,
             this,&MainWindow::onSendPressed);
@@ -114,8 +160,8 @@ void MainWindow::init()
             this, &MainWindow::brushColorChange);
     connect(this, &MainWindow::brushColorChange,
             ui->canvas, &Canvas::setBrushColor);
-    connect(ui->canvas, &Canvas::pickColorComplete,
-            this, &MainWindow::onPickColorComplete);
+    connect(ui->canvas, &Canvas::canvasToolComplete,
+            this, &MainWindow::onCanvasToolComplete);
 
     connect(ui->colorGrid,
             static_cast<void (ColorGrid::*)(const int&)>
@@ -132,78 +178,20 @@ void MainWindow::init()
             static_cast<void (CanvasContainer::*)(const QPointF&)>
             (&CanvasContainer::centerOn));
 
+    connect(ui->memberList, &MemberListWidget::memberGetKicked,
+            this, &MainWindow::requestKickUser);
+
     layerWidgetInit();
     colorGridInit();
+    statusBarInit();
     toolbarInit();
     viewInit();
     shortcutInit();
-    //    stylize();
     socketInit();
-    scriptInit();
 
-}
-
-void MainWindow::cmdRouterInit()
-{
-    cmdRouter_.regHandler("action",
-                          "close",
-                          std::bind(&MainWindow::onCommandActionClose,
-                                    this,
-                                    std::placeholders::_1));
-    cmdRouter_.regHandler("response",
-                          "close",
-                          std::bind(&MainWindow::onCommandResponseClose,
-                                    this,
-                                    std::placeholders::_1));
-    cmdRouter_.regHandler("action",
-                          "clearall",
-                          std::bind(&MainWindow::onCommandActionClearAll,
-                                    this,
-                                    std::placeholders::_1));
-    cmdRouter_.regHandler("response",
-                          "clearall",
-                          std::bind(&MainWindow::onCommandResponseClearAll,
-                                    this,
-                                    std::placeholders::_1));
-    cmdRouter_.regHandler("response",
-                          "onlinelist",
-                          std::bind(&MainWindow::onCommandResponseOnlinelist,
-                                    this,
-                                    std::placeholders::_1));
-    cmdRouter_.regHandler("response",
-                          "checkout",
-                          std::bind(&MainWindow::onCommandResponseCheckout,
-                                    this,
-                                    std::placeholders::_1));
-    cmdRouter_.regHandler("action",
-                          "notify",
-                          std::bind(&MainWindow::onActionNotify,
-                                    this,
-                                    std::placeholders::_1));
-    cmdRouter_.regHandler("response",
-                          "archivesign",
-                          std::bind(&MainWindow::onResponseArchiveSign,
-                                    this,
-                                    std::placeholders::_1));
-    cmdRouter_.regHandler("response",
-                          "archive",
-                          std::bind(&MainWindow::onResponseArchive,
-                                    this,
-                                    std::placeholders::_1));
-}
-
-void MainWindow::scriptInit()
-{
-    scriptEngine_ = new QScriptEngine;
-
-    QScriptValue scriptMainWindow = scriptEngine_->newQObject(this);
-    scriptEngine_->globalObject().setProperty("mainwindow", scriptMainWindow);
-
-    QScriptValue scriptCanvas = scriptEngine_->newQObject(this->ui->canvas);
-    scriptEngine_->globalObject().setProperty("canvas", scriptCanvas);
-
-    QScriptValue scriptClientSocket = scriptEngine_->newQObject(&Singleton<ClientSocket>::instance());
-    scriptEngine_->globalObject().setProperty("clientsocket", scriptClientSocket);
+    // 初始化在线列表定时器
+    onlineListTimer_ = new QTimer(this);
+    connect(onlineListTimer_, &QTimer::timeout, this, &MainWindow::onOnlineListTimer);
 }
 
 void MainWindow::layerWidgetInit()
@@ -257,7 +245,9 @@ void MainWindow::toolbarInit()
     };
 
     auto brushes = Singleton<BrushManager>::instance().allBrushes();
+    auto brushesV3 = Singleton<BrushManager>::instance().allBrushesV3();
 
+    // 添加v1笔刷
     for(auto &item: brushes){
         // create action on tool bar
         QAction * action = toolbar_->addAction(item->icon(),
@@ -270,67 +260,124 @@ void MainWindow::toolbarInit()
         brushActionGroup_->addAction(action);
 
         // set shortcut for the brush
-        SingleShortcut *shortcut = new SingleShortcut(this);
-        shortcut->setKey(item->shortcut());
-        connect(shortcut, &SingleShortcut::activated,
-                [=](){
+        regShortcut<>(item->shortcut(),
+                      [this, action](){
             lastBrushAction = brushActionGroup_->checkedAction();
             action->trigger();
-        });
-        connect(shortcut, &SingleShortcut::inactivated,
-                restoreAction);
+        },
+        restoreAction);
+
         action->setToolTip(
                     tr("%1\n"
                        "Shortcut: %2")
                     .arg(item->displayName())
-                    .arg(shortcut->key()
-                         .toString()));
+                    .arg(item->shortcut().toString()));
         if(toolbar_->actions().count() < 2){
             action->trigger();
         }
     }
 
+    // 添加v3笔刷
+    for(auto &item: brushesV3){
+        // create action on tool bar
+        QAction * action = toolbar_->addAction(item->icon(),
+                                               item->displayName());
+        action->setObjectName(item->name());
+        connect(action, &QAction::triggered,
+                this, &MainWindow::onBrushTypeChange);
+        action->setCheckable(true);
+        action->setAutoRepeat(false);
+        brushActionGroup_->addAction(action);
+
+        // set shortcut for the brush
+        regShortcut<>(item->shortcut(),
+                      [this, action](){
+            lastBrushAction = brushActionGroup_->checkedAction();
+            action->trigger();
+        },
+        restoreAction);
+
+        action->setToolTip(
+                    tr("%1\n"
+                       "Shortcut: %2")
+                    .arg(item->displayName())
+                    .arg(item->shortcut().toString()));
+    }
+
 
     // doing hacking to color picker
-    QIcon colorpickerIcon;
-    colorpickerIcon.addFile(":/iconset/ui/picker-1.png",
-                            QSize(), QIcon::Disabled);
-    colorpickerIcon.addFile(":/iconset/ui/picker-2.png",
-                            QSize(), QIcon::Active);
-    colorpickerIcon.addFile(":/iconset/ui/picker-3.png",
-                            QSize(), QIcon::Selected);
-    colorpickerIcon.addFile(":/iconset/ui/picker-3.png",
-                            QSize(), QIcon::Normal, QIcon::On);
-    colorpickerIcon.addFile(":/iconset/ui/picker-4.png",
-                            QSize(), QIcon::Normal);
-    QAction *colorpicker = toolbar_->addAction(colorpickerIcon,
-                                               tr("Color Picker"));
+    QIcon colorpickerIcon(":/iconset/ui/brush/colorpicker.png");
+    QAction *colorpicker = new QAction(colorpickerIcon, tr("Color Picker"), this);
     colorpicker->setCheckable(true);
     colorpicker->setAutoRepeat(false);
-    // we need the real QToolButton to know weather the picker is
-    // canceled by hand
-    auto l = colorpicker->associatedWidgets();
-    if(l.count() > 1){
-        QToolButton *b = qobject_cast<QToolButton *>(l[1]);
-        if(b){
-            colorPickerButton_ = b;
-            connect(b, &QToolButton::clicked,
-                    this, &MainWindow::onColorPickerPressed);
+    
+    // 手动构造 QToolButton 并添加到工具栏
+    colorPickerButton_ = new QToolButton(this);
+    colorPickerButton_->setDefaultAction(colorpicker);
+    colorPickerButton_->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    toolbar_->addWidget(colorPickerButton_);
+    
+    // 连接信号槽
+    connect(colorPickerButton_, &QToolButton::clicked,
+            this, &MainWindow::onColorPickerPressed);
 
-            SingleShortcut *pickerShortcut = new SingleShortcut(this);
-            pickerShortcut->setKey(Qt::Key_C);
-            connect(pickerShortcut, &SingleShortcut::activated,
-                    b, &QToolButton::click);
-            connect(pickerShortcut, &SingleShortcut::inactivated,
-                    b, &QToolButton::click);
-            colorpicker->setToolTip(
-                        tr("%1\n"
-                           "Shortcut: %2")
-                        .arg(colorpicker->text())
-                        .arg(pickerShortcut->key()
-                             .toString()));
-        }
-    }
+    auto colorpicker_key = Singleton<ShortcutManager>::instance()
+            .shortcut("colorpicker")["key"].toString();
+    SingleShortcut *pickerShortcut = new SingleShortcut(this);
+    pickerShortcut->setKey(colorpicker_key);
+    connect(pickerShortcut, &SingleShortcut::activated,
+            colorPickerButton_, &QToolButton::click);
+    connect(pickerShortcut, &SingleShortcut::inactivated,
+            colorPickerButton_, &QToolButton::click);
+    colorpicker->setToolTip(
+                tr("%1\n"
+                   "Shortcut: %2")
+                .arg(colorpicker->text())
+                .arg(colorpicker_key));
+
+    // doing hacking for move tool
+    QIcon moveIcon(":/iconset/ui/brush/move.png");
+    QAction *moveTool = new QAction(moveIcon, tr("Move Tool"), this);
+    moveTool->setCheckable(true);
+    moveTool->setAutoRepeat(false);
+    
+    // 手动构造 QToolButton 并添加到工具栏
+    moveToolButton_ = new QToolButton(this);
+    moveToolButton_->setDefaultAction(moveTool);
+    moveToolButton_->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    toolbar_->addWidget(moveToolButton_);
+    
+    // 连接信号槽
+    connect(moveToolButton_, &QToolButton::clicked,
+            this, &MainWindow::onMoveToolPressed);
+    
+    auto movetool_key = Singleton<ShortcutManager>::instance()
+            .shortcut("movetool")["key"].toString();
+    SingleShortcut *moveToolShortcut = new SingleShortcut(this);
+    moveToolShortcut->setKey(movetool_key);
+    connect(moveToolShortcut, &SingleShortcut::activated,
+            moveToolButton_, &QToolButton::click);
+    connect(moveToolShortcut, &SingleShortcut::inactivated,
+            moveToolButton_, &QToolButton::click);
+    moveTool->setToolTip(
+                tr("%1\n"
+                   "Shortcut: %2")
+                .arg(moveTool->text())
+                .arg(movetool_key));
+
+    // // TODO: v3笔刷成熟后可以放开
+    // 从 settings 读取 tablet 默认状态，与 configuredialog.cpp 保持一致
+    // QSettings settings(GlobalDef::SETTINGS_NAME, QSettings::defaultFormat(), qApp);
+    // bool enable_tablet = settings.value("canvas/enable_tablet", false).toBool();
+
+    // QToolBar *tabletEnableToolbar = new QToolBar(tr("Tablet"), this);
+    // tabletEnableToolbar->setObjectName("TabletEnableToolbar");
+    // QAction *tabletAction = tabletEnableToolbar->addAction(QIcon(":/iconset/ui/tablet.png"), tr("Draw with Tablet"));
+    // tabletAction->setCheckable(true);
+    // tabletAction->setChecked(enable_tablet);
+    // ui->canvas->setTabletEnabled(enable_tablet);
+    // connect(tabletAction, &QAction::toggled, ui->canvas, &Canvas::setTabletEnabled);
+    // addToolBar(Qt::TopToolBarArea, tabletEnableToolbar);
 
     // for brush width
     QToolBar *brushSettingToolbar = new QToolBar(tr("Brush Settings"), this);
@@ -341,112 +388,95 @@ void MainWindow::toolbarInit()
             ui->canvas, &Canvas::setBrushWidth);
     connect(brushSettingWidget, &BrushSettingsWidget::hardnessChanged,
             ui->canvas, &Canvas::setBrushHardness);
+    connect(brushSettingWidget, &BrushSettingsWidget::thicknessChanged,
+            ui->canvas, &Canvas::setBrushThickness);
+    connect(brushSettingWidget, &BrushSettingsWidget::waterChanged,
+            ui->canvas, &Canvas::setBrushWater);
+    connect(brushSettingWidget, &BrushSettingsWidget::extendChanged,
+            ui->canvas, &Canvas::setBrushExtend);
+    connect(brushSettingWidget, &BrushSettingsWidget::mixinChanged,
+            ui->canvas, &Canvas::setBrushMixin);
     connect(brushSettingToolbar, &QToolBar::orientationChanged,
             brushSettingWidget, &BrushSettingsWidget::setOrientation);
 
-    // shortcuts for width control
-    ShortcutManager &stctmgr = Singleton<ShortcutManager>::instance();
-    QShortcut* widthActionSub = new QShortcut(this);
-    widthActionSub->setKey(stctmgr.shortcut("subwidth")["key"].toString());
-    connect(widthActionSub, &QShortcut::activated,
-            brushSettingWidget, &BrushSettingsWidget::widthDown);
-    QShortcut* widthActionAdd = new QShortcut(this);
-    widthActionAdd->setKey(stctmgr.shortcut("addwidth")["key"].toString());
-    connect(widthActionAdd, &QShortcut::activated,
-            brushSettingWidget, &BrushSettingsWidget::widthUp);
-    // shortcuts for hardness control
-    QShortcut* hardnessActionSub = new QShortcut(this);
-    hardnessActionSub->setKey(stctmgr.shortcut("subhardness")["key"].toString());
-    connect(hardnessActionSub, &QShortcut::activated,
-            brushSettingWidget, &BrushSettingsWidget::hardnessDown);
-    QShortcut* hardnessActionAdd = new QShortcut(this);
-    hardnessActionAdd->setKey(stctmgr.shortcut("addhardness")["key"].toString());
-    connect(hardnessActionAdd, &QShortcut::activated,
-            brushSettingWidget, &BrushSettingsWidget::hardnessUp);
+
+    //    ShortcutManager &stctmgr = Singleton<ShortcutManager>::instance();
+    regShortcut<>("subwidth",
+                  std::bind(&BrushSettingsWidget::widthDown, brushSettingWidget));
+    regShortcut<>("addwidth",
+                  std::bind(&BrushSettingsWidget::widthUp, brushSettingWidget));
+
+    regShortcut<>("subhardness",
+                  std::bind(&BrushSettingsWidget::hardnessDown, brushSettingWidget));
+    regShortcut<>("addhardness",
+                  std::bind(&BrushSettingsWidget::hardnessUp, brushSettingWidget));
+
+    regShortcut<>("subthickness",
+                  std::bind(&BrushSettingsWidget::thicknessDown, brushSettingWidget));
+    regShortcut<>("addthickness",
+                  std::bind(&BrushSettingsWidget::thicknessUp, brushSettingWidget));
 
     brushSettingControl_ = brushSettingWidget;
     brushSettingToolbar->addWidget(brushSettingWidget);
 
-    // for room share
-    auto& client_socket = Singleton<ClientSocket>::instance();
+    changeToBrush("BasicBrush");
+
+    // for room share - 修改为使用 SSE 客户端的 URL 生成
     QToolBar* roomShareToolbar = new QToolBar(tr("Room Share"), this);
-    brushSettingToolbar->setObjectName("RoomShareToolbar");
+    roomShareToolbar->setObjectName("RoomShareToolbar");
     this->addToolBar(Qt::TopToolBarArea, roomShareToolbar);
     RoomShareBar* rsb = new RoomShareBar(this);
-    rsb->setAddress(client_socket.toUrl());
+    // SSE 客户端暂时不提供 URL 生成功能，使用占位符
+    rsb->setAddress("SSE Client - URL generation not implemented");
     roomShareToolbar->addWidget(rsb);
+}
 
-    if(client_socket.isIPv6Address()){
-        auto f = [this](){
-            GradualBox::showText(tr("Notice, we detected you're using IPv6 protocol"\
-                                    " which may result in that your Room URL is not available"\
-                                    " for IPv4 users."));
-        };
+void MainWindow::statusBarInit()
+{
+    networkIndicator_ = new NetworkIndicator(this);
+    this->statusBar()->addPermanentWidget(networkIndicator_);
+}
 
-        GlobalDef::deferJob(f, 5000);
+void MainWindow::requestCloseRoom()
+{
+    if (!clientSocket_->isRoomOwner()) {
+        QMessageBox::warning(this,
+                         tr("Warning"),
+                         tr("You are not the room owner, you can't close the room."),
+                         QMessageBox::Close);
+        return;
+    }
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::warning(this,
+                         tr("Warning"),
+                         tr("You are closing the room.\n"
+                            "Your paintings will be lost if you don't save them.\n"
+                            "Are you sure you want to close the room?"),
+                         QMessageBox::Yes | QMessageBox::No);
+    if (reply == QMessageBox::Yes) {
+        clientSocket_->requestCloseRoom();
     }
 }
 
-QString MainWindow::getRoomKey()
+void MainWindow::requestKickUser(const QString& id)
 {
-    QCryptographicHash hash(QCryptographicHash::Md5);
-    auto&& roomName = Singleton<ClientSocket>::instance().roomName();
-    hash.addData(roomName.toUtf8());
-    QString hashed_name = hash.result().toHex();
-    QSettings settings(GlobalDef::SETTINGS_NAME,
-                       QSettings::defaultFormat(),
-                       qApp);
-    settings.sync();
-    if( !settings.contains("rooms/"+hashed_name) ){
-        // Tell user that he's not owner
-        qDebug()<<"hashed_name"<<hashed_name
-               <<" key cannot found!";
-        return QString();
+    if (!clientSocket_->isRoomOwner()) {
+      QMessageBox::warning(
+          this, tr("Warning"),
+          tr("You are not the room owner, you can't kick user."),
+          QMessageBox::Close);
+      return;
     }
-    QVariant key = settings.value("rooms/"+hashed_name);
-    return key.toString();
-}
-
-void MainWindow::requestOnlinelist()
-{
-    QJsonObject obj;
-    obj.insert("request", QString("onlinelist"));
-    obj.insert("type", QString("command"));
-    obj.insert("clientid", Singleton<ClientSocket>::instance().clientId());
-//    qDebug()<<"clientid: "<<Singleton<ClientSocket>::instance().clientId();
-
-    Singleton<ClientSocket>::instance().sendCmdPack(obj);
-}
-
-void MainWindow::requestCheckout()
-{
-    QJsonObject obj;
-    obj.insert("request", QString("checkout"));
-    obj.insert("type", QString("command"));
-    obj.insert("key", getRoomKey());
-    qDebug()<<"checkout with key: "<<getRoomKey();
-
-    Singleton<ClientSocket>::instance().sendCmdPack(obj);
-}
-
-void MainWindow::requestArchiveSign()
-{
-    QJsonObject obj;
-    obj.insert("request", QString("archivesign"));
-    qDebug()<<"request archive signature";
-
-    Singleton<ClientSocket>::instance().sendCmdPack(obj);
-}
-
-void MainWindow::requestArchive()
-{
-    auto& socket = Singleton<ClientSocket>::instance();
-    QJsonObject obj;
-    obj.insert("request", QString("archive"));
-    obj.insert("start", (int)socket.archiveSize());
-    qDebug()<<"request archive"<<obj;
-
-    socket.sendCmdPack(obj);
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::warning(this,
+                         tr("Warning"),
+                         tr("You are kicking someone.\n"
+                            "He/She may never be allowed to join the room again.\n"
+                            "Are you sure you want to kick user?"),
+                         QMessageBox::Yes | QMessageBox::No);
+    if (reply == QMessageBox::Yes) {
+        clientSocket_->requestKickUser(id);
+    }
 }
 
 void MainWindow::shortcutInit()
@@ -467,78 +497,273 @@ void MainWindow::shortcutInit()
             this, &MainWindow::about);
     connect(ui->actionAbout_Qt, &QAction::triggered,
             &QApplication::aboutQt);
+    connect(ui->actionExport_to_PSD, &QAction::triggered,
+            this, &MainWindow::exportToPSD);
     connect(ui->actionClose_Room, &QAction::triggered,
-            [&](){
-        QJsonObject obj;
-        QString r_key = getRoomKey();
-        obj.insert("request", QString("close"));
-        if(r_key.isEmpty()){
-            QMessageBox::warning(this,
-                                 tr("Sorry"),
-                                 tr("Only room owner is authorized "
-                                    "to close the room.\n"
-                                    "It seems you're not room manager."));
-            return;
-        }
-        obj.insert("key", r_key);
-        Singleton<ClientSocket>::instance().sendCmdPack(obj);
-    });
+            this, &MainWindow::requestCloseRoom);
     connect(ui->actionAll_Layers, &QAction::triggered,
             this, &MainWindow::clearAllLayer);
     connect(ui->actionConfiguration, &QAction::triggered,
-            [this](){
+            [](){
         ConfigureDialog conf_dialog;
         conf_dialog.exec();
     });
 
-    QShortcut* console_shortcut = new QShortcut(QKeySequence("F12"), this);
-    connect(console_shortcut, &QShortcut::activated,
-            this, &MainWindow::openConsole);
+    regShortcut<>("zoomin", [this](){
+        this->ui->centralWidget->scaleBy(1.2);
+    });
+    regShortcut<>("zoomout", [this](){
+        this->ui->centralWidget->scaleBy(0.8);
+    });
+    regShortcut<>("rotateclock", [this](){
+        this->ui->centralWidget->rotateBy(10);
+    });
+    regShortcut<>("rotateanticlock", [this](){
+        this->ui->centralWidget->rotateBy(-10);
+    });
+    regShortcut<>("canvasreset", [this](){
+        this->ui->centralWidget->setRotation(0);
+        this->ui->centralWidget->setScaleFactor(1);
+    });
 }
 
 void MainWindow::socketInit()
 {
-    auto& client_socket = Singleton<ClientSocket>::instance();
+    // 创建SSE客户端套接字
+    clientSocket_ = new SSEClientSocket(roomInfoManager_, this);
+    qDebug() << "[MainWindow] 创建SSE客户端套接字"<<clientSocket_;
 
-    connect(&client_socket, &ClientSocket::newMessage,
-            this, &MainWindow::onNewMessage);
-    connect(this, &MainWindow::sendMessage,
-            &client_socket, &ClientSocket::sendMessage);
+    connect(clientSocket_, &SSEClientSocket::newMessage, this,
+            &MainWindow::onNewMessage);
+    
+    // 连接用户主动操作的错误信号（带重试按钮的对话框）
+    connect(clientSocket_, &SSEClientSocket::requestLoginFailed, this,
+            &MainWindow::onRequestLoginFailed);
+    connect(clientSocket_, &SSEClientSocket::requestChatMessageFailed, this,
+            &MainWindow::onRequestChatMessageFailed);
+    connect(clientSocket_, &SSEClientSocket::requestDrawDataFailed, this,
+            &MainWindow::onRequestDrawDataFailed);
+    connect(clientSocket_, &SSEClientSocket::requestClearCanvasFailed, this,
+            &MainWindow::onRequestClearCanvasFailed);
+    connect(clientSocket_, &SSEClientSocket::requestCheckoutFailed, this,
+            &MainWindow::onRequestCheckoutFailed);
+    connect(clientSocket_, &SSEClientSocket::requestCloseRoomFailed, this,
+            &MainWindow::onRequestCloseRoomFailed);
+    connect(clientSocket_, &SSEClientSocket::requestKickUserFailed, this,
+            &MainWindow::onRequestKickUserFailed);
+    
+    // 连接自动操作的错误信号（GradualBox提示）
+    connect(clientSocket_, &SSEClientSocket::requestOnlineListFailed, this,
+            &MainWindow::onRequestOnlineListFailed);
 
-    connect(&client_socket, &ClientSocket::cmdPack,
-            this, &MainWindow::onCmdData);
-    connect(&client_socket, &ClientSocket::disconnected,
-            this, &MainWindow::onServerDisconnected);
-    cmdRouterInit();
-    auto fff = [this](){
-        Singleton<ClientSocket>::instance().setPoolEnabled(false);
-        requestArchiveSign();
+    // 添加对 notify 事件的连接
+    connect(clientSocket_, &SSEClientSocket::getNotified, this,
+            &MainWindow::onNotify);
 
-        // checkout if client is room owner
-        if(!getRoomKey().isNull()){
-            requestCheckout();
-        }
-    };
-    GlobalDef::deferJob<decltype(fff)>(fff);
-    QTimer *t = new QTimer(this);
-    connect(t, &QTimer::timeout,
-            this, &MainWindow::requestOnlinelist);
-    t->start(5000);
+    // 添加其他重要的信号连接
+    connect(clientSocket_, &SSEClientSocket::getKicked, this,
+            &MainWindow::onKicked);
+    connect(clientSocket_, &SSEClientSocket::delayGet, this,
+            &MainWindow::onDelayGet);
+    connect(clientSocket_, &SSEClientSocket::layerAllCleared, this,
+            &MainWindow::onAllLayerCleared);
+    connect(clientSocket_, &SSEClientSocket::memberListFetched, this,
+            &MainWindow::onMemberlistFetched);
+    connect(clientSocket_, &SSEClientSocket::roomAboutToClose, this,
+            &MainWindow::onAboutToClose);
+
+    // 添加对 newClientId 信号的连接
+    connect(clientSocket_, &SSEClientSocket::newClientId, this,
+            &MainWindow::onNewClientId);
+
+    connect(clientSocket_, &SSEClientSocket::roomJoined, this,
+            &MainWindow::onRoomJoined);
+
+    connect(clientSocket_, &SSEClientSocket::roomOfflined, this,
+            &MainWindow::onServerDisconnected);
+
+    connect(clientSocket_, &SSEClientSocket::roomExited, this,
+            &MainWindow::onRoomExited);
+
+    connect(clientSocket_, &SSEClientSocket::loginCompleted, this,
+            &MainWindow::onLoginCompleted);
+
+    // 重连相关信号连接
+    connect(clientSocket_, &SSEClientSocket::reconnectionStarted, this,
+            &MainWindow::onReconnectionStarted);
+    connect(clientSocket_, &SSEClientSocket::reconnectionSucceeded, this,
+            &MainWindow::onReconnectionSucceeded);
+    connect(clientSocket_, &SSEClientSocket::reconnectionFailed, this,
+            &MainWindow::onReconnectionFailed);
+    connect(clientSocket_, &SSEClientSocket::reconnectionCompleted, this,
+            &MainWindow::onReconnectionCompleted);
+}
+
+void MainWindow::tryJoinRoom(const RoomConnectionInfo& roomInfo)
+{
+  // 如果有房间信息，自动连接到房间
+  if (!roomInfo.roomName.isEmpty() && !roomInfo.webAddress.isEmpty()) {
+    // 设置用户名
+    clientSocket_->setUserName(roomInfo.nickname);
+
+    // 连接到房间
+    qDebug() << "[MainWindow] 连接到房间" << clientSocket_;
+    clientSocket_->tryJoinRoom(roomInfo.webAddress, roomInfo.roomName,
+                               roomInfo.password);
+
+    // 更新窗口标题
+    setWindowTitle(roomInfo.roomName + tr(" - Mr.Paint"));
+  } else {
+    qDebug() << "房间信息不完整，无法连接";
+  }
+}
+
+void MainWindow::onRoomJoined()
+{
+    qDebug() << "成功加入房间";
+
+    // 更新窗口标题
+    QString roomName = clientSocket_->roomName();
+    if (!roomName.isEmpty()) {
+        setWindowTitle(roomName + tr(" - Mr.Paint"));
+    }
+
+    ui->centralWidget->setCanvas(ui->canvas);
+
+    // 注意：画布尺寸设置已移至登录完成后，因为此时房间信息更完整
+
+    // 房间加入时启动定时器
+    startOnlineListTimer();
+}
+
+void MainWindow::onRoomExited()
+{
+    qDebug() << "已退出房间";
+    // 房间退出时停止定时器
+    stopOnlineListTimer();
+}
+
+void MainWindow::onLoginCompleted(const QString &roomName, const QString &remoteArchiveSign)
+{
+    qDebug() << "[MainWindow] 登录完成，房间:" << roomName << "远程archive签名:" << remoteArchiveSign;
+
+    // 通知 Canvas 登录完成，开始数据同步
+    if (ui->canvas) {
+        ui->canvas->onLoginCompleted(roomName, remoteArchiveSign, clientSocket_);
+    }
 }
 
 void MainWindow::onServerDisconnected()
 {
     GradualBox::showText(tr("Server Connection Failed."));
     ui->canvas->setEnabled(false);
-    // TODO: reconnect to room and request login
+
+    // 停止周期性在线列表获取定时器
+    stopOnlineListTimer();
+    clientSocket_->stopHeartbeat();
 }
 
-void MainWindow::onCmdData(const QJsonObject &data)
+// 新增：重连相关槽函数实现
+void MainWindow::onReconnectionStarted()
 {
-    cmdRouter_.onData(data);
+    qDebug() << "[MainWindow] 开始重连";
+
+    // 设置Canvas为loading状态
+    if (ui->canvas) {
+        ui->canvas->setArchiveLoading(true);
+    }
+
+    // 在聊天框显示重连提示
+    if (ui->textEdit) {
+        QTextCursor c = ui->textEdit->textCursor();
+        c.movePosition(QTextCursor::End);
+        ui->textEdit->setTextCursor(c);
+        ui->textEdit->insertHtml(QString("<span style='color: orange;'>%1</span>")
+                                .arg(tr("Connection interrupted, reconnecting...")));
+        ui->textEdit->verticalScrollBar()->setValue(ui->textEdit->verticalScrollBar()->maximum());
+        ui->textEdit->insertPlainText("\n");
+    }
+
+    // 更新网络指示器
+    if (networkIndicator_) {
+        networkIndicator_->setLevel(NetworkIndicator::LEVEL::UNKNOWN);
+    }
 }
 
-void MainWindow::onCommandActionClose(const QJsonObject &)
+void MainWindow::onReconnectionSucceeded()
+{
+    qDebug() << "[MainWindow] 重连成功";
+
+    // 在聊天框显示重连成功提示
+    if (ui->textEdit) {
+        QTextCursor c = ui->textEdit->textCursor();
+        c.movePosition(QTextCursor::End);
+        ui->textEdit->setTextCursor(c);
+        ui->textEdit->insertHtml(QString("<span style='color: green;'>%1</span>")
+                                .arg(tr("Reconnection successful, synchronizing data...")));
+        ui->textEdit->verticalScrollBar()->setValue(ui->textEdit->verticalScrollBar()->maximum());
+        ui->textEdit->insertPlainText("\n");
+    }
+
+    // 注意：Canvas的loading状态将在数据同步完成后解除
+}
+
+void MainWindow::onReconnectionFailed(const QString &reason)
+{
+    qDebug() << "[MainWindow] 重连失败:" << reason;
+
+    // 在聊天框显示重连失败提示
+    if (ui->textEdit) {
+        QTextCursor c = ui->textEdit->textCursor();
+        c.movePosition(QTextCursor::End);
+        ui->textEdit->setTextCursor(c);
+        ui->textEdit->insertHtml(QString("<span style='color: red;'>%1</span>")
+                                .arg(tr("Reconnection failed: %1").arg(reason)));
+        ui->textEdit->verticalScrollBar()->setValue(ui->textEdit->verticalScrollBar()->maximum());
+        ui->textEdit->insertPlainText("\n");
+    }
+
+    // 解除Canvas loading状态（重连失败）
+    if (ui->canvas) {
+        ui->canvas->setArchiveLoading(false);
+    }
+
+    // 更新网络指示器
+    if (networkIndicator_) {
+        networkIndicator_->setLevel(NetworkIndicator::LEVEL::NONE);
+    }
+}
+
+void MainWindow::onReconnectionCompleted()
+{
+    qDebug() << "[MainWindow] 重连完成，数据同步结束";
+
+    // 在聊天框显示重连完成提示
+    if (ui->textEdit) {
+        QTextCursor c = ui->textEdit->textCursor();
+        c.movePosition(QTextCursor::End);
+        ui->textEdit->setTextCursor(c);
+        ui->textEdit->insertHtml(QString("<span style='color: green;'>%1</span>")
+                                .arg(tr("Reconnection completed, you can continue drawing")));
+        ui->textEdit->verticalScrollBar()->setValue(ui->textEdit->verticalScrollBar()->maximum());
+        ui->textEdit->insertPlainText("\n");
+    }
+
+    // 解除Canvas loading状态（重连完成）
+    if (ui->canvas) {
+        ui->canvas->setArchiveLoading(false);
+    }
+
+    // 重新启动在线列表定时器
+    startOnlineListTimer();
+
+    // 重新启动心跳
+    if (clientSocket_) {
+        clientSocket_->enableHeartbeat(true);
+    }
+}
+
+void MainWindow::onAboutToClose()
 {
     QMessageBox::warning(this,
                          tr("Closing"),
@@ -546,104 +771,29 @@ void MainWindow::onCommandActionClose(const QJsonObject &)
                             "closed the room. This room will close"
                             " when everyone leaves.\n"
                             "Save your work if you like it!"));
-    Singleton<ClientSocket>::instance().setRoomCloseFlag();
 }
 
-void MainWindow::onCommandResponseClose(const QJsonObject &m)
+void MainWindow::onAllLayerCleared()
 {
-    bool result = m["result"].toBool();
-    if(!result){
-        QMessageBox::critical(this,
-                              tr("Sorry"),
-                              tr("Sorry, it seems you're not"
-                                 "room owner."));
-    }else{
-        // Since server accepted close request, we can
-        // wait for close now.
-        // of course, delete the key. it's useless.
-        QCryptographicHash hash(QCryptographicHash::Md5);
-        auto&& roomName = Singleton<ClientSocket>::instance().roomName();
-        hash.addData(roomName.toUtf8());
-        QString hashed_name = hash.result().toHex();
-        QSettings settings(GlobalDef::SETTINGS_NAME,
-                           QSettings::defaultFormat(),
-                           qApp);
-        settings.remove("rooms/"+hashed_name);
-        settings.sync();
-        ui->statusBar->showMessage(tr("Close Request Completed."),
-                                   5000);
-    }
-}
-
-void MainWindow::onCommandResponseClearAll(const QJsonObject &m)
-{
-    bool result = m["result"].toBool();
-    if(!result){
-        QMessageBox::critical(this,
-                              tr("Sorry"),
-                              tr("Sorry, it seems you're not"
-                                 "room owner."));
-    }
-    ui->statusBar->showMessage(tr("Clear Request Completed."),
-                               5000);
-}
-
-void MainWindow::onCommandResponseCheckout(const QJsonObject &m)
-{
-    bool result = m["result"].toBool();
-    if(!result){
-        //        QMessageBox::critical(this,
-        //                              tr("Sorry"),
-        //                              tr("Sorry, it seems you're not"
-        //                                 "room owner."));
-    }else{
-        int hours = m["cycle"].toDouble();
-        if(hours){
-            // prepare next checkout
-            // this rarely happens, but still need
-            QTimer * checkoutTimer = new QTimer(this);
-            checkoutTimer->setSingleShot(true);
-            hours--;
-            checkoutTimer->setInterval(hours * 3600*1000);
-            connect(checkoutTimer, &QTimer::timeout,
-                    this, &MainWindow::requestCheckout);
-        }
-        ui->statusBar->showMessage(tr("Checkout Completed."),
-                                   5000);
-    }
-}
-
-void MainWindow::onCommandActionClearAll(const QJsonObject &obj)
-{
-    qDebug()<<"on action clearall"<<obj;
-    if(obj.contains("signature")){
-        auto&& s = obj.value("signature").toString();
-        Singleton<ClientSocket>::instance().setArchiveSignature(s);
-    }
     ui->canvas->clearAllLayer();
 }
 
-void MainWindow::onCommandResponseOnlinelist(const QJsonObject &o)
+void MainWindow::onMemberlistFetched(const QHash<QString, QVariantList> &list)
 {
-    QJsonArray list = o.value("onlinelist").toArray();
-    MemberList l;
-    for(int i=0;i<list.count();++i){
-        QJsonObject obj = list[i].toObject();
-        QString id = obj.value("clientid").toString();
-        QString nick = obj.value("name").toString();
-        QVariantList vl;
-        vl.append(nick);
-        l.insert(id, vl);
-    }
-    ui->memberList->setMemberList(l);
-    ui->statusBar->showMessage(tr("Online List Refreshed."),
-                               2000);
+    ui->memberList->setMemberList(list);
+//    ui->statusBar->showMessage(tr("Online List Refreshed."),
+//                               2000);
 }
 
-void MainWindow::onActionNotify(const QJsonObject &o)
+void MainWindow::onNotify(const QString &content)
 {
-    QString content = o.value("content").toString();
-    if(content.isEmpty()){
+    if (content.isEmpty()) {
+        return;
+    }
+
+    // 安全检查
+    if (!ui || !ui->textEdit) {
+        qWarning() << "[MainWindow] onNotify: ui or textEdit is null";
         return;
     }
 
@@ -656,54 +806,43 @@ void MainWindow::onActionNotify(const QJsonObject &o)
                        ->maximum());
     ui->textEdit->insertPlainText("\n");
 
-    qDebug()<<"notified with: "<<o;
+    // 收到通知后，重新获取在线列表
+    if (clientSocket_) {
+        clientSocket_->requestOnlinelist();
+    }
 }
 
-void MainWindow::onResponseArchiveSign(const QJsonObject &o)
+void MainWindow::onKicked()
 {
-    if(!o.contains("result") || !o.contains("signature")){
-        return;
-    }
-    int errcode = 800;
-    if(!o.value("result").toBool()){
-        errcode = o.value("errcode").toDouble();
-        QMessageBox::critical(this,
-                              tr("Error"),
-                              tr("Sorry, an error occurred.\n"
-                                 "Error: %1, %2").arg(errcode)
-                              .arg(ErrorTable::toString(errcode)));
-        return;
-    }
-
-    QString signature = o.value("signature").toString();
-
-    auto& socket = Singleton<ClientSocket>::instance();
-    socket.setArchiveSignature(signature);
-    requestArchive();
+    GradualBox::showText(tr("You've been kicked by room owner."), true, 3000);
 }
 
-void MainWindow::onResponseArchive(const QJsonObject &o)
+void MainWindow::onDelayGet(const int delay)
 {
-    if(!o.contains("result")|| !o.contains("datalength")){
+    typedef NetworkIndicator::LEVEL NL;
+    if(delay < 0){
+        networkIndicator_->setLevel(NL::UNKNOWN);
         return;
     }
-    int errcode = 900;
-    if(!o.value("result").toBool()){
-        errcode = o.value("errcode").toDouble();
-        QMessageBox::critical(this,
-                              tr("Error"),
-                              tr("Sorry, an error occurred.\n"
-                                 "Error: %1, %2").arg(errcode)
-                              .arg(ErrorTable::toString(errcode)));
+    if(delay > 60){
+        networkIndicator_->setLevel(NL::NONE);
         return;
     }
-
-    quint64 datalength = o.value("datalength").toDouble();
-
-    // TODO: re-match signature and receive archive data
-    auto& socket = Singleton<ClientSocket>::instance();
-    socket.setSchedualDataLength(datalength);
+    if(delay > 20){
+        networkIndicator_->setLevel(NL::LOW);
+        return;
+    }
+    if(delay > 10){
+        networkIndicator_->setLevel(NL::MEDIUM);
+        return;
+    }
+    if(delay < 10){
+        networkIndicator_->setLevel(NL::GOOD);
+        return;
+    }
 }
+
+
 
 void MainWindow::onNewMessage(const QString &content)
 {
@@ -718,7 +857,7 @@ void MainWindow::onNewMessage(const QString &content)
     QSettings settings(GlobalDef::SETTINGS_NAME,
                        QSettings::defaultFormat(),
                        qApp);
-    bool msg_notify = settings.value("chat/msg_notify").toBool();
+    bool msg_notify = settings.value("chat/msg_notify", true).toBool();
     if(!this->isActiveWindow() && msg_notify)
         PlatformExtend::notify(this);
 }
@@ -726,14 +865,15 @@ void MainWindow::onNewMessage(const QString &content)
 void MainWindow::onSendPressed()
 {
     QString string(ui->lineEdit->text());
-    if(string.isEmpty() || string.count()>256){
+    if(string.isEmpty() || string.length()>256){
         qDebug()<<"Warnning: text too long or empty.";
         return;
     }
-    string.prepend(Singleton<ClientSocket>::instance().userName()
-                   + ": ");
-    string.append('\n');
-    emit sendMessage(string);
+    // 修改消息发送方式，SSE 客户端使用 sendChatMessage
+    QString messageContent = string;
+    if (clientSocket_) {
+        clientSocket_->sendChatMessage(messageContent);
+    }
     ui->lineEdit->clear();
 }
 
@@ -750,13 +890,18 @@ void MainWindow::onColorGridPicked(int, const QColor &c)
 
 void MainWindow::onBrushTypeChange()
 {
-    ui->canvas->changeBrush(sender()->objectName());
+    changeToBrush(sender()->objectName());
 }
 
 void MainWindow::onBrushSettingsChanged(const QVariantMap &m)
 {
-    int w = m["width"].toInt();
-    int h = m["hardness"].toInt();
+    qDebug() << "[MainWindow] onBrushSettingsChanged" << m;
+    int width = m["width"].toInt();
+    int hardness = m["hardness"].toInt();
+    int thickness = m["thickness"].toInt();
+    int water = m["water"].toInt();
+    int extend = m["extend"].toInt();
+    int mixin = m["mixin"].toInt();
     QVariantMap colorMap = m["color"].toMap();
     QColor c(colorMap["red"].toInt(),
             colorMap["green"].toInt(),
@@ -765,12 +910,18 @@ void MainWindow::onBrushSettingsChanged(const QVariantMap &m)
     // INFO: to prevent scaled to 1px, should always
     // change width first
     if(brushSettingControl_){
-        if(brushSettingControl_->width() != w)
-            brushSettingControl_->setWidth(w);
-    }
-    if(brushSettingControl_){
-        if(brushSettingControl_->hardness() != h)
-            brushSettingControl_->setHardness(h);
+        if(brushSettingControl_->width() != width)
+            brushSettingControl_->setWidth(width);
+        if(brushSettingControl_->hardness() != hardness)
+            brushSettingControl_->setHardness(hardness);
+        if(brushSettingControl_->thickness() != thickness)
+            brushSettingControl_->setThickness(thickness);
+        if(brushSettingControl_->water() != water)
+            brushSettingControl_->setWater(water);
+        if(brushSettingControl_->extend() != extend)
+            brushSettingControl_->setExtend(extend);
+        if(brushSettingControl_->mixin() != mixin)
+            brushSettingControl_->setMixin(mixin);
     }
     if(ui->colorBox->color() != c)
         ui->colorBox->setColor(c);
@@ -783,15 +934,29 @@ void MainWindow::onPanoramaRefresh()
                                 ui->centralWidget->visualRect().toRect());
 }
 
+void MainWindow::onMoveToolPressed(bool c)
+{
+    ui->canvas->onMoveTool(c);
+    if(brushActionGroup_){
+        brushActionGroup_->setDisabled(c);
+    }
+    if(colorPickerButton_){
+        colorPickerButton_->setDisabled(c);
+    }
+}
+
 void MainWindow::onColorPickerPressed(bool c)
 {
     ui->canvas->onColorPicker(c);
     if(brushActionGroup_){
         brushActionGroup_->setDisabled(c);
     }
+    if(moveToolButton_){
+        moveToolButton_->setDisabled(c);
+    }
 }
 
-void MainWindow::onPickColorComplete()
+void MainWindow::onCanvasToolComplete()
 {
     if(brushActionGroup_){
         brushActionGroup_->setDisabled(false);
@@ -799,18 +964,40 @@ void MainWindow::onPickColorComplete()
     if(colorPickerButton_){
         colorPickerButton_->setChecked(false);
     }
+    if(moveToolButton_){
+        moveToolButton_->setChecked(false);
+    }
 }
 
-void MainWindow::openConsole()
+
+
+void MainWindow::changeToBrush(const QString &brushName)
 {
-    if(!console_){
-        console_ = new DeveloperConsole(this);
-        connect(this, &MainWindow::scriptResult,
-                console_, &DeveloperConsole::append);
-        connect(console_, &DeveloperConsole::evaluate,
-                this, &MainWindow::evaluateScript);
+    // 检查是否为v3笔刷
+    if (Singleton<BrushManager>::instance().isV3Brush(brushName)) {
+        ui->canvas->changeBrushV3(brushName);
+        // v3笔刷暂时不支持所有设置，禁用相关控件
+        if (this->brushSettingControl_) {
+            this->brushSettingControl_->setHardnessEnabled(false);
+            this->brushSettingControl_->setThicknessEnabled(false);
+            this->brushSettingControl_->setWaterEnabled(false);
+            this->brushSettingControl_->setExtendEnabled(false);
+            this->brushSettingControl_->setMixinEnabled(false);
+        }
+    } else {
+        ui->canvas->changeBrush(brushName);
+        auto f = ui->canvas->brushFeatures();
+        if(!this->brushSettingControl_){
+            return;
+        }
+        this->brushSettingControl_->setHardnessEnabled(f.support(BrushFeature::HARDNESS));
+        this->brushSettingControl_->setThicknessEnabled(f.support(BrushFeature::THICKNESS));
+        this->brushSettingControl_->setWaterEnabled(f.support(BrushFeature::WATER));
+        this->brushSettingControl_->setExtendEnabled(f.support(BrushFeature::EXTEND));
+        this->brushSettingControl_->setMixinEnabled(f.support(BrushFeature::MIXIN));
     }
-    console_->show();
+
+    // onBrushSettingsChanged(ui->canvas->brushSettings());
 }
 
 void MainWindow::remoteAddLayer(const QString &layerName)
@@ -820,8 +1007,18 @@ void MainWindow::remoteAddLayer(const QString &layerName)
     }
 
     LayerItem *item = new LayerItem;
-    item->setVisibleIcon(QIcon(":/iconset/ui/visibility-on.png"));
-    item->setLockIcon(QIcon(":/iconset/ui/lock.png"));
+    QIcon visibility(":/iconset/ui/visibility-on.png");
+    visibility.addFile(":/iconset/ui/visibility-off.png",
+                       QSize(),
+                       QIcon::Selected,
+                       QIcon::On);
+    item->setVisibleIcon(visibility);
+    QIcon lock(":/iconset/ui/lock.png");
+    lock.addFile(":/iconset/ui/unlock.png",
+                 QSize(),
+                 QIcon::Selected,
+                 QIcon::On);
+    item->setLockIcon(lock);
     item->setLabel(layerName);
     ui->layerWidget->addItem(item);
 }
@@ -833,8 +1030,18 @@ void MainWindow::addLayer(const QString &layerName)
         name = QString::number(ui->canvas->layerNum());
 
     LayerItem *item = new LayerItem;
-    item->setVisibleIcon(QIcon(":/iconset/ui/visibility-on.png"));
-    item->setLockIcon(QIcon(":/iconset/ui/lock.png"));
+    QIcon visibility(":/iconset/ui/visibility-on.png");
+    visibility.addFile(":/iconset/ui/visibility-off.png",
+                       QSize(),
+                       QIcon::Selected,
+                       QIcon::On);
+    item->setVisibleIcon(visibility);
+    QIcon lock(":/iconset/ui/lock.png");
+    lock.addFile(":/iconset/ui/unlock.png",
+                 QSize(),
+                 QIcon::Selected,
+                 QIcon::On);
+    item->setLockIcon(lock);
     item->setLabel(name);
     ui->layerWidget->addItem(item);
     ui->canvas->addLayer(name);
@@ -870,18 +1077,24 @@ void MainWindow::clearLayer(const QString &name)
                                         QMessageBox::Yes|QMessageBox::No);
     if(result == QMessageBox::Yes){
         ui->canvas->clearLayer(name);
-        QJsonObject map;
-        map.insert("request", QString("clear"));
-        map.insert("type", QString("command"));
-        map.insert("key", getRoomKey());
-        map.insert("layer", name);
-        Singleton<ClientSocket>::instance().sendCmdPack(map);
+        // SSE 客户端暂时不支持单层清空，显示提示信息
+        QMessageBox::information(this,
+                                 tr("Notice"),
+                                 tr("Layer clearing command sent to canvas.\n"
+                                    "Server-side layer clearing is not yet implemented "
+                                    "in the SSE client version."));
     }
-
 }
 
 void MainWindow::clearAllLayer()
 {
+    if (!clientSocket_->isRoomOwner()) {
+        QMessageBox::warning(this,
+                         tr("Warning"),
+                         tr("You are not the room owner, you can't close the room."),
+                         QMessageBox::Close);
+        return;
+    }
     auto result = QMessageBox::question(this,
                                         tr("OMG"),
                                         tr("You're going to clear ALL LAYERS"
@@ -890,46 +1103,12 @@ void MainWindow::clearAllLayer()
                                            "Do you really want to do so?"),
                                         QMessageBox::Yes|QMessageBox::No);
     if(result == QMessageBox::Yes){
-        QJsonObject map;
-        QString r_key = getRoomKey();
-        if(r_key.isEmpty()){
-            QMessageBox::warning(this,
-                                 tr("Sorry"),
-                                 tr("Only room owner is authorized "
-                                    "to clear the canvas.\n"
-                                    "It seems you're not room manager."));
-            return;
+        if (clientSocket_) {
+            clientSocket_->clearCanvas();
+        } else {
+            qDebug() << "[MainWindow] 未连接到房间，无法清空画布";
         }
-        map.insert("request", QString("clearall"));
-        map.insert("type", QString("command"));
-        map.insert("key", getRoomKey());
-        Singleton<ClientSocket>::instance().sendCmdPack(map);
     }
-}
-
-void MainWindow::evaluateScript(const QString &script)
-{
-    if(!scriptEngine_){
-        qWarning()<<"Cannot evaluate script before script engine init!";
-        return;
-    }
-
-    // pause event process
-    if(scriptEngine_->processEventsInterval() > 0){
-        scriptEngine_->setProcessEventsInterval(-1);
-    }
-
-    emit scriptResult(scriptEngine_->evaluate(script).toString());
-}
-
-void MainWindow::runScript(const QString &script)
-{
-    if(!scriptEngine_){
-        qWarning()<<"Cannot run script before script engine init!";
-        return;
-    }
-    scriptEngine_->setProcessEventsInterval(300);
-    emit scriptResult(scriptEngine_->evaluate(script).toString());
 }
 
 void MainWindow::deleteLayer(const QString &name)
@@ -940,15 +1119,40 @@ void MainWindow::deleteLayer(const QString &name)
 
 void MainWindow::closeEvent( QCloseEvent * event )
 {
-    QMessageBox msgBox;
-    msgBox.setText(tr("Waiting for sync, please do not close.\n"\
-                   "This will cost you 1 minute at most."));
-    msgBox.setStandardButtons(QMessageBox::NoButton);
-    msgBox.setWindowModality(Qt::ApplicationModal);
-    msgBox.setModal(true);
-    msgBox.setWindowFlags(Qt::WindowTitleHint
-                          | Qt::CustomizeWindowHint);
-    msgBox.show();
+    ui->canvas->pause();
+
+    // 停止定时器
+    if (onlineListTimer_) {
+        onlineListTimer_->stop();
+    }
+
+    // 新增：在关闭前保存画布快照
+    if (ui->canvas) {
+        qDebug() << "[MainWindow] 关闭窗口前保存画布快照";
+        ui->canvas->exportCanvasSnapshot();
+
+        // 等待一小段时间确保快照保存完成
+        QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        QThread::msleep(100);
+    }
+
+    // 先断开网络连接，避免在对象销毁过程中产生错误
+    if (clientSocket_) {
+        clientSocket_->disconnect();
+    }
+
+    // 等待一小段时间，确保网络操作完成
+    QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+    QProgressDialog dialog(tr("Waiting for sync, please do not close.\n"\
+                              "This will cost you 1 minute at most."),
+                           QString(),
+                           0, 0, this);
+    dialog.setWindowModality(Qt::ApplicationModal);
+    dialog.show();
+
+    // This is a workaround to make msgBox text shown
+    QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
     QSettings settings(GlobalDef::SETTINGS_NAME,
                        QSettings::defaultFormat(),
@@ -957,15 +1161,13 @@ void MainWindow::closeEvent( QCloseEvent * event )
                       ui->colorGrid->dataExport());
     settings.setValue("mainwindow/view",
                       saveState());
+
+    // 保存房间信息（用于程序重启时复用Archive信息）
+    roomInfoManager_->saveRoomInfoToSettings();
+
     settings.sync();
 
-    auto& client_socket = Singleton<ClientSocket>::instance();
-
-    disconnect(&client_socket, &ClientSocket::disconnected,
-            this, &MainWindow::onServerDisconnected);
-
-    client_socket.close();
-    msgBox.close();
+    dialog.close();
 
     event->accept();
 }
@@ -975,7 +1177,7 @@ void MainWindow::exportAllToFile()
     QString fileName =
             QFileDialog::getSaveFileName(this,
                                          tr("Export all to file"),
-                                         QDir::currentPath(),
+                                         this->windowTitle(),
                                          tr("Images (*.png)"));
     fileName = fileName.trimmed();
     if(fileName.isEmpty()){
@@ -993,7 +1195,7 @@ void MainWindow::exportVisibleToFile()
     QString fileName =
             QFileDialog::getSaveFileName(this,
                                          tr("Export visible part to file"),
-                                         QDir::currentPath(),
+                                         this->windowTitle(),
                                          tr("Images (*.png)"));
     fileName = fileName.trimmed();
     if(fileName.isEmpty()){
@@ -1004,6 +1206,46 @@ void MainWindow::exportVisibleToFile()
     }
     QImage image = ui->canvas->currentCanvas();
     image.save(fileName, "PNG");
+}
+
+void MainWindow::exportToPSD()
+{
+    QString fileName =
+            QFileDialog::getSaveFileName(this,
+                                         tr("Export contents to psd file"),
+                                         this->windowTitle(),
+                                         tr("Photoshop Images (*.psd)"));
+    fileName = fileName.trimmed();
+    if(fileName.isEmpty()){
+        return;
+    }
+    if(!fileName.endsWith(".psd", Qt::CaseInsensitive)){
+        fileName = fileName + ".psd";
+    }
+
+    // save all layers into psd
+
+    QProgressDialog *dialog = new QProgressDialog(tr("Exporting..."), QString(), 0, 0, this);
+    dialog->setWindowModality(Qt::WindowModal);
+    dialog->show();
+    QFutureWatcher<QByteArray> *watcher = new QFutureWatcher<QByteArray>;
+    QFuture<QByteArray> *future = new QFuture<QByteArray>(QtConcurrent::run(imagesToPSD,
+                                                                            ui->canvas->layerImages(),
+                                                                            ui->canvas->allCanvas()));
+    watcher->setFuture(*future);
+    connect(watcher, &QFutureWatcher<QByteArray>::finished, [watcher, dialog, future, fileName](){
+        QByteArray data = future->result();
+        QFile file(fileName);
+        if(!file.open(QIODevice::Truncate|QIODevice::WriteOnly)) {
+            return;
+        }
+        qDebug()<<data.length();
+        file.write(data);
+        file.close();
+        dialog->close();
+        dialog->deleteLater();
+        watcher->deleteLater();
+    });
 }
 
 void MainWindow::exportAllToClipboard()
@@ -1029,4 +1271,167 @@ void MainWindow::about()
 {
     AboutDialog dialog(this);
     dialog.exec();
+}
+
+template<typename T, typename U>
+bool MainWindow::regShortcut(const QString& name, T func, U func2)
+{
+    //    auto shortcut_type = (ShT)config["type"].toInt();
+    return regShortcut<>(QKeySequence(shortcutManager_->shortcut(name)["key"].toString()),
+            func, func2);
+}
+
+template<typename T>
+bool MainWindow::regShortcut(const QString& name, T func)
+{
+    return regShortcut<>(QKeySequence(shortcutManager_->shortcut(name)["key"].toString()), func);
+}
+
+template<typename T, typename U>
+bool MainWindow::regShortcut(const QKeySequence& k, T func, U func2)
+{
+    if(keyMap_.contains(k.toString())){
+        return false;
+    }
+    keyMap_.insert(k.toString(), true);
+
+    SingleShortcut *shortcut = new SingleShortcut(this);
+    shortcut->setKey(k);
+    connect(shortcut, &SingleShortcut::activated,
+            func);
+    connect(shortcut, &SingleShortcut::inactivated,
+            func2);
+    return true;
+}
+
+template<typename T>
+bool MainWindow::regShortcut(const QKeySequence& k, T func)
+{
+    if(keyMap_.contains(k.toString())){
+        return false;
+    }
+    keyMap_.insert(k.toString(), true);
+    QShortcut* shortcut = new QShortcut(k, this);
+    connect(shortcut, &QShortcut::activated,
+            func);
+    return true;
+}
+
+void MainWindow::onOnlineListTimer()
+{
+    // 检查是否仍然连接到房间
+    if (!clientSocket_ || clientSocket_->roomName().isEmpty() || clientSocket_->getClientIdOfCurrentRoom().isEmpty()) {
+        qDebug() << "[MainWindow] 定时器触发但未连接到房间，停止定时器";
+        stopOnlineListTimer();
+        return;
+    }
+
+    // 周期性获取在线列表
+    qDebug() << "[MainWindow] 定时器触发：获取在线列表，房间:" << clientSocket_->roomName();
+    clientSocket_->requestOnlinelist();
+}
+
+void MainWindow::startOnlineListTimer()
+{
+    if (onlineListTimer_ && !onlineListTimer_->isActive()) {
+        // 检查是否已经连接到房间
+        if (clientSocket_ && !clientSocket_->roomName().isEmpty() && !clientSocket_->getClientIdOfCurrentRoom().isEmpty()) {
+            onlineListTimer_->start(10000); // 每10秒执行一次
+            qDebug() << "[MainWindow] 启动周期性在线列表获取定时器，房间:" << clientSocket_->roomName();
+        } else {
+            qDebug() << "[MainWindow] 未连接到房间，跳过启动定时器";
+        }
+    }
+}
+
+void MainWindow::stopOnlineListTimer()
+{
+    if (onlineListTimer_ && onlineListTimer_->isActive()) {
+        onlineListTimer_->stop();
+        qDebug() << "[MainWindow] 停止周期性在线列表获取定时器";
+    }
+}
+
+void MainWindow::onNewClientId(const QString &clientId)
+{
+    roomInfoManager_->updateClientIdOfRoom(clientSocket_->roomName(), clientId);
+}
+
+// ==================== 用户主动操作错误处理（带重试按钮的对话框）====================
+
+void MainWindow::onRequestLoginFailed(const QString &errorMessage)
+{
+    QMessageBox::StandardButton reply = QMessageBox::critical(this, tr("Login Failed"),
+        tr("An error occurred while logging into the room:\n%1\n\nWould you like to retry?").arg(errorMessage),
+        QMessageBox::Retry | QMessageBox::Cancel);
+    
+    if (reply == QMessageBox::Retry) {
+        // 重新尝试登录
+        QString roomName = clientSocket_->roomName();
+        QString nickname = clientSocket_->nickname();
+        if (!roomName.isEmpty() && !nickname.isEmpty()) {
+            clientSocket_->connectToRoom(roomName, nickname);
+        }
+    }
+}
+
+void MainWindow::onRequestChatMessageFailed(const QString &errorMessage)
+{
+    QMessageBox::critical(this, tr("Send Message Failed"),
+        tr("An error occurred while sending chat message:\n%1\n\nPlease try again later.").arg(errorMessage),
+        QMessageBox::Ok);
+}
+
+void MainWindow::onRequestDrawDataFailed(const QString &errorMessage)
+{
+    QMessageBox::critical(this, tr("Send Drawing Data Failed"),
+        tr("An error occurred while sending drawing data:\n%1\n\nPlease try again later.").arg(errorMessage),
+        QMessageBox::Ok);
+}
+
+void MainWindow::onRequestClearCanvasFailed(const QString &errorMessage)
+{
+    QMessageBox::StandardButton reply = QMessageBox::critical(this, tr("Clear Canvas Failed"),
+        tr("An error occurred while clearing canvas:\n%1\n\nWould you like to retry?").arg(errorMessage),
+        QMessageBox::Retry | QMessageBox::Cancel);
+    
+    if (reply == QMessageBox::Retry) {
+        clientSocket_->clearCanvas();
+    }
+}
+
+void MainWindow::onRequestCheckoutFailed(const QString &errorMessage)
+{
+    QMessageBox::StandardButton reply = QMessageBox::critical(this, tr("Renew Room Failed"),
+        tr("An error occurred while renewing room:\n%1\n\nWould you like to retry?").arg(errorMessage),
+        QMessageBox::Retry | QMessageBox::Cancel);
+    
+    if (reply == QMessageBox::Retry) {
+        clientSocket_->requestCheckout();
+    }
+}
+
+void MainWindow::onRequestCloseRoomFailed(const QString &errorMessage)
+{
+    QMessageBox::StandardButton reply = QMessageBox::critical(this, tr("Close Room Failed"),
+        tr("An error occurred while closing room:\n%1\n\nWould you like to retry?").arg(errorMessage),
+        QMessageBox::Retry | QMessageBox::Cancel);
+    
+    if (reply == QMessageBox::Retry) {
+        clientSocket_->requestCloseRoom();
+    }
+}
+
+void MainWindow::onRequestKickUserFailed(const QString &errorMessage)
+{
+    QMessageBox::critical(this, tr("Kick User Failed"),
+        tr("An error occurred while kicking user:\n%1\n\nPlease try again later").arg(errorMessage),
+        QMessageBox::Ok);
+}
+
+// ==================== 自动操作错误处理（GradualBox提示）====================
+
+void MainWindow::onRequestOnlineListFailed(const QString &errorMessage)
+{
+    GradualBox::showText(tr("Failed to get online list: %1").arg(errorMessage), true, 3000);
 }

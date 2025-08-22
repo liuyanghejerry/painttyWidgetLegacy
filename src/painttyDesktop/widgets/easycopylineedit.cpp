@@ -5,7 +5,7 @@ EasyCopyLineEdit::EasyCopyLineEdit(QWidget *parent) :
 {
 }
 
-void EasyCopyLineEdit::enterEvent(QEvent *)
+void EasyCopyLineEdit::enterEvent(QEnterEvent *)
 {
     selectAll();
 

@@ -1,0 +1,54 @@
+{
+  "configurations": [
+    {
+      "name": "Mac",
+      "includePath": [
+        "${workspaceFolder}/**",
+        "${workspaceFolder}/painttyWidget/src/**",
+        "${workspaceFolder}/painttyWidget/src/common/**",
+        "${workspaceFolder}/painttyWidget/src/painttyDesktop/**",
+        "/Users/liuyanghejerry/develop/Qt/5.15.2/clang_64/lib/QtCore.framework/Headers",
+        "/Users/liuyanghejerry/develop/Qt/5.15.2/clang_64/lib/QtGui.framework/Headers",
+        "/Users/liuyanghejerry/develop/Qt/5.15.2/clang_64/lib/QtWidgets.framework/Headers",
+        "/Users/liuyanghejerry/develop/Qt/5.15.2/clang_64/lib/QtNetwork.framework/Headers",
+        
+        "/Users/liuyanghejerry/develop/Qt/5.15.2/clang_64/lib/QtConcurrent.framework/Headers",
+        "/Users/liuyanghejerry/develop/Qt/5.15.2/clang_64/include",
+        "/Users/liuyanghejerry/develop/Qt/5.15.2/clang_64/include/QtCore",
+        "/Users/liuyanghejerry/develop/Qt/5.15.2/clang_64/include/QtGui",
+        "/Users/liuyanghejerry/develop/Qt/5.15.2/clang_64/include/QtWidgets",
+        "/Users/liuyanghejerry/develop/Qt/5.15.2/clang_64/include/QtNetwork",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include",
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"
+      ],
+      "defines": [
+        "PAINTTY_DEV",
+        "PAINTTY_DESKTOP",
+        "QT_CORE_LIB",
+        "QT_GUI_LIB", 
+        "QT_WIDGETS_LIB",
+        "QT_NETWORK_LIB",
+        "QT_SCRIPT_LIB",
+        "QT_CONCURRENT_LIB",
+        "QT_NO_DEBUG"
+      ],
+      "macFrameworkPath": [
+        "/Users/liuyanghejerry/develop/Qt/5.15.2/clang_64/lib",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks"
+      ],
+      "compilerPath": "/usr/bin/clang++",
+      "cStandard": "c11",
+      "cppStandard": "c++11",
+      "intelliSenseMode": "macos-clang-x64",
+      "browse": {
+        "path": [
+          "${workspaceFolder}",
+          "/Users/liuyanghejerry/develop/Qt/5.15.2/clang_64/include",
+          "/Users/liuyanghejerry/develop/Qt/5.15.2/clang_64/lib"
+        ],
+        "limitSymbolsToIncludedHeaders": true
+      }
+    }
+  ],
+  "version": 4
+} 

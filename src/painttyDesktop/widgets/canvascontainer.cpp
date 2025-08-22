@@ -1,5 +1,6 @@
 #include <QGraphicsScene>
 #include "canvascontainer.h"
+#include "canvas.h"
 #include <QGraphicsProxyWidget>
 #include <QApplication>
 #include <QScrollBar>
@@ -10,7 +11,7 @@
 #include <qmath.h>
 #include <QDebug>
 
-#include "../../common/common.h"
+#include "../common/common.h"
 
 using GlobalDef::MAX_SCALE_FACTOR;
 using GlobalDef::MIN_SCALE_FACTOR;
@@ -38,13 +39,27 @@ CanvasContainer::~CanvasContainer()
 
 void CanvasContainer::setCanvas(QWidget *canvas)
 {
+    if (!canvas) {
+        qWarning() << "CanvasContainer::setCanvas: canvas is null";
+        return;
+    }
+    
     if (canvas->parent())
     {
         canvas->setParent(0);
         canvas->setWindowFlags(canvas->windowFlags() | Qt::Window);
     }
     proxy = scene->addWidget(canvas);
-    canvas->installEventFilter(this);
+    
+    // 确保 proxy 创建成功后再安装事件过滤器
+    if (proxy && proxy->widget()) {
+        canvas->installEventFilter(this);
+        if (viewport()) {
+            viewport()->installEventFilter(this); //at this time, viewport is available, so we intall event filter to send tablet event
+        }
+    } else {
+        qWarning() << "CanvasContainer::setCanvas: failed to create proxy widget";
+    }
 }
 
 void CanvasContainer::setScaleFactor(qreal factor)
@@ -76,8 +91,43 @@ void CanvasContainer::setSmoothScale(bool smooth)
     }
 }
 
+void CanvasContainer::scaleBy(qreal factor)
+{
+    factor *= currentScaleFactor();
+    setScaleFactorInternal(factor);
+}
+void CanvasContainer::setRotation(int degree)
+{
+    if (!proxy) {
+        return;
+    }
+    
+    degree = qBound(-180, degree, 180);
+    if(int(proxy->rotation()) == degree){
+        return;
+    }
+    QPointF position = proxy->mapFromScene(
+                mapToScene(viewport()->rect().center()));
+    if(proxy->rect().contains(position))
+        proxy->setTransformOriginPoint(position);
+    proxy->setRotation(degree);
+    setSceneRect(scene->itemsBoundingRect());
+    emit rotated(degree);
+}
+
+void CanvasContainer::rotateBy(int deg)
+{
+    if (!proxy) {
+        return;
+    }
+    setRotation(int(proxy->rotation())+deg);
+}
+
 QRectF CanvasContainer::visualRect() const
 {
+    if (!proxy) {
+        return QRectF();
+    }
     return proxy->mapFromScene(
                 mapToScene(viewport()->rect()))
             .boundingRect().intersected(proxy->rect());
@@ -85,6 +135,9 @@ QRectF CanvasContainer::visualRect() const
 
 void CanvasContainer::centerOn(const QPointF &pos)
 {
+    if (!proxy) {
+        return;
+    }
     QPointF point = proxy->mapToScene(pos);
     QGraphicsView::centerOn(point);
 }
@@ -92,6 +145,14 @@ void CanvasContainer::centerOn(const QPointF &pos)
 void CanvasContainer::centerOn(qreal x, qreal y)
 {
     centerOn(QPoint(x, y));
+}
+
+void CanvasContainer::moveBy(const QPoint &p)
+{
+    auto v = qBound(horizontalScrollBar()->minimum(), horizontalScrollBar()->value() + p.x(), horizontalScrollBar()->maximum());
+    horizontalScrollBar()->setValue(v);
+    v = qBound(verticalScrollBar()->minimum(), verticalScrollBar()->value() + p.y(), verticalScrollBar()->maximum());
+    verticalScrollBar()->setValue(v);
 }
 
 qreal CanvasContainer::calculateFactor(qreal current, bool zoomIn)
@@ -165,25 +226,31 @@ void CanvasContainer::setScaleFactorInternal(qreal factor, const QPoint scaleCen
 
 void CanvasContainer::wheelEvent(QWheelEvent *event)
 {
-    if (!event->modifiers().testFlag(Qt::ControlModifier)
-            || !proxy)
+    if (event->modifiers() & Qt::ControlModifier && proxy) //tablet pinch is ctrl+scrolling
     {
-        QGraphicsView::wheelEvent(event);
+        setScaleFactorInternal(calculateFactor(proxy->scale(), event->angleDelta().y() > 0), event->position().toPoint());
         return;
     }
-    //QPointF position = proxy->mapFromScene(mapToScene(event->pos()));
-    //if (!proxy->rect().contains(position))
-    //return;
-    //proxy->setTransformOriginPoint(position);
-    setScaleFactorInternal(calculateFactor(proxy->scale(), event->delta() > 0), event->pos());
+    if (event->modifiers() & Qt::AltModifier && proxy) //tablet pinch is alt+scrolling
+    {
+        QWheelEvent *event2 = new QWheelEvent(event->position(), event->globalPosition(), event->pixelDelta(),
+                        event->angleDelta(), event->buttons(),
+                        event->modifiers(), event->phase(), event->inverted());
+        QGraphicsView::wheelEvent(event);
+        delete(event2);
+        return;
+    }
+    if (proxy && proxy->widget() && qobject_cast<Canvas*>(proxy->widget())->tabletEnabled()) //it seems that tablet pen scrolling is conflict with drawing, we disable it
+        return;
+    QGraphicsView::wheelEvent(event);
 }
 
 void CanvasContainer::mousePressEvent(QMouseEvent *event)
 {
+    if (proxy && proxy->widget() && qobject_cast<Canvas*>(proxy->widget())->tabletEnabled()) //it seems that tablet pen right click is conflict with drawing, we disable it
+        return;
     if (event->button() == Qt::RightButton)
     {
-        horizontalScrollValue = horizontalScrollBar()->value();
-        verticalScrollValue = verticalScrollBar()->value();
         moveStartPoint = event->pos();
     }
     QGraphicsView::mousePressEvent(event);
@@ -191,12 +258,11 @@ void CanvasContainer::mousePressEvent(QMouseEvent *event)
 
 void CanvasContainer::mouseMoveEvent(QMouseEvent *event)
 {
+    if (proxy && proxy->widget() && qobject_cast<Canvas*>(proxy->widget())->tabletEnabled())
+        return;
     if (event->buttons() & Qt::RightButton)
     {
-        horizontalScrollValue += (moveStartPoint - event->pos()).x();
-        verticalScrollValue += (moveStartPoint - event->pos()).y();
-        horizontalScrollBar()->setValue(horizontalScrollValue);
-        verticalScrollBar()->setValue(verticalScrollValue);
+        moveBy(moveStartPoint - event->pos());
         moveStartPoint = event->pos();
     }
     QGraphicsView::mouseMoveEvent(event);
@@ -204,8 +270,36 @@ void CanvasContainer::mouseMoveEvent(QMouseEvent *event)
 
 bool CanvasContainer::eventFilter(QObject *object, QEvent *event)
 {
+    // 添加空指针检查，防止段错误
+    if (!proxy || !proxy->widget()) {
+        return QGraphicsView::eventFilter(object, event);
+    }
+    
     if (object == proxy->widget()
             && event->type() == QEvent::CursorChange)
         proxy->setCursor(proxy->widget()->cursor());
-    return false;
+    if (object == viewport()) //process tablet event
+    {
+        if (event->type() == QEvent::TabletPress
+                || event->type() == QEvent::TabletMove
+                || event->type() == QEvent::TabletRelease)
+        {
+            QTabletEvent *e = static_cast<QTabletEvent*>(event);
+            QTabletEvent newEvent(e->type(),
+                                  e->pointingDevice(),
+                                  proxy->mapFromScene(mapToScene(e->position().toPoint())),
+                                  e->globalPosition(),
+                                  e->pressure(),
+                                  e->xTilt(),
+                                  e->yTilt(),
+                                  e->tangentialPressure(),
+                                  e->rotation(),
+                                  e->z(),
+                                  e->modifiers(),
+                                  e->button(), e->buttons());
+            QApplication::sendEvent(proxy->widget(), &newEvent);
+            return true;
+        }
+    }
+    return QGraphicsView::eventFilter(object, event);
 }

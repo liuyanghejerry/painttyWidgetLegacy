@@ -1,0 +1,122 @@
+{
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "cSpell.words": [
+    "aliyuncs",
+    "archivesign",
+    "clearall",
+    "clientid",
+    "currentload",
+    "datalength",
+    "drawline",
+    "drawlive",
+    "drawpoint",
+    "emptyclose",
+    "errcode",
+    "maxload",
+    "newroom",
+    "onlinelist",
+    "Paintty",
+    "RINGCAPTCHA",
+    "roomlist",
+    "serveraddress",
+    "VITE",
+    "welcomemsg",
+    "qmake",
+    "moc",
+    "paintty",
+    "QtCore",
+    "QtGui",
+    "QtWidgets",
+    "QtNetwork",
+    "QOBJECT",
+    "qobject",
+    "QObject",
+    "QString",
+    "QWidget",
+    "QApplication"
+  ],
+  // C++ 配置
+  "C_Cpp.default.cppStandard": "c++11",
+  "C_Cpp.default.intelliSenseMode": "macos-clang-x64",
+  "C_Cpp.default.compilerPath": "/usr/bin/clang++",
+  "C_Cpp.default.includePath": [
+    "${workspaceFolder}/**",
+    "${workspaceFolder}/painttyWidget/src/**",
+    "${workspaceFolder}/painttyWidget/src/common/**",
+    "~/develop/Qt/5.15.2/clang_64/lib/QtCore.framework/Headers",
+    "~/develop/Qt/5.15.2/clang_64/lib/QtGui.framework/Headers",
+    "~/develop/Qt/5.15.2/clang_64/lib/QtWidgets.framework/Headers",
+    "~/develop/Qt/5.15.2/clang_64/lib/QtNetwork.framework/Headers",
+    
+    "~/develop/Qt/5.15.2/clang_64/lib/QtConcurrent.framework/Headers"
+  ],
+  "C_Cpp.default.defines": [
+    "PAINTTY_DEV",
+    "PAINTTY_DESKTOP",
+    "QT_CORE_LIB",
+    "QT_GUI_LIB",
+    "QT_WIDGETS_LIB",
+    "QT_NETWORK_LIB"
+  ],
+  "C_Cpp.errorSquiggles": "enabled",
+  "C_Cpp.intelliSenseEngine": "default",
+  
+  // 文件关联
+  "files.associations": {
+    "*.pro": "qmake",
+    "*.pri": "qmake",
+    "*.qrc": "xml",
+    "*.ui": "xml",
+    "*.ts": "xml",
+    "*.qm": "binary",
+    "*.h": "cpp",
+    "*.cpp": "cpp",
+    "*.hpp": "cpp",
+    "*.cc": "cpp",
+    "*.cxx": "cpp",
+    "qobject": "cpp",
+    "qstring": "cpp",
+    "qwidget": "cpp",
+    "qapplication": "cpp"
+  },
+  
+  // clangd 支持
+  "clangd.arguments": [
+    "--background-index",
+    "--clang-tidy",
+    "--completion-style=detailed",
+    "--header-insertion=iwyu",
+    "--cross-file-rename"
+  ],
+  
+  // 工作区设置
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.patterns": {
+    "*.pro": "*.pro.user, Makefile*, *.qmake.stash",
+    "*.ui": "ui_*.h",
+    "*.h": "*.cpp, moc_*.cpp, moc_*.h",
+    "*.cpp": "*.h"
+  },
+  
+  // 搜索排除
+  "search.exclude": {
+    "**/build*": true,
+    "**/*.pro.user*": true,
+    "**/moc_*.cpp": true,
+    "**/moc_*.h": true,
+    "**/ui_*.h": true,
+    "**/qrc_*.cpp": true,
+    "**/.qmake.stash": true,
+    "**/Makefile*": true
+  },
+  
+  // 文件监视排除
+  "files.watcherExclude": {
+    "**/build*/**": true,
+    "**/*.pro.user*": true,
+    "**/moc_*.cpp": true,
+    "**/moc_*.h": true,
+    "**/ui_*.h": true,
+    "**/qrc_*.cpp": true
+  }
+}

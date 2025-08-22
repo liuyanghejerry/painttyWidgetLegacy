@@ -1,2 +1,15 @@
 /painttyDesktop.pro.user
 /*.user
+.DS_Store
+/build
+.qmake.stash
+Makefile
+*.log
+*.tmp
+moc_*.cpp
+ui_*.h
+*.o
+*.user.*
+*.user
+*Makefile*
+moc_predefs.h

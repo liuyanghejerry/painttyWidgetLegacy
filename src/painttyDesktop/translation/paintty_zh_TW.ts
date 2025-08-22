@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.0" language="zh_TW">
+<TS version="2.1" language="zh_TW">
 <context>
     <name>AboutDialog</name>
     <message>
@@ -10,8 +10,12 @@
     </message>
     <message>
         <location filename="../widgets/aboutdialog.ui" line="26"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Mr.Paint is a free software for paint-chat. However, it&apos;s in alpha state.&lt;/p&gt;&lt;p&gt;If you have any questions about Mr.Paint, please visit &lt;a href=&quot;http://mrspaint.com&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;our site&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Mr.Paint version: %1&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Copyright Information:&lt;/p&gt;&lt;p&gt;painttyWidget : The client of Mr.Paint built with Qt&lt;/p&gt;&lt;p&gt;Copyright (C) 2013 Project Paintty&lt;/p&gt;&lt;p&gt;This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.&lt;/p&gt;&lt;p&gt;This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.&lt;/p&gt;&lt;p&gt;You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;茶繪君是一個免費的茶繪軟體，但它還處於構思階段。&lt;/p&gt;&lt;p&gt;如果您有任何問題，請訪問&lt;a href=&quot;http://mrspaint.com&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;我們的網站&lt;/span&gt;&lt;/a&gt;。&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;茶繪君版本: %1&lt;/span&gt;&lt;/p&gt;&lt;p&gt;版權信息:&lt;/p&gt;&lt;p&gt;painttyWidget : The client of Mr.Paint built with Qt&lt;/p&gt;&lt;p&gt;Copyright (C) 2013 Project Paintty&lt;/p&gt;&lt;p&gt;This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.&lt;/p&gt;&lt;p&gt;This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.&lt;/p&gt;&lt;p&gt;You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
         <source>&lt;p&gt;Mr.Paint is a free software for paint-chat. However, it&apos;s in alpha state.&lt;/p&gt;&lt;p&gt;If you have any questions about Mr.Paint, please visit &lt;a href=&quot;http://mrspaint.com&quot;&gt;our site&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;Copyright Information:&lt;/p&gt;&lt;p&gt;painttyWidget : The client of Mr.Paint built with Qt&lt;/p&gt;&lt;p&gt;Copyright (C) 2013 Project Paintty&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.&lt;/p&gt;&lt;p&gt;This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.&lt;/p&gt;&lt;p&gt;You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA&lt;/p&gt;</source>
-        <translation>&lt;p&gt;茶繪君是一個免費的茶繪軟體。但它還處於構思階段。&lt;/p&gt;&lt;p&gt;如果您有任何問題，請訪問&lt;a href=&quot;http://mrspaint.com&quot;&gt;我們的網站&lt;/a&gt;&lt;/p&gt;&lt;p&gt;版權信息：&lt;/p&gt;&lt;p&gt;painttyWidget : The client of Mr.Paint built with Qt&lt;/p&gt;&lt;p&gt;Copyright (C) 2013 Project Paintty&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.&lt;/p&gt;&lt;p&gt;This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.&lt;/p&gt;&lt;p&gt;You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA&lt;/p&gt;</translation>
+        <translation type="vanished">&lt;p&gt;茶繪君是一個免費的茶繪軟體。但它還處於構思階段。&lt;/p&gt;&lt;p&gt;如果您有任何問題，請訪問&lt;a href=&quot;http://mrspaint.com&quot;&gt;我們的網站&lt;/a&gt;&lt;/p&gt;&lt;p&gt;版權信息：&lt;/p&gt;&lt;p&gt;painttyWidget : The client of Mr.Paint built with Qt&lt;/p&gt;&lt;p&gt;Copyright (C) 2013 Project Paintty&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.&lt;/p&gt;&lt;p&gt;This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.&lt;/p&gt;&lt;p&gt;You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA&lt;/p&gt;</translation>
     </message>
 </context>
 <context>
@@ -22,9 +26,44 @@
         <translation>寬度</translation>
     </message>
     <message>
-        <location filename="../widgets/brushsettingswidget.cpp" line="17"/>
+        <location filename="../widgets/brushsettingswidget.cpp" line="16"/>
         <source>Hardness</source>
         <translation>硬度</translation>
+    </message>
+    <message>
+        <location filename="../widgets/brushsettingswidget.cpp" line="19"/>
+        <source>Thickness</source>
+        <translation>濃度</translation>
+    </message>
+    <message>
+        <location filename="../widgets/brushsettingswidget.cpp" line="22"/>
+        <source>Water</source>
+        <translation>水分量</translation>
+    </message>
+    <message>
+        <location filename="../widgets/brushsettingswidget.cpp" line="25"/>
+        <source>Extend</source>
+        <translation>色延伸</translation>
+    </message>
+    <message>
+        <location filename="../widgets/brushsettingswidget.cpp" line="28"/>
+        <source>Mixin</source>
+        <translation>混色</translation>
+    </message>
+    <message>
+        <location filename="../widgets/brushsettingswidget.cpp" line="33"/>
+        <source>平滑度</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/brushsettingswidget.cpp" line="36"/>
+        <source>压感曲线</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/brushsettingswidget.cpp" line="39"/>
+        <source>倾角灵敏度</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -82,34 +121,34 @@
     </message>
     <message>
         <location filename="../widgets/colorspinboxgroup.ui" line="90"/>
-        <location filename="../widgets/colorspinboxgroup.cpp" line="89"/>
+        <location filename="../widgets/colorspinboxgroup.cpp" line="81"/>
         <source>Blue</source>
         <translation>藍</translation>
     </message>
     <message>
         <location filename="../widgets/colorspinboxgroup.ui" line="76"/>
-        <location filename="../widgets/colorspinboxgroup.cpp" line="88"/>
+        <location filename="../widgets/colorspinboxgroup.cpp" line="80"/>
         <source>Green</source>
         <translation>綠</translation>
     </message>
     <message>
         <location filename="../widgets/colorspinboxgroup.ui" line="62"/>
-        <location filename="../widgets/colorspinboxgroup.cpp" line="87"/>
+        <location filename="../widgets/colorspinboxgroup.cpp" line="79"/>
         <source>Red</source>
         <translation>紅</translation>
     </message>
     <message>
-        <location filename="../widgets/colorspinboxgroup.cpp" line="67"/>
+        <location filename="../widgets/colorspinboxgroup.cpp" line="65"/>
         <source>Hue</source>
         <translation>色調</translation>
     </message>
     <message>
-        <location filename="../widgets/colorspinboxgroup.cpp" line="68"/>
+        <location filename="../widgets/colorspinboxgroup.cpp" line="66"/>
         <source>Saturation</source>
         <translation>飽和度</translation>
     </message>
     <message>
-        <location filename="../widgets/colorspinboxgroup.cpp" line="69"/>
+        <location filename="../widgets/colorspinboxgroup.cpp" line="67"/>
         <source>Value</source>
         <translation>亮度</translation>
     </message>
@@ -127,99 +166,159 @@
         <translation>通用</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.ui" line="33"/>
+        <location filename="../widgets/configuredialog.ui" line="30"/>
         <source>&amp;Language:</source>
         <translation>語言</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.ui" line="46"/>
         <source>&amp;Connection:</source>
-        <translation>連結</translation>
+        <translation type="vanished">連結</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.ui" line="56"/>
         <source>Try to use IPv6 to connect to server</source>
-        <translation>嘗試使用IPv6連結伺服器</translation>
+        <translation type="vanished">嘗試使用IPv6連結伺服器</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.ui" line="63"/>
+        <location filename="../widgets/configuredialog.ui" line="71"/>
         <source>Clear Cache</source>
         <translation>刪除快取</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.ui" line="71"/>
-        <location filename="../widgets/configuredialog.ui" line="92"/>
+        <location filename="../widgets/configuredialog.ui" line="43"/>
+        <source>Custom Font:</source>
+        <translation>特製字體</translation>
+    </message>
+    <message>
+        <location filename="../widgets/configuredialog.ui" line="50"/>
+        <source>Use Droid Sans Font</source>
+        <translation>啟用Droid Sans字體</translation>
+    </message>
+    <message>
+        <source>Hide sponsor content</source>
+        <translation type="vanished">隱藏贊助商訊息</translation>
+    </message>
+    <message>
+        <location filename="../widgets/configuredialog.ui" line="80"/>
+        <location filename="../widgets/configuredialog.ui" line="101"/>
         <source>Shortcut</source>
         <translation>快捷鍵</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.ui" line="87"/>
+        <location filename="../widgets/configuredialog.ui" line="96"/>
         <source>Name</source>
         <translation>名字</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.ui" line="97"/>
+        <location filename="../widgets/configuredialog.ui" line="106"/>
         <source>Type</source>
         <translation>型別</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.ui" line="105"/>
+        <location filename="../widgets/configuredialog.ui" line="114"/>
         <source>Double click the shortcut and press your shortcut keys.</source>
         <translation>雙擊快捷鍵並輸入您的快捷鍵</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.ui" line="116"/>
+        <location filename="../widgets/configuredialog.ui" line="125"/>
         <source>Server</source>
         <translation>伺服器</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.ui" line="122"/>
+        <location filename="../widgets/configuredialog.ui" line="217"/>
+        <source>我的房间</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/configuredialog.ui" line="223"/>
+        <source>您创建的房间列表：</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/configuredialog.ui" line="240"/>
+        <location filename="../widgets/configuredialog.cpp" line="156"/>
+        <source>房间名称</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/configuredialog.ui" line="245"/>
+        <location filename="../widgets/configuredialog.cpp" line="156"/>
+        <source>创建时间</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/configuredialog.ui" line="255"/>
+        <source>刷新列表</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/configuredialog.ui" line="277"/>
+        <location filename="../widgets/configuredialog.cpp" line="167"/>
+        <source>点击刷新按钮获取您的房间列表</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>IPv4 address</source>
-        <translation>IPv4位址</translation>
+        <translation type="vanished">IPv4位址</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.ui" line="132"/>
         <source>IPv6 address</source>
-        <translation>IPv6位址</translation>
+        <translation type="vanished">IPv6位址</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.ui" line="142"/>
         <source>Server Port</source>
-        <translation>伺服器埠</translation>
+        <translation type="vanished">伺服器埠</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.ui" line="152"/>
+        <location filename="../widgets/configuredialog.ui" line="188"/>
+        <source>Enable Tablet Support</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Full speed replay (May cause UI lock)</source>
+        <translation type="vanished">全速回放 (可能致使界面短時死鎖)</translation>
+    </message>
+    <message>
+        <location filename="../widgets/configuredialog.ui" line="131"/>
         <source>Use default server</source>
         <translation>使用預設選項</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.ui" line="164"/>
+        <location filename="../widgets/configuredialog.ui" line="140"/>
+        <source>address</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/configuredialog.ui" line="157"/>
         <source>Warning, non-default server may lead to software crush.
 Use at your own risk.</source>
         <translation>警示：使用非預設選項可能會導致軟件崩潰。
 使用者自負風險。</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.ui" line="182"/>
+        <location filename="../widgets/configuredialog.ui" line="64"/>
         <source>Disable IME when painting (Windows exclusive)</source>
         <translation>作圖時禁用輸入法（Windows）</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.ui" line="189"/>
+        <location filename="../widgets/configuredialog.ui" line="57"/>
         <source>Message Notification (Windows exclusive)</source>
         <translation>消息提醒（Windows）</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.ui" line="196"/>
         <source>Enable Wacom Tablet (Windows exclusive)</source>
-        <translation>支持繪圖板（暫不可用）</translation>
+        <translation type="vanished">支持繪圖板（暫不可用）</translation>
+    </message>
+    <message>
+        <location filename="../widgets/configuredialog.ui" line="195"/>
+        <source>Always skip replay if possible</source>
+        <translation>可能的話總是跳過回放</translation>
     </message>
     <message>
         <source>Note: You still cannot edit them yet.</source>
         <translation type="obsolete">提示：我們仍未增加快捷鍵的修改功能。</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.ui" line="176"/>
+        <location filename="../widgets/configuredialog.ui" line="182"/>
         <source>Experimental Fetures</source>
         <translation>實驗項目</translation>
     </message>
@@ -232,60 +331,47 @@ Use at your own risk.</source>
         <translation type="obsolete">消息通知</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.cpp" line="63"/>
+        <location filename="../widgets/configuredialog.cpp" line="69"/>
         <source>System Default</source>
         <translation>系統默認</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.cpp" line="82"/>
+        <location filename="../widgets/configuredialog.cpp" line="87"/>
         <source>Brushes</source>
         <translation>畫刷</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.cpp" line="98"/>
+        <location filename="../widgets/configuredialog.cpp" line="103"/>
         <source>Immediately</source>
         <translation>立即</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.cpp" line="100"/>
+        <location filename="../widgets/configuredialog.cpp" line="105"/>
         <source>When Release</source>
         <translation>鬆開</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.cpp" line="242"/>
-        <location filename="../widgets/configuredialog.cpp" line="255"/>
+        <location filename="../widgets/configuredialog.cpp" line="208"/>
+        <source>找到 %1 个房间</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/configuredialog.cpp" line="325"/>
+        <location filename="../widgets/configuredialog.cpp" line="335"/>
         <source>Restart</source>
         <translation>重新啟動</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.cpp" line="243"/>
+        <location filename="../widgets/configuredialog.cpp" line="326"/>
         <source>Application must restart to enable some of the settings.
 Do you want to restart right now?</source>
         <translation>程式必須重新啟動才可以應用新的語言設置。
 是否立即重新啟動？</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.cpp" line="256"/>
+        <location filename="../widgets/configuredialog.cpp" line="336"/>
         <source>New settings will be applied on next start.</source>
         <translation>語言更改將在下次啟動程式時生效。</translation>
-    </message>
-</context>
-<context>
-    <name>DeveloperConsole</name>
-    <message>
-        <location filename="../widgets/developerconsole.ui" line="42"/>
-        <source>Type command and push...</source>
-        <translation>輸入指令並運行...</translation>
-    </message>
-    <message>
-        <location filename="../widgets/developerconsole.ui" line="49"/>
-        <source>Push</source>
-        <translation>運行</translation>
-    </message>
-    <message>
-        <location filename="../widgets/developerconsole.ui" line="14"/>
-        <source>Developer Console</source>
-        <translation>開發者交互環境</translation>
     </message>
 </context>
 <context>
@@ -293,7 +379,7 @@ Do you want to restart right now?</source>
     <message>
         <location filename="../widgets/helpdialog.ui" line="14"/>
         <source>Dialog</source>
-        <translation></translation>
+        <translation>對話框</translation>
     </message>
 </context>
 <context>
@@ -319,7 +405,7 @@ Do you want to restart right now?</source>
     <message>
         <location filename="../widgets/layerwidgetheader.cpp" line="14"/>
         <source>%</source>
-        <translation></translation>
+        <translation>%</translation>
     </message>
     <message>
         <location filename="../widgets/layerwidgetheader.cpp" line="21"/>
@@ -331,151 +417,307 @@ Do you want to restart right now?</source>
     <name>MainWindow</name>
     <message>
         <location filename="../widgets/mainwindow.ui" line="14"/>
+        <location filename="../widgets/mainwindow.cpp" line="119"/>
         <source>Mr.Paint</source>
         <translation>茶繪君</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="25"/>
+        <location filename="../widgets/mainwindow.ui" line="34"/>
         <source>Color</source>
         <translation>顏色</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="71"/>
+        <location filename="../widgets/mainwindow.ui" line="81"/>
         <source>Chat</source>
         <translation>聊天</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="137"/>
+        <location filename="../widgets/mainwindow.ui" line="147"/>
         <source>Send</source>
         <translation>發送</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="148"/>
+        <location filename="../widgets/mainwindow.ui" line="158"/>
         <source>Layers</source>
         <translation>圖層</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="187"/>
+        <location filename="../widgets/mainwindow.ui" line="197"/>
         <source>&amp;File</source>
         <translation>文件(&amp;F)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="191"/>
+        <location filename="../widgets/mainwindow.ui" line="201"/>
         <source>Export...</source>
         <translation>導出...</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="203"/>
+        <location filename="../widgets/mainwindow.ui" line="214"/>
         <source>&amp;About</source>
         <translation>關於(&amp;A)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="210"/>
+        <location filename="../widgets/mainwindow.ui" line="221"/>
         <source>&amp;View</source>
         <translation>視圖(&amp;V)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="216"/>
+        <location filename="../widgets/mainwindow.ui" line="227"/>
         <source>&amp;Room</source>
         <translation>房間(&amp;R)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="220"/>
+        <location filename="../widgets/mainwindow.ui" line="231"/>
         <source>Clear Canvas</source>
         <translation>清空畫布</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="229"/>
+        <location filename="../widgets/mainwindow.ui" line="240"/>
         <source>&amp;Edit</source>
         <translation>編輯(&amp;E)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="241"/>
+        <location filename="../widgets/mainwindow.ui" line="252"/>
         <source>Panorama</source>
         <translation>全景圖</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="279"/>
+        <location filename="../widgets/mainwindow.ui" line="290"/>
         <source>Export All to File</source>
         <translation>導出全部至文件</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="284"/>
+        <location filename="../widgets/mainwindow.ui" line="295"/>
         <source>Export Visible To File</source>
         <translation>導出可見圖層至文件</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="289"/>
+        <location filename="../widgets/mainwindow.ui" line="300"/>
         <source>&amp;Quit</source>
         <translation>退出(&amp;Q)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="294"/>
+        <location filename="../widgets/mainwindow.ui" line="305"/>
         <source>About Mr.Paint</source>
         <translation>關於茶繪君</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="299"/>
+        <location filename="../widgets/mainwindow.ui" line="310"/>
         <source>About Qt</source>
         <translation>關於Qt</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="304"/>
+        <location filename="../widgets/mainwindow.ui" line="315"/>
         <source>Export Visible To ClipBorad</source>
         <translation>導出可見圖層至剪貼板</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="309"/>
+        <location filename="../widgets/mainwindow.ui" line="320"/>
         <source>Export All To Clipboard</source>
         <translation>導出全部至剪貼板</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="314"/>
+        <location filename="../widgets/mainwindow.ui" line="325"/>
         <source>Reset View</source>
         <translation>重置視圖</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="319"/>
+        <location filename="../widgets/mainwindow.ui" line="330"/>
         <source>Nothing Here</source>
         <translation>無</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="334"/>
+        <location filename="../widgets/mainwindow.ui" line="345"/>
         <source>Configuration</source>
         <translation>設定</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="324"/>
+        <location filename="../widgets/mainwindow.ui" line="350"/>
+        <source>Export to PSD File</source>
+        <translation>導出為PSD文檔</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.ui" line="335"/>
         <source>Close Room</source>
         <translation>關閉房間</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="329"/>
+        <location filename="../widgets/mainwindow.ui" line="340"/>
         <source>All Layers</source>
         <translation>所有圖層</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="247"/>
+        <location filename="../widgets/mainwindow.cpp" line="235"/>
         <source>Brushes</source>
         <translation>畫刷</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="283"/>
-        <location filename="../widgets/mainwindow.cpp" line="327"/>
+        <location filename="../widgets/mainwindow.cpp" line="271"/>
+        <location filename="../widgets/mainwindow.cpp" line="301"/>
+        <location filename="../widgets/mainwindow.cpp" line="333"/>
+        <location filename="../widgets/mainwindow.cpp" line="363"/>
         <source>%1
 Shortcut: %2</source>
         <translation>%1
 快捷鍵：%2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="307"/>
+        <location filename="../widgets/mainwindow.cpp" line="310"/>
         <source>Color Picker</source>
         <translation>拾色器</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="336"/>
+        <location filename="../widgets/mainwindow.cpp" line="340"/>
+        <source>Move Tool</source>
+        <translation>移動工具</translation>
+    </message>
+    <message>
+        <source>Tablet</source>
+        <translation type="vanished">數位板</translation>
+    </message>
+    <message>
+        <source>Draw with Tablet</source>
+        <translation type="vanished">使用數位板繪製</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="383"/>
         <source>Brush Settings</source>
         <translation>畫刷設定</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="444"/>
+        <location filename="../widgets/mainwindow.cpp" line="451"/>
+        <location filename="../widgets/mainwindow.cpp" line="465"/>
+        <location filename="../widgets/mainwindow.cpp" line="472"/>
+        <location filename="../widgets/mainwindow.cpp" line="1093"/>
+        <source>Warning</source>
+        <translation type="unfinished">警告</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="445"/>
+        <location filename="../widgets/mainwindow.cpp" line="1094"/>
+        <source>You are not the room owner, you can&apos;t close the room.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="452"/>
+        <source>You are closing the room.
+Your paintings will be lost if you don&apos;t save them.
+Are you sure you want to close the room?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="466"/>
+        <source>You are not the room owner, you can&apos;t kick user.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="473"/>
+        <source>You are kicking someone.
+He/She may never be allowed to join the room again.
+Are you sure you want to kick user?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="1370"/>
+        <source>Login Failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="1371"/>
+        <source>An error occurred while logging into the room:
+%1
+
+Would you like to retry?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="1386"/>
+        <source>Send Message Failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="1387"/>
+        <source>An error occurred while sending chat message:
+%1
+
+Please try again later.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="1393"/>
+        <source>Send Drawing Data Failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="1394"/>
+        <source>An error occurred while sending drawing data:
+%1
+
+Please try again later.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="1400"/>
+        <source>Clear Canvas Failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="1401"/>
+        <source>An error occurred while clearing canvas:
+%1
+
+Would you like to retry?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="1411"/>
+        <source>Renew Room Failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="1412"/>
+        <source>An error occurred while renewing room:
+%1
+
+Would you like to retry?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="1422"/>
+        <source>Close Room Failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="1423"/>
+        <source>An error occurred while closing room:
+%1
+
+Would you like to retry?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="1433"/>
+        <source>Kick User Failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="1434"/>
+        <source>An error occurred while kicking user:
+%1
+
+Please try again later</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="1442"/>
+        <source>Failed to get online list: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="1234"/>
+        <source>Exporting...</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>&amp;Language</source>
@@ -500,18 +742,13 @@ Do you want to restart right now?</source>
         <translation type="obsolete">語言更改將在下次啟動程式時生效。</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="477"/>
-        <location filename="../widgets/mainwindow.cpp" line="557"/>
-        <location filename="../widgets/mainwindow.cpp" line="583"/>
-        <location filename="../widgets/mainwindow.cpp" line="897"/>
         <source>Sorry</source>
-        <translation>抱歉</translation>
+        <translation type="vanished">抱歉</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="478"/>
         <source>Only room owner is authorized to close the room.
 It seems you&apos;re not room manager.</source>
-        <translation>只有房主才有權限關閉房間。
+        <translation type="vanished">只有房主才有權限關閉房間。
 您似乎不是房主。</translation>
     </message>
     <message>
@@ -521,7 +758,8 @@ It seems you&apos;re not room manager.</source>
 </translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="83"/>
+        <location filename="../widgets/mainwindow.cpp" line="615"/>
+        <location filename="../widgets/mainwindow.cpp" line="628"/>
         <source> - Mr.Paint</source>
         <translation> - 茶繪君</translation>
     </message>
@@ -532,7 +770,7 @@ It seems you&apos;re not room manager.</source>
 </translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="372"/>
+        <location filename="../widgets/mainwindow.cpp" line="425"/>
         <source>Room Share</source>
         <translation>分享房間</translation>
     </message>
@@ -543,116 +781,224 @@ It seems you&apos;re not room manager.</source>
 </translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="381"/>
         <source>Notice, we detected you&apos;re using IPv6 protocol which may result in that your Room URL is not available for IPv4 users.</source>
-        <translation>提示：檢測到您正在使用IPv6協定，這將導致您的房間URL無法與IPv4用戶共通。</translation>
+        <translation type="vanished">提示：檢測到您正在使用IPv6協定，這將導致您的房間URL無法與IPv4用戶共通。</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="531"/>
+        <source>Only room owner is authorized to kick members.
+It seems you&apos;re not room manager.</source>
+        <translation type="vanished">僅有房主才可移出成員。
+您似乎不是房主。</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="658"/>
         <source>Server Connection Failed.</source>
         <translation>伺服器斷開了連接。</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="544"/>
+        <location filename="../widgets/mainwindow.cpp" line="682"/>
+        <source>Connection interrupted, reconnecting...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="703"/>
+        <source>Reconnection successful, synchronizing data...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="721"/>
+        <source>Reconnection failed: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="747"/>
+        <source>Reconnection completed, you can continue drawing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="769"/>
         <source>Closing</source>
         <translation>房間關閉</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="545"/>
+        <location filename="../widgets/mainwindow.cpp" line="770"/>
         <source>Warning, the room owner has closed the room. This room will close when everyone leaves.
 Save your work if you like it!</source>
         <translation>警告，房主已經關閉了本房間。所有人離開後本房間將刪除。
 請保存好您的得意之作！</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="558"/>
-        <location filename="../widgets/mainwindow.cpp" line="584"/>
         <source>Sorry, it seems you&apos;re notroom owner.</source>
-        <translation>抱歉，您似乎不是房主。</translation>
+        <translation type="vanished">抱歉，您似乎不是房主。</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="573"/>
         <source>Close Request Completed.</source>
-        <translation>關閉命令已發送</translation>
+        <translation type="vanished">關閉命令已發送</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="587"/>
         <source>Clear Request Completed.</source>
-        <translation>清空命令已發送</translation>
+        <translation type="vanished">清空命令已發送</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="611"/>
         <source>Checkout Completed.</source>
-        <translation>簽到完畢</translation>
+        <translation type="vanished">簽到完畢</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="639"/>
         <source>Online List Refreshed.</source>
-        <translation>在線列表刷新完畢</translation>
+        <translation type="vanished">在線列表刷新完畢</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="671"/>
-        <location filename="../widgets/mainwindow.cpp" line="694"/>
+        <location filename="../widgets/mainwindow.cpp" line="817"/>
+        <source>You&apos;ve been kicked by room owner.</source>
+        <translation>您已被房主移出</translation>
+    </message>
+    <message>
         <source>Error</source>
-        <translation>出錯</translation>
+        <translation type="vanished">出錯</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="672"/>
-        <location filename="../widgets/mainwindow.cpp" line="695"/>
         <source>Sorry, an error occurred.
 Error: %1, %2</source>
-        <translation>抱歉，出錯了。
+        <translation type="vanished">抱歉，出錯了。
 錯誤：%1，%2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="865"/>
-        <location filename="../widgets/mainwindow.cpp" line="886"/>
+        <location filename="../widgets/mainwindow.cpp" line="1072"/>
+        <location filename="../widgets/mainwindow.cpp" line="1099"/>
         <source>OMG</source>
         <translation>天吶</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="866"/>
+        <location filename="../widgets/mainwindow.cpp" line="1073"/>
         <source>You&apos;re going to clear layer %1. All the work of that layerwill be deleted and CANNOT be undone.
 Do you really want to do so?</source>
         <translation>您將清空圖層 %1。該圖層的所有內容將被清空，並且&lt;b&gt;無法&lt;/b&gt;恢復。
 您確定您要這麼做嗎？</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="887"/>
+        <location filename="../widgets/mainwindow.cpp" line="1082"/>
+        <source>Notice</source>
+        <translation type="unfinished">注意</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="1083"/>
+        <source>Layer clearing command sent to canvas.
+Server-side layer clearing is not yet implemented in the SSE client version.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="1100"/>
         <source>You&apos;re going to clear ALL LAYERS. All of work in this roomwill be deleted and CANNOT be undone.
 Do you really want to do so?</source>
         <translation>您將清空所有圖層。本房間的所有內容將被清空，並且&lt;b&gt;無法&lt;/b&gt;恢復。
 您確定要這麼做嗎？</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="898"/>
         <source>Only room owner is authorized to clear the canvas.
 It seems you&apos;re not room manager.</source>
-        <translation>只有房間所有者才可清理畫布。
+        <translation type="vanished">只有房間所有者才可清理畫布。
 您似乎不是所有者。</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="944"/>
+        <location filename="../widgets/mainwindow.cpp" line="1147"/>
         <source>Waiting for sync, please do not close.
 This will cost you 1 minute at most.</source>
         <translation>正在等待同步，請不要關閉。
 整個過程至多需要1分鐘。</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="977"/>
+        <location filename="../widgets/mainwindow.cpp" line="1185"/>
         <source>Export all to file</source>
         <translation>全部導出至文件</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="979"/>
-        <location filename="../widgets/mainwindow.cpp" line="997"/>
+        <location filename="../widgets/mainwindow.cpp" line="1187"/>
+        <location filename="../widgets/mainwindow.cpp" line="1205"/>
         <source>Images (*.png)</source>
         <translation>圖像 (*.png)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="995"/>
+        <location filename="../widgets/mainwindow.cpp" line="1203"/>
         <source>Export visible part to file</source>
         <translation>導出可見圖層至文件</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="1221"/>
+        <source>Export contents to psd file</source>
+        <translation>導出為PSD文件</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="1223"/>
+        <source>Photoshop Images (*.psd)</source>
+        <translation>Photoshop文檔 (*.psd)</translation>
+    </message>
+</context>
+<context>
+    <name>MemberListWidget</name>
+    <message>
+        <location filename="../widgets/memberlistwidget.cpp" line="68"/>
+        <source>Kick</source>
+        <translation>移出</translation>
+    </message>
+</context>
+<context>
+    <name>NetworkIndicator</name>
+    <message>
+        <location filename="../widgets/networkindicator.cpp" line="7"/>
+        <source>- %1</source>
+        <translation>- %1</translation>
+    </message>
+    <message>
+        <location filename="../widgets/networkindicator.cpp" line="10"/>
+        <location filename="../widgets/networkindicator.cpp" line="75"/>
+        <source>Network speed unknown</source>
+        <translation>網速不可知</translation>
+    </message>
+    <message>
+        <location filename="../widgets/networkindicator.cpp" line="53"/>
+        <source>Dead</source>
+        <translation>沒網速</translation>
+    </message>
+    <message>
+        <location filename="../widgets/networkindicator.cpp" line="54"/>
+        <source>Network sucks now</source>
+        <translation>基本沒有速度</translation>
+    </message>
+    <message>
+        <location filename="../widgets/networkindicator.cpp" line="58"/>
+        <source>Bad</source>
+        <translation>渣網速</translation>
+    </message>
+    <message>
+        <location filename="../widgets/networkindicator.cpp" line="59"/>
+        <source>Network is very bad</source>
+        <translation>網速是個渣渣</translation>
+    </message>
+    <message>
+        <location filename="../widgets/networkindicator.cpp" line="63"/>
+        <source>Medium</source>
+        <translation>中速</translation>
+    </message>
+    <message>
+        <location filename="../widgets/networkindicator.cpp" line="64"/>
+        <source>Network is ok</source>
+        <translation>網速一般般</translation>
+    </message>
+    <message>
+        <location filename="../widgets/networkindicator.cpp" line="68"/>
+        <source>Good</source>
+        <translation>高速</translation>
+    </message>
+    <message>
+        <location filename="../widgets/networkindicator.cpp" line="69"/>
+        <source>Excellent network</source>
+        <translation>大觸般的網速!</translation>
+    </message>
+    <message>
+        <location filename="../widgets/networkindicator.cpp" line="7"/>
+        <location filename="../widgets/networkindicator.cpp" line="74"/>
+        <source>Unknown</source>
+        <translation>不可知</translation>
     </message>
 </context>
 <context>
@@ -690,12 +1036,12 @@ This will cost you 1 minute at most.</source>
     <message>
         <location filename="../widgets/newroomwindow.ui" line="46"/>
         <source>2880</source>
-        <translation></translation>
+        <translation>2880</translation>
     </message>
     <message>
         <location filename="../widgets/newroomwindow.ui" line="60"/>
         <source>1920</source>
-        <translation></translation>
+        <translation>1920</translation>
     </message>
     <message>
         <location filename="../widgets/newroomwindow.ui" line="109"/>
@@ -722,38 +1068,38 @@ Do you want to retry?</source>
 想要重試嗎？</translation>
     </message>
     <message>
-        <location filename="../widgets/newroomwindow.cpp" line="63"/>
-        <location filename="../widgets/newroomwindow.cpp" line="74"/>
+        <location filename="../widgets/newroomwindow.cpp" line="65"/>
+        <location filename="../widgets/newroomwindow.cpp" line="76"/>
         <source>Error!</source>
         <translation>出錯啦！</translation>
     </message>
     <message>
-        <location filename="../widgets/newroomwindow.cpp" line="61"/>
+        <location filename="../widgets/newroomwindow.cpp" line="63"/>
         <source>Your room name is empty or too long!</source>
         <translation>您房間名稱不能為空或過長！</translation>
     </message>
     <message>
-        <location filename="../widgets/newroomwindow.cpp" line="72"/>
+        <location filename="../widgets/newroomwindow.cpp" line="74"/>
         <source>Your welcome message is too long!</source>
         <translation>您的歡迎辭太長了！</translation>
     </message>
     <message>
-        <location filename="../widgets/newroomwindow.cpp" line="86"/>
+        <location filename="../widgets/newroomwindow.cpp" line="88"/>
         <source>Large Canvas!</source>
         <translation>好大的畫布！</translation>
     </message>
     <message>
-        <location filename="../widgets/newroomwindow.cpp" line="87"/>
+        <location filename="../widgets/newroomwindow.cpp" line="89"/>
         <source>You set a large canvas size, which may have high load on low-memory computers.</source>
         <translation>您設置了一個很大的畫布，在內存較小的計算機上可能產生過大的運行負擔。</translation>
     </message>
     <message>
-        <location filename="../widgets/newroomwindow.cpp" line="116"/>
+        <location filename="../widgets/newroomwindow.cpp" line="126"/>
         <source>Do you really want to cancel?</source>
         <translation>您真的想要取消嗎？</translation>
     </message>
     <message>
-        <location filename="../widgets/newroomwindow.cpp" line="117"/>
+        <location filename="../widgets/newroomwindow.cpp" line="127"/>
         <source>Cancel?</source>
         <translation>取消？</translation>
     </message>
@@ -761,139 +1107,301 @@ Do you want to retry?</source>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../misc/errortable.cpp" line="43"/>
-        <location filename="../misc/errortable.cpp" line="67"/>
-        <location filename="../misc/errortable.cpp" line="81"/>
         <source>unknown error.</source>
-        <translation>未知錯誤。</translation>
+        <translation type="vanished">未知錯誤。</translation>
     </message>
     <message>
-        <location filename="../misc/errortable.cpp" line="45"/>
         <source>server is busy.</source>
-        <translation>伺服器很忙。</translation>
+        <translation type="vanished">伺服器很忙。</translation>
     </message>
     <message>
-        <location filename="../misc/errortable.cpp" line="47"/>
         <source>name collision.</source>
-        <translation>名稱衝突。</translation>
+        <translation type="vanished">名稱衝突。</translation>
     </message>
     <message>
-        <location filename="../misc/errortable.cpp" line="49"/>
-        <location filename="../misc/errortable.cpp" line="69"/>
         <source>invalid name.</source>
-        <translation>無效的名字。</translation>
+        <translation type="vanished">無效的名字。</translation>
     </message>
     <message>
-        <location filename="../misc/errortable.cpp" line="51"/>
         <source>invalid max member.</source>
-        <translation>無效的最大人數。</translation>
+        <translation type="vanished">無效的最大人數。</translation>
     </message>
     <message>
-        <location filename="../misc/errortable.cpp" line="53"/>
         <source>invalid welcome words.</source>
-        <translation>無效的歡迎辭。</translation>
+        <translation type="vanished">無效的歡迎辭。</translation>
     </message>
     <message>
-        <location filename="../misc/errortable.cpp" line="55"/>
         <source>invalid auto closing empty room.</source>
-        <translation>無效的自動關房。</translation>
+        <translation type="vanished">無效的自動關房。</translation>
     </message>
     <message>
-        <location filename="../misc/errortable.cpp" line="57"/>
         <source>invalid password.</source>
-        <translation>無效的密碼。</translation>
+        <translation type="vanished">無效的密碼。</translation>
     </message>
     <message>
-        <location filename="../misc/errortable.cpp" line="59"/>
         <source>auto closing empty room not supported.</source>
-        <translation>不支持自動關房。</translation>
+        <translation type="vanished">不支持自動關房。</translation>
     </message>
     <message>
-        <location filename="../misc/errortable.cpp" line="61"/>
         <source>private room not supported.</source>
-        <translation>不支持私密房間。</translation>
+        <translation type="vanished">不支持私密房間。</translation>
     </message>
     <message>
-        <location filename="../misc/errortable.cpp" line="63"/>
         <source>too many rooms.</source>
-        <translation>房間太多了。</translation>
+        <translation type="vanished">房間太多了。</translation>
     </message>
     <message>
-        <location filename="../misc/errortable.cpp" line="65"/>
         <source>invalid canvas size.</source>
-        <translation>無效的畫布大小。</translation>
+        <translation type="vanished">無效的畫布大小。</translation>
     </message>
     <message>
-        <location filename="../misc/errortable.cpp" line="71"/>
         <source>invalid password or lack of password.</source>
-        <translation>無效的密碼，或缺少密碼。</translation>
+        <translation type="vanished">無效的密碼，或缺少密碼。</translation>
     </message>
     <message>
-        <location filename="../misc/errortable.cpp" line="73"/>
         <source>room is full.</source>
-        <translation>房間已滿。</translation>
+        <translation type="vanished">房間已滿。</translation>
     </message>
     <message>
-        <location filename="../misc/errortable.cpp" line="75"/>
         <source>you&apos;re banned.</source>
-        <translation>您已被封禁。</translation>
+        <translation type="vanished">您已被封禁。</translation>
     </message>
     <message>
-        <location filename="../misc/errortable.cpp" line="77"/>
+        <source>server is too busy.</source>
+        <translation type="vanished">伺服器繁忙。</translation>
+    </message>
+    <message>
         <source>closed by room or room manager.</source>
-        <translation>被房間或管理員關閉。</translation>
+        <translation type="vanished">被房間或管理員關閉。</translation>
     </message>
     <message>
-        <location filename="../misc/errortable.cpp" line="79"/>
         <source>closed by room owner.</source>
-        <translation>被房主關閉。</translation>
+        <translation type="vanished">被房主關閉。</translation>
     </message>
     <message>
-        <location filename="../misc/errortable.cpp" line="83"/>
         <source>room is closed already.</source>
-        <translation>房間已經關閉了。</translation>
+        <translation type="vanished">房間已經關閉了。</translation>
     </message>
     <message>
-        <location filename="../misc/errortable.cpp" line="85"/>
+        <source>wrong key.</source>
+        <translation type="vanished">錯誤的密鑰。</translation>
+    </message>
+    <message>
+        <source>timeout, which means too late.</source>
+        <translation type="vanished">已超時。</translation>
+    </message>
+    <message>
+        <source>out of range.</source>
+        <translation type="vanished">超出範圍。</translation>
+    </message>
+    <message>
         <source>Unnamed error: %1.</source>
-        <translation>未命名的錯誤：%1。</translation>
+        <translation type="vanished">未命名的錯誤：%1。</translation>
     </message>
     <message>
-        <location filename="../paintingTools/brush/brush.cpp" line="51"/>
         <source>Brush</source>
-        <translation>畫刷</translation>
+        <translation type="vanished">畫刷</translation>
     </message>
     <message>
-        <location filename="../paintingTools/brush/eraser.cpp" line="9"/>
         <source>Eraser</source>
-        <translation>橡皮</translation>
+        <translation type="vanished">橡皮</translation>
     </message>
     <message>
-        <location filename="../paintingTools/brush/pencil.cpp" line="13"/>
         <source>Pencil</source>
-        <translation>鉛筆</translation>
+        <translation type="vanished">鉛筆</translation>
     </message>
     <message>
-        <location filename="../paintingTools/brush/sketchbrush.cpp" line="9"/>
         <source>Sketch</source>
-        <translation>素描筆</translation>
+        <translation type="vanished">素描筆</translation>
     </message>
     <message>
-        <location filename="../paintingTools/brush/wetfingure.cpp" line="6"/>
         <source>Wet Fingure</source>
-        <translation>濕手指</translation>
+        <translation type="vanished">濕手指</translation>
     </message>
     <message>
-        <location filename="../main.cpp" line="80"/>
         <source>No Updater?</source>
-        <translation>找不到更新器</translation>
+        <translation type="obsolete">找不到更新器</translation>
     </message>
     <message>
-        <location filename="../main.cpp" line="81"/>
+        <source>Update Disabled</source>
+        <translation type="vanished">更新器不可用</translation>
+    </message>
+    <message>
+        <source>Sorry, we do not support auto-update on Mac OSX.&lt;br/&gt;You may want to check &lt;a href=&quot;http://mrspaint.com&quot;&gt;our site&lt;/a&gt;for new versions manually.</source>
+        <translation type="vanished">抱歉，我們現在仍不支持Mac OSX平台上的自動更新。&lt;br/&gt;您可能需要手動訪問&lt;a href=&quot;http://mrspaint.com&quot;&gt;我們的網站&lt;/a&gt;來查詢更新。</translation>
+    </message>
+    <message>
+        <source>Sorry, we do not support auto-update on Mac OSX.
+You may want to check &lt;a href=&quot;http://mrspaint.com&quot;&gt;our site&lt;/a&gt;for new versions manually.</source>
+        <translation type="vanished">抱歉，我們現在仍不支持Mac OSX平台上的自動更新。\n您可能需要手動訪問&lt;a href=&quot;http://mrspaint.com&quot;&gt;我們的網站&lt;/a&gt;來查詢更新。</translation>
+    </message>
+    <message>
+        <location filename="../main.cpp" line="126"/>
         <source>We cannot find updater.
 You may need to check update yourself.</source>
         <translation>我們無法找到更新器。
 您只能手動檢查更新。</translation>
+    </message>
+    <message>
+        <location filename="../main.cpp" line="246"/>
+        <source>Password</source>
+        <translation type="unfinished">密碼</translation>
+    </message>
+    <message>
+        <location filename="../main.cpp" line="247"/>
+        <source>This is a private room, please input password:</source>
+        <translation type="unfinished">這是一個私人房間，請您輸入密碼：</translation>
+    </message>
+    <message>
+        <location filename="../paintingTools/brush/basicbrush.cpp" line="32"/>
+        <source>BasicBrush</source>
+        <translation>畫筆</translation>
+    </message>
+    <message>
+        <location filename="../paintingTools/brush/basiceraser.cpp" line="19"/>
+        <source>BasicEraser</source>
+        <translation>橡皮</translation>
+    </message>
+    <message>
+        <location filename="../paintingTools/brush/binarybrush.cpp" line="20"/>
+        <source>BinaryBrush</source>
+        <translation>二值筆</translation>
+    </message>
+    <message>
+        <location filename="../paintingTools/brush/maskbased.cpp" line="20"/>
+        <source>Crayon</source>
+        <translation>蠟筆</translation>
+    </message>
+    <message>
+        <location filename="../paintingTools/brush/sketchbrush.cpp" line="18"/>
+        <source>SketchBrush</source>
+        <translation>速寫筆</translation>
+    </message>
+    <message>
+        <source>WaterBrush</source>
+        <translation type="vanished">水彩筆</translation>
+    </message>
+    <message>
+        <location filename="../common/network/known-error.cpp" line="8"/>
+        <location filename="../common/network/known-error.cpp" line="55"/>
+        <source>Unknown error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/network/known-error.cpp" line="9"/>
+        <location filename="../common/network/known-error.cpp" line="27"/>
+        <source>Server busy</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/network/known-error.cpp" line="10"/>
+        <source>Room name already exists</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/network/known-error.cpp" line="11"/>
+        <source>Invalid name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/network/known-error.cpp" line="12"/>
+        <source>Invalid maximum member count</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/network/known-error.cpp" line="13"/>
+        <source>Invalid welcome message</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/network/known-error.cpp" line="14"/>
+        <source>Invalid empty room close setting</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/network/known-error.cpp" line="15"/>
+        <source>Invalid password</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/network/known-error.cpp" line="16"/>
+        <source>Auto-close empty rooms not supported</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/network/known-error.cpp" line="17"/>
+        <source>Private rooms not supported</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/network/known-error.cpp" line="18"/>
+        <source>Room limit reached</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/network/known-error.cpp" line="19"/>
+        <source>Invalid canvas size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/network/known-error.cpp" line="22"/>
+        <source>Unknown error during login</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/network/known-error.cpp" line="23"/>
+        <source>Invalid username</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/network/known-error.cpp" line="24"/>
+        <source>Invalid password or password missing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/network/known-error.cpp" line="25"/>
+        <source>Room is full</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/network/known-error.cpp" line="26"/>
+        <source>You have been banned</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/network/known-error.cpp" line="30"/>
+        <source>Unknown error during archive operation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/network/known-error.cpp" line="33"/>
+        <source>Unknown error getting online list</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/network/known-error.cpp" line="34"/>
+        <source>Room is closed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/network/known-error.cpp" line="37"/>
+        <source>Unknown error during check-in</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/network/known-error.cpp" line="38"/>
+        <source>Invalid key provided during check-in</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/network/known-error.cpp" line="39"/>
+        <source>Check-in too late</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/network/known-error.cpp" line="41"/>
+        <source>Unknown error code: %1</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -910,7 +1418,7 @@ You may need to check update yourself.</source>
     <message>
         <location filename="../widgets/roomlistdialog.ui" line="42"/>
         <source>TextLabel</source>
-        <translation></translation>
+        <translation>文字標籤</translation>
     </message>
     <message>
         <location filename="../widgets/roomlistdialog.ui" line="52"/>
@@ -977,148 +1485,137 @@ You may need to check update yourself.</source>
         <translation type="obsolete">注意：我們還在構思階段，至多提供50個房間。</translation>
     </message>
     <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="72"/>
-        <location filename="../widgets/roomlistdialog.cpp" line="616"/>
+        <location filename="../widgets/roomlistdialog.cpp" line="104"/>
+        <location filename="../widgets/roomlistdialog.cpp" line="404"/>
         <source>Rooms: %1, Members: %2</source>
         <translation>房間：%1，人數：%2</translation>
     </message>
     <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="100"/>
+        <location filename="../widgets/roomlistdialog.cpp" line="150"/>
         <source>Room Name</source>
         <translation>房間名</translation>
     </message>
     <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="101"/>
+        <location filename="../widgets/roomlistdialog.cpp" line="151"/>
         <source>Privacy</source>
         <translation>私密性</translation>
     </message>
     <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="102"/>
+        <location filename="../widgets/roomlistdialog.cpp" line="152"/>
         <source>Current Member</source>
         <translation>在線人數</translation>
     </message>
     <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="103"/>
+        <location filename="../widgets/roomlistdialog.cpp" line="153"/>
         <source>Max Member</source>
         <translation>最大人數</translation>
     </message>
     <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="176"/>
-        <location filename="../widgets/roomlistdialog.cpp" line="198"/>
+        <location filename="../widgets/roomlistdialog.cpp" line="191"/>
+        <location filename="../widgets/roomlistdialog.cpp" line="239"/>
         <source>Warning</source>
         <translation>警告</translation>
     </message>
     <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="177"/>
+        <location filename="../widgets/roomlistdialog.cpp" line="192"/>
         <source>You must have a valid nick name.</source>
         <translation>您必須有一個合法的暱稱</translation>
     </message>
     <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="199"/>
+        <location filename="../widgets/roomlistdialog.cpp" line="240"/>
         <source>You didn&apos;t choose any room.</source>
         <translation>您沒有選擇任何房間。</translation>
     </message>
     <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="220"/>
-        <location filename="../widgets/roomlistdialog.cpp" line="244"/>
-        <location filename="../widgets/roomlistdialog.cpp" line="552"/>
         <source>Error!</source>
-        <translation>出錯啦！</translation>
+        <translation type="vanished">出錯啦！</translation>
     </message>
     <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="221"/>
-        <location filename="../widgets/roomlistdialog.cpp" line="245"/>
         <source>Cannot connect to server.
 If this situation continues, you should consider &lt;a href=&apos;http://mrspaint.com&apos;&gt;update&lt;/a&gt; manually.</source>
-        <translation>無法連接伺服器。
+        <translation type="vanished">無法連接伺服器。
 如果始終無法連接，請嘗試&lt;a href=&apos;http://mrspaint.com&apos;&gt;手動更新&lt;/a&gt;。</translation>
     </message>
     <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="513"/>
         <source>Succeed!</source>
-        <translation>建立成功！</translation>
+        <translation type="vanished">建立成功！</translation>
     </message>
     <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="514"/>
         <source>Go get your room!</source>
-        <translation>快去房間吧！</translation>
+        <translation type="vanished">快去房間吧！</translation>
     </message>
     <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="548"/>
         <source>Error: %1, %2
 Do you want to retry?</source>
-        <translation>錯誤：%1，%2
+        <translation type="vanished">錯誤：%1，%2
 想要重試嗎？</translation>
     </message>
     <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="598"/>
+        <location filename="../widgets/roomlistdialog.cpp" line="382"/>
         <source>Private</source>
         <translation>私</translation>
     </message>
     <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="598"/>
+        <location filename="../widgets/roomlistdialog.cpp" line="382"/>
         <source>Public</source>
         <translation>公</translation>
     </message>
     <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="428"/>
         <source>Connection</source>
-        <translation>連接</translation>
+        <translation type="vanished">連接</translation>
     </message>
     <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="429"/>
         <source>Sorry, server has closed.</source>
-        <translation>抱歉，伺服器好像斷開了。</translation>
+        <translation type="vanished">抱歉，伺服器好像斷開了。</translation>
     </message>
     <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="297"/>
+        <location filename="../widgets/roomlistdialog.cpp" line="250"/>
         <source>Full loaded</source>
         <translation>滿載</translation>
     </message>
     <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="38"/>
+        <location filename="../widgets/roomlistdialog.cpp" line="53"/>
         <source>Room Url</source>
         <translation>房間URL</translation>
     </message>
     <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="39"/>
+        <location filename="../widgets/roomlistdialog.cpp" line="54"/>
         <source>Input room url:</source>
         <translation>輸入房間URL：</translation>
     </message>
     <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="298"/>
+        <location filename="../widgets/roomlistdialog.cpp" line="251"/>
         <source>Cannot join a full loaded room.</source>
         <translation>無法加入一個滿房</translation>
     </message>
     <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="307"/>
         <source>Password</source>
-        <translation>密碼</translation>
+        <translation type="vanished">密碼</translation>
     </message>
     <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="308"/>
         <source>This is a private room, please input password:</source>
-        <translation>這是一個私人房間，請您輸入密碼：</translation>
+        <translation type="vanished">這是一個私人房間，請您輸入密碼：</translation>
     </message>
     <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="463"/>
+        <location filename="../widgets/roomlistdialog.cpp" line="319"/>
+        <location filename="../widgets/roomlistdialog.cpp" line="333"/>
+        <location filename="../widgets/roomlistdialog.cpp" line="342"/>
         <source>Error</source>
         <translation>出錯</translation>
     </message>
     <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="464"/>
         <source>Sorry, an error occurred.
 Error: %1, %2</source>
-        <translation>抱歉，出錯了。
+        <translation type="vanished">抱歉，出錯了。
 錯誤：%1，%2</translation>
     </message>
     <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="650"/>
+        <location filename="../widgets/roomlistdialog.cpp" line="452"/>
         <source>Notice</source>
         <translation>注意</translation>
     </message>
     <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="651"/>
+        <location filename="../widgets/roomlistdialog.cpp" line="453"/>
         <source>We&apos;re still in alpha test. This means the program may crash at any time in any condition.
 Use this software only when you accept it.</source>
         <translation>我們仍處於早期測試階段。這意味著軟體隨時有可能宕機。
@@ -1134,18 +1631,57 @@ Use this software only when you accept it.</source>
     </message>
 </context>
 <context>
+    <name>SSEClientSocket</name>
+    <message>
+        <location filename="../common/network/sse-clientsocket.cpp" line="938"/>
+        <source>Failed to process login response</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/network/sse-clientsocket.cpp" line="1066"/>
+        <location filename="../common/network/sse-clientsocket.cpp" line="1088"/>
+        <location filename="../common/network/sse-clientsocket.cpp" line="1117"/>
+        <location filename="../common/network/sse-clientsocket.cpp" line="1146"/>
+        <location filename="../common/network/sse-clientsocket.cpp" line="1188"/>
+        <location filename="../common/network/sse-clientsocket.cpp" line="1217"/>
+        <location filename="../common/network/sse-clientsocket.cpp" line="1246"/>
+        <location filename="../common/network/sse-clientsocket.cpp" line="1275"/>
+        <source>Invalid JSON response</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/network/sse-clientsocket.cpp" line="1566"/>
+        <source>Invalid manager address: %1. 
+Use default manager address in settings please.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/network/sse-clientsocket.cpp" line="1574"/>
+        <source>Empty host in manager address: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/network/sse-clientsocket.cpp" line="1583"/>
+        <source>DNS lookup failed for host: %1. Error: %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/network/sse-clientsocket.cpp" line="1598"/>
+        <source>No IPv4 address found for host: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ShortcutDelegate</name>
     <message>
-        <location filename="../widgets/configuredialog.cpp" line="275"/>
-        <location filename="../widgets/configuredialog.cpp" line="296"/>
-        <location filename="../widgets/configuredialog.cpp" line="315"/>
+        <location filename="../widgets/configuredialog.cpp" line="376"/>
+        <location filename="../widgets/configuredialog.cpp" line="395"/>
         <source>Immediately</source>
         <translation>立即模式</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.cpp" line="276"/>
-        <location filename="../widgets/configuredialog.cpp" line="298"/>
-        <location filename="../widgets/configuredialog.cpp" line="317"/>
+        <location filename="../widgets/configuredialog.cpp" line="378"/>
+        <location filename="../widgets/configuredialog.cpp" line="397"/>
         <source>When Release</source>
         <translation>傳統模式</translation>
     </message>
@@ -1153,44 +1689,111 @@ Use this software only when you accept it.</source>
 <context>
     <name>ShortcutManager</name>
     <message>
-        <location filename="../misc/shortcutmanager.cpp" line="14"/>
         <source>Pencil</source>
-        <translation>鉛筆</translation>
+        <translation type="vanished">鉛筆</translation>
     </message>
     <message>
-        <location filename="../misc/shortcutmanager.cpp" line="20"/>
+        <location filename="../misc/shortcutmanager.cpp" line="15"/>
         <source>Brush</source>
         <translation>畫刷</translation>
     </message>
     <message>
-        <location filename="../misc/shortcutmanager.cpp" line="26"/>
+        <location filename="../misc/shortcutmanager.cpp" line="39"/>
         <source>Sketch</source>
         <translation>素描筆</translation>
     </message>
     <message>
-        <location filename="../misc/shortcutmanager.cpp" line="32"/>
+        <location filename="../misc/shortcutmanager.cpp" line="21"/>
         <source>Eraser</source>
         <translation>橡皮</translation>
     </message>
     <message>
-        <location filename="../misc/shortcutmanager.cpp" line="38"/>
+        <location filename="../misc/shortcutmanager.cpp" line="27"/>
+        <source>BinaryBrush</source>
+        <translation>二值筆</translation>
+    </message>
+    <message>
+        <location filename="../misc/shortcutmanager.cpp" line="33"/>
+        <source>Crayon</source>
+        <translation>蠟筆</translation>
+    </message>
+    <message>
+        <location filename="../misc/shortcutmanager.cpp" line="52"/>
+        <source>ColorPicker</source>
+        <translation>拾色器</translation>
+    </message>
+    <message>
+        <location filename="../misc/shortcutmanager.cpp" line="58"/>
+        <source>MoveTool</source>
+        <translation>移動工具</translation>
+    </message>
+    <message>
+        <location filename="../misc/shortcutmanager.cpp" line="64"/>
         <source>Increase brush width</source>
         <translation>加粗</translation>
     </message>
     <message>
-        <location filename="../misc/shortcutmanager.cpp" line="44"/>
+        <location filename="../misc/shortcutmanager.cpp" line="70"/>
         <source>Decrease brush width</source>
         <translation>變細</translation>
     </message>
     <message>
-        <location filename="../misc/shortcutmanager.cpp" line="50"/>
+        <location filename="../misc/shortcutmanager.cpp" line="76"/>
         <source>Increase brush hardness</source>
         <translation>增加硬度</translation>
     </message>
     <message>
-        <location filename="../misc/shortcutmanager.cpp" line="56"/>
+        <location filename="../misc/shortcutmanager.cpp" line="82"/>
         <source>Decrease brush hardness</source>
         <translation>減少硬度</translation>
+    </message>
+    <message>
+        <location filename="../misc/shortcutmanager.cpp" line="88"/>
+        <source>Increase brush thickness</source>
+        <translation>增加濃度</translation>
+    </message>
+    <message>
+        <location filename="../misc/shortcutmanager.cpp" line="94"/>
+        <source>Decrease brush thickness</source>
+        <translation>減少濃度</translation>
+    </message>
+    <message>
+        <location filename="../misc/shortcutmanager.cpp" line="106"/>
+        <source>Zoom in canvas</source>
+        <translation>放大畫布</translation>
+    </message>
+    <message>
+        <location filename="../misc/shortcutmanager.cpp" line="112"/>
+        <source>Zoom out canvas</source>
+        <translation>縮小畫布</translation>
+    </message>
+    <message>
+        <location filename="../misc/shortcutmanager.cpp" line="118"/>
+        <source>Rotate canvas clockwise</source>
+        <translation>順時針旋轉畫布</translation>
+    </message>
+    <message>
+        <location filename="../misc/shortcutmanager.cpp" line="124"/>
+        <source>Rotate canvas anticlockwise</source>
+        <translation>逆時針旋轉畫布</translation>
+    </message>
+    <message>
+        <location filename="../misc/shortcutmanager.cpp" line="130"/>
+        <source>Reset canvas transformations</source>
+        <translation>重置畫布平面變換</translation>
+    </message>
+</context>
+<context>
+    <name>WaitUpdaterDialog</name>
+    <message>
+        <location filename="../widgets/waitupdaterdialog.ui" line="14"/>
+        <source>Update checking</source>
+        <translation>檢查更新</translation>
+    </message>
+    <message>
+        <location filename="../widgets/waitupdaterdialog.ui" line="20"/>
+        <source>Checking updates...</source>
+        <translation>檢查更新中...</translation>
     </message>
 </context>
 </TS>

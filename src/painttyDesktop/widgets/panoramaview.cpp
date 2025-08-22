@@ -13,7 +13,7 @@ PanoramaView::PanoramaView(QWidget *parent) :
     sized_img_(preferSize_)
 {
     QPalette p = this->palette();
-    p.setColor(QPalette::Background, Qt::gray);
+    p.setColor(QPalette::Window, Qt::gray);
     this->setPalette(p);
     sized_img_.fill(Qt::white);
     full_img_.fill(Qt::white);

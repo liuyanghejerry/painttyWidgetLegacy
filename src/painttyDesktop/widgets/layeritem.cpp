@@ -25,7 +25,8 @@ LayerItem::LayerItem(QWidget *parent) :
 
     setFocusPolicy(Qt::ClickFocus);
 
-    int m = lay->margin();
+    QMargins margins = lay->contentsMargins();
+    int m = margins.left();
     lay->setContentsMargins(m,m-5,0,m-5);
 
     connect(lock_,&IconCheckBox::toggled,

@@ -1,10 +1,10 @@
 #include "panoramaslider.h"
-#include "../../common/common.h"
+#include "../common/common.h"
 
 #include <QHBoxLayout>
 #include <QSlider>
 #include <QLineEdit>
-#include <QRegExpValidator>
+#include <QRegularExpressionValidator>
 #include <QtCore/qmath.h>
 
 using GlobalDef::MIN_SCALE_FACTOR;
@@ -18,9 +18,9 @@ PanoramaSlider::PanoramaSlider(QWidget *parent) :
     inputReg("([0-9]*(\\.[0-9]*)?)%?")
 {
     QHBoxLayout *layout = new QHBoxLayout(this);
-    input->setFixedWidth(input->fontMetrics().width("100.00%"));
+    input->setFixedWidth(input->fontMetrics().horizontalAdvance("100.00%"));
     input->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-    input->setValidator(new QRegExpValidator(inputReg, input));
+    input->setValidator(new QRegularExpressionValidator(inputReg, input));
 
     this->setLayout(layout);
     layout->addWidget(slider);
@@ -78,13 +78,14 @@ void PanoramaSlider::calculateScale(int sliderValue)
 
 void PanoramaSlider::inputScaleConfirmed()
 {
-    if (inputReg.indexIn(input->text()))
+    QRegularExpressionMatch match = inputReg.match(input->text());
+    if (!match.hasMatch())
         calculateScale(slider->value());
     else
     {
         bool ok;
         qreal newScale = qBound(MIN_SCALE_FACTOR,
-                                inputReg.cap(1).toDouble(&ok) / 100.0,
+                                match.captured(1).toDouble(&ok) / 100.0,
                                 MAX_SCALE_FACTOR);
         if (ok)
         {

@@ -1,0 +1,53 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Qt Application",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/painttyWidget/build/MrPaint.app/Contents/MacOS/MrPaint",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/painttyWidget",
+      "environment": [
+        {
+          "name": "QT_QPA_PLATFORM_PLUGIN_PATH",
+          "value": "~/develop/Qt/5.15.2/clang_64/plugins"
+        },
+        {
+          "name": "DYLD_LIBRARY_PATH",
+          "value": "~/develop/Qt/5.15.2/clang_64/lib"
+        }
+      ],
+      "externalConsole": false,
+      "MIMode": "lldb",
+      "preLaunchTask": "Qt: make",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "logging": {
+        "trace": false,
+        "traceResponse": false,
+        "engineLogging": false
+      }
+    },
+    {
+      "name": "Attach to Qt Process",
+      "type": "cppdbg",
+      "request": "attach",
+      "program": "${workspaceFolder}/painttyWidget/build/MrPaint.app/Contents/MacOS/MrPaint",
+      "MIMode": "lldb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb", 
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    }
+  ]
+} 

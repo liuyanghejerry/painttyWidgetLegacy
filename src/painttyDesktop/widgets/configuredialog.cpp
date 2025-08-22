@@ -2,33 +2,39 @@
 #include <QApplication>
 #include <QDir>
 #include <QRegularExpression>
+#include <QLocale>
 #include <QMessageBox>
 #include <QProcess>
 #include <QTreeWidgetItem>
 #include <QMapIterator>
 #include <QComboBox>
+#include <QKeySequenceEdit>
+#include <QHeaderView>
+#include <QDateTime>
 #include "configuredialog.h"
 #include "ui_configuredialog.h"
-#include "../../common/common.h"
+#include "../common/common.h"
 #include "../misc/shortcutmanager.h"
 #include "../misc/singleton.h"
-#include "shortcutgrabberedit.h"
+#include "../common/room-info-manager.h"
 
 ConfigureDialog::ConfigureDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::ConfigureDialog),
-    tryIpv6(false),
     msg_notify(false),
     auto_disable_ime(false),
-    use_defalut_server(true),
-    server_port(0)
+    skip_replay(false),
+    use_droid_font(false),
+    use_default_server(true)
 {
     ui->setupUi(this);
+    resize(width() * logicalDpiX() / 96, height() * logicalDpiY() / 96);
     readSettings();
     initLanguageList();
     initShortcutList();
     initServerSettings();
     initUi();
+    initMyRoomsTab();
 
     connect(this, &ConfigureDialog::accepted,
             this, &ConfigureDialog::acceptConfigure);
@@ -42,17 +48,17 @@ ConfigureDialog::~ConfigureDialog()
 void ConfigureDialog::readSettings()
 {
     QSettings settings(GlobalDef::SETTINGS_NAME,
-                       QSettings::defaultFormat(),
-                       qApp);
+                       QSettings::defaultFormat());
     selectedLanguage = settings.value("global/language").toString();
-    tryIpv6 = settings.value("global/ipv6", false).toBool();
-    msg_notify = settings.value("chat/msg_notify", false).toBool();
-    auto_disable_ime = settings.value("canvas/auto_disable_ime", false).toBool();
+    msg_notify = settings.value("chat/msg_notify", true).toBool();
+    auto_disable_ime = settings.value("canvas/auto_disable_ime", true).toBool();
+    // TODO: v3笔刷成熟后可以默认为true
     enable_tablet = settings.value("canvas/enable_tablet", false).toBool();
-    use_defalut_server = settings.value("global/server/use_default", true).toBool();
-    IPv4_addr = settings.value("global/server/ipv4_addr", QString()).toString();
-    IPv6_addr = settings.value("global/server/ipv6_addr", QString()).toString();
-    server_port = settings.value("global/server/server_port", 0).toUInt();
+    use_default_server = settings.value("global/server/use_default", true).toBool();
+    addr = settings.value("global/server/addr").toString();
+    skip_replay = settings.value("canvas/skip_replay", true).toBool();
+    use_droid_font = settings.value("global/use_droid_font", false).toBool();
+
 }
 
 void ConfigureDialog::initLanguageList()
@@ -74,8 +80,7 @@ void ConfigureDialog::initLanguageList()
 
 void ConfigureDialog::initShortcutList()
 {
-    const ShortcutManager& manager = Singleton<ShortcutManager>::instance();
-    const QVariantMap& shortcutMap = manager.allShortcutMap();
+    const QVariantMap& shortcutMap = Singleton<ShortcutManager>::instance().allShortcutMap();
     ShortcutDelegate *delegate = new ShortcutDelegate(ui->shortcutList);
     ui->shortcutList->setItemDelegate(delegate);
     QTreeWidgetItem *categoryItem = new QTreeWidgetItem(ui->shortcutList);
@@ -114,39 +119,96 @@ void ConfigureDialog::initServerSettings()
             [this](int n_state){
         if(n_state == Qt::Checked){
             ui->ipv4_lineedit->setDisabled(true);
-            ui->ipv6_lineedit->setDisabled(true);
-            ui->port_lineedit->setDisabled(true);
             ui->server_notice_label->setVisible(false);
         }else{
             ui->ipv4_lineedit->setDisabled(false);
-            ui->ipv6_lineedit->setDisabled(false);
-            ui->port_lineedit->setDisabled(false);
             ui->server_notice_label->setVisible(true);
         }
     });
-    ui->use_default_server_checkbox->setChecked(use_defalut_server);
+    ui->use_default_server_checkbox->setChecked(use_default_server);
 
-    ui->ipv4_lineedit->setText(IPv4_addr);
-    ui->ipv6_lineedit->setText(IPv6_addr);
-    if(!server_port){
-        ui->port_lineedit->clear();
-    }else{
-        ui->port_lineedit->setText(QString::number(server_port, 10));
-    }
+    ui->ipv4_lineedit->setText(addr);
 }
 
 void ConfigureDialog::initUi()
 {
-    ui->ipv6CheckBox->setChecked(tryIpv6);
     ui->msg_notify_checkbox->setChecked(msg_notify);
     ui->auto_disable_ime_checkbox->setChecked(auto_disable_ime);
     ui->enable_tablet->setChecked(enable_tablet);
+    ui->skip_replay->setChecked(skip_replay);
+    ui->droid_font_checkbox->setChecked(use_droid_font);
+
     connect(ui->clearCache, &QPushButton::clicked,
             [](){
         QDir cacheDir("cache");
         cacheDir.removeRecursively();
     });
+
+    // TODO: v3笔刷成熟后可以放开
+    ui->enable_tablet->setDisabled(true);
 }
+
+void ConfigureDialog::initMyRoomsTab()
+{
+    // 初始化我的房间表格
+    ui->myRoomsTable->setColumnCount(2);
+    QStringList headers;
+    headers << tr("房间名称") << tr("创建时间");
+    ui->myRoomsTable->setHorizontalHeaderLabels(headers);
+    ui->myRoomsTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+    // ui->myRoomsTable->setSortingEnabled(true);
+    // ui->myRoomsTable->sortByColumn(1, Qt::DescendingOrder);
+    
+    // 连接信号槽
+    connect(ui->refreshMyRoomsButton, &QPushButton::clicked,
+            this, &ConfigureDialog::refreshMyRooms);
+    
+    // 初始状态
+    ui->myRoomsStatusLabel->setText(tr("点击刷新按钮获取您的房间列表"));
+    refreshMyRooms();
+}
+
+void ConfigureDialog::refreshMyRooms()
+{
+    // 使用RoomInfoManager获取本地房间列表
+    RoomInfoManager& roomInfoManager = RoomInfoManager::instance();
+    myRoomsInfo = roomInfoManager.listMyRooms();
+    
+    qDebug() << "refreshMyRooms: 找到" << myRoomsInfo.size() << "个本地房间";
+    
+    // 更新UI显示
+    updateMyRoomsTable();
+}
+
+void ConfigureDialog::updateMyRoomsTable()
+{
+    ui->myRoomsTable->clearContents();
+    ui->myRoomsTable->setRowCount(0);
+    ui->myRoomsTable->setSortingEnabled(false);
+    
+    int row = 0;
+    for (const auto& roomInfo : myRoomsInfo) {
+        ui->myRoomsTable->insertRow(row);
+        
+        // 房间名称
+        QTableWidgetItem* nameItem = new QTableWidgetItem(roomInfo->roomName);
+        nameItem->setTextAlignment(Qt::AlignCenter);
+        ui->myRoomsTable->setItem(row, 0, nameItem);
+        
+        // 创建时间（从本地缓存获取）
+        QTableWidgetItem* timeItem = new QTableWidgetItem("N/A");
+        timeItem->setTextAlignment(Qt::AlignCenter);
+        ui->myRoomsTable->setItem(row, 1, timeItem);
+        
+        row++;
+    }
+    
+    ui->myRoomsTable->setSortingEnabled(true);
+    ui->refreshMyRoomsButton->setEnabled(true);
+    ui->myRoomsStatusLabel->setText(tr("找到 %1 个房间").arg(row));
+}
+
+
 
 void ConfigureDialog::acceptConfigure()
 {
@@ -164,16 +226,15 @@ void ConfigureDialog::acceptConfigure()
         needRestart = true;
     }
 
-    //save ipv6 settings
-    if (ui->ipv6CheckBox->isChecked() != tryIpv6)
+    // droid font
+    if(ui->droid_font_checkbox->isChecked() != use_droid_font)
     {
-        settings.setValue("global/ipv6", ui->ipv6CheckBox->isChecked());
+        settings.setValue("global/use_droid_font", ui->droid_font_checkbox->isChecked());
         needRestart = true;
     }
 
     //save shortcut settings
-    ShortcutManager& manager = Singleton<ShortcutManager>::instance();
-    QVariantMap shortcutMap = manager.allShortcutMap();
+    QVariantMap shortcutMap = Singleton<ShortcutManager>::instance().allShortcutMap();
     for (int i = 0; i < ui->shortcutList->topLevelItemCount(); i++)
     {
         QTreeWidgetItem *categoryItem = ui->shortcutList->topLevelItem(i);
@@ -196,13 +257,14 @@ void ConfigureDialog::acceptConfigure()
                 //to see if we need restart and set new value.
             {
                 needRestart = true;
-                manager.setShortcut(shortcutItem->data(0, Qt::UserRole).toString(),
-                                    newSequence,
-                                    newType);
+                Singleton<ShortcutManager>::instance()
+                        .setShortcut(shortcutItem->data(0, Qt::UserRole).toString(),
+                                     newSequence,
+                                     newType);
             }
         }
     }
-    manager.saveToConfigure();
+    Singleton<ShortcutManager>::instance().saveToConfigure();
 
     //save msg notify settings
     if (ui->msg_notify_checkbox->isChecked() != msg_notify)
@@ -228,33 +290,50 @@ void ConfigureDialog::acceptConfigure()
     }
 
     // save server settings
-    settings.setValue("global/server/use_default", use_defalut_server);
-    settings.setValue("global/server/ipv4_addr", IPv4_addr);
-    settings.setValue("global/server/ipv6_addr", IPv6_addr);
-    settings.setValue("global/server/server_port", server_port);
-    needRestart = true;
+    {
+        if (ui->use_default_server_checkbox->isChecked() != use_default_server)
+        {
+            settings.setValue("global/server/use_default",
+                              ui->use_default_server_checkbox->isChecked());
+            needRestart = true;
+        }
+        QString ip_t(ui->ipv4_lineedit->text().trimmed());
+        if (ip_t != addr)
+        {
+            settings.setValue("global/server/addr",
+                              ip_t);
+            needRestart = true;
+        }
+    }
+
+    // save canvas replay-skip settings
+    if (ui->skip_replay->isChecked() != skip_replay)
+    {
+        settings.setValue("canvas/skip_replay",
+                          ui->skip_replay->isChecked());
+        needRestart = true;
+    }
+
 
     settings.sync();
 
     //see if we need to restart
-    if (needRestart)
-    {
-        int result = QMessageBox::warning(this, tr("Restart"),
-                                          tr("Application must restart to "
-                                             "enable some of the settings.\n"
-                                             "Do you want to restart right now?"),
-                                          QMessageBox::Yes | QMessageBox::No);
-        if (result == QMessageBox::Yes)
-        {
-            qApp->closeAllWindows();
-            qApp->exit(1);
-            QProcess::startDetached(qApp->applicationFilePath(), QStringList());
-        }
-        else if (result == QMessageBox::No)
-        {
-            QMessageBox::warning(this , tr("Restart"),
-                                 tr("New settings will be applied on next start."));
-        }
+    if (!needRestart) {
+        return;
+    }
+
+    int result = QMessageBox::warning(this, tr("Restart"),
+                                      tr("Application must restart to "
+                                         "enable some of the settings.\n"
+                                         "Do you want to restart right now?"),
+                                      QMessageBox::Yes | QMessageBox::No);
+    if (result == QMessageBox::Yes) {
+        qApp->closeAllWindows();
+        qApp->exit(1);
+        QProcess::startDetached(qApp->applicationFilePath(), QStringList());
+    } else if (result == QMessageBox::No) {
+        QMessageBox::warning(this , tr("Restart"),
+                             tr("New settings will be applied on next start."));
     }
 }
 
@@ -268,13 +347,14 @@ QWidget* ShortcutDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
     if (!index.isValid() || !index.parent().isValid() || !index.column())
         return 0;
     if (index.column() == 1)
-        return new ShortcutGrabberEdit(parent);
+        return new QKeySequenceEdit(parent);
     else if (index.column() == 2)
     {
-        QComboBox *comboBox = new QComboBox(parent);
-        comboBox->addItems(QStringList() << tr("Immediately")
-                           << tr("When Release"));
-        return comboBox;
+        //        QComboBox *comboBox = new QComboBox(parent);
+        //        comboBox->addItems(QStringList() << tr("Immediately")
+        //                           << tr("When Release"));
+        //        return comboBox;
+        return 0;
     }
     else
         return 0;
@@ -286,8 +366,8 @@ void ShortcutDelegate::setEditorData(QWidget *editor, const QModelIndex &index) 
         return;
     if (index.column() == 1)
     {
-        ShortcutGrabberEdit *shortcutEditor = qobject_cast<ShortcutGrabberEdit*>(editor);
-        shortcutEditor->setShortcut(index.data(Qt::UserRole).value<QKeySequence>());
+        QKeySequenceEdit *shortcutEditor = qobject_cast<QKeySequenceEdit*>(editor);
+        shortcutEditor->setKeySequence(index.data(Qt::UserRole).value<QKeySequence>());
     }
     else if (index.column() == 2)
     {
@@ -305,9 +385,9 @@ void ShortcutDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, 
         return;
     if (index.column() == 1)
     {
-        ShortcutGrabberEdit *shortcutEditor = qobject_cast<ShortcutGrabberEdit*>(editor);
-        model->setData(index, shortcutEditor->shortcut(), Qt::UserRole);
-        model->setData(index, shortcutEditor->text(), Qt::DisplayRole);
+        QKeySequenceEdit *shortcutEditor = qobject_cast<QKeySequenceEdit*>(editor);
+        model->setData(index, shortcutEditor->keySequence(), Qt::UserRole);
+        model->setData(index, shortcutEditor->keySequence().toString(), Qt::DisplayRole);
     }
     else if (index.column() == 2)
     {

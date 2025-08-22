@@ -24,9 +24,6 @@
        <string>General</string>
       </attribute>
       <layout class="QFormLayout" name="formLayout">
-       <property name="fieldGrowthPolicy">
-        <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-       </property>
        <item row="0" column="0">
         <widget class="QLabel" name="languageLabel">
          <property name="text">
@@ -41,29 +38,41 @@
         <widget class="QComboBox" name="languageComboBox"/>
        </item>
        <item row="1" column="0">
-        <widget class="QLabel" name="connectLabel">
+        <widget class="QLabel" name="droidFontLabel">
          <property name="text">
-          <string>&amp;Connection:</string>
-         </property>
-         <property name="buddy">
-          <cstring>ipv6CheckBox</cstring>
+          <string>Custom Font:</string>
          </property>
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QCheckBox" name="ipv6CheckBox">
+        <widget class="QCheckBox" name="droid_font_checkbox">
          <property name="text">
-          <string>Try to use IPv6 to connect to server</string>
+          <string>Use Droid Sans Font</string>
          </property>
         </widget>
        </item>
-       <item row="2" column="0">
+       <item row="2" column="0" colspan="2">
+        <widget class="QCheckBox" name="msg_notify_checkbox">
+         <property name="text">
+          <string>Message Notification (Windows exclusive)</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0" colspan="2">
+        <widget class="QCheckBox" name="auto_disable_ime_checkbox">
+         <property name="text">
+          <string>Disable IME when painting (Windows exclusive)</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
         <widget class="QPushButton" name="clearCache">
          <property name="text">
           <string>Clear Cache</string>
          </property>
         </widget>
        </item>
+
       </layout>
      </widget>
      <widget class="QWidget" name="shortcutTab">
@@ -115,45 +124,29 @@
       <attribute name="title">
        <string>Server</string>
       </attribute>
-      <layout class="QFormLayout" name="formLayout_2">
-       <item row="1" column="0">
-        <widget class="QLabel" name="ipv4_label">
-         <property name="text">
-          <string>IPv4 address</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QLineEdit" name="ipv4_lineedit"/>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="ipv6_label">
-         <property name="text">
-          <string>IPv6 address</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QLineEdit" name="ipv6_lineedit"/>
-       </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="port_label">
-         <property name="text">
-          <string>Server Port</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1">
-        <widget class="QLineEdit" name="port_lineedit"/>
-       </item>
-       <item row="0" column="0" colspan="2">
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
         <widget class="QCheckBox" name="use_default_server_checkbox">
          <property name="text">
           <string>Use default server</string>
          </property>
         </widget>
        </item>
-       <item row="4" column="0" colspan="2">
+       <item>
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="0" column="0">
+          <widget class="QLabel" name="ipv4_label">
+           <property name="text">
+            <string>address</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="ipv4_lineedit"/>
+         </item>
+        </layout>
+       </item>
+       <item>
         <widget class="QLabel" name="server_notice_label">
          <property name="styleSheet">
           <string notr="true">#server_notice_label {
@@ -169,6 +162,19 @@ Use at your own risk.</string>
          </property>
         </widget>
        </item>
+       <item>
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="experimentalTab">
@@ -177,26 +183,20 @@ Use at your own risk.</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="QCheckBox" name="auto_disable_ime_checkbox">
-         <property name="text">
-          <string>Disable IME when painting (Windows exclusive)</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QCheckBox" name="msg_notify_checkbox">
-         <property name="text">
-          <string>Message Notification (Windows exclusive)</string>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QCheckBox" name="enable_tablet">
          <property name="text">
-          <string>Enable Wacom Tablet (Windows exclusive)</string>
+          <string>Enable Tablet Support</string>
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="QCheckBox" name="skip_replay">
+         <property name="text">
+          <string>Always skip replay if possible</string>
+         </property>
+        </widget>
+       </item>
+
        <item>
         <spacer name="verticalSpacer">
          <property name="orientation">
@@ -209,6 +209,77 @@ Use at your own risk.</string>
           </size>
          </property>
         </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="myRoomsTab">
+      <attribute name="title">
+       <string>我的房间</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <item>
+        <widget class="QLabel" name="myRoomsLabel">
+         <property name="text">
+          <string>您创建的房间列表：</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTableWidget" name="myRoomsTable">
+         <property name="alternatingRowColors">
+          <bool>true</bool>
+         </property>
+         <property name="selectionBehavior">
+          <enum>QAbstractItemView::SelectRows</enum>
+         </property>
+         <property name="columnCount">
+          <number>2</number>
+         </property>
+         <column>
+          <property name="text">
+           <string>房间名称</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>创建时间</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QPushButton" name="refreshMyRoomsButton">
+           <property name="text">
+            <string>刷新列表</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QLabel" name="myRoomsStatusLabel">
+         <property name="text">
+          <string>点击刷新按钮获取您的房间列表</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>

@@ -1,10 +1,22 @@
 #include "abstractbrush.h"
+#include <QDebug>
+#include <QPainter>
+#include <QPixmapCache>
 
-AbstractBrush::AbstractBrush()
-    :leftOverDistance(0),
-      hardness_(100)
+typedef BrushFeature::LIMIT BFL;
+
+AbstractBrush::AbstractBrush():
+    width_(10),
+    thickness_(BFL::THICKNESS_MAX),
+    color_(Qt::black),
+    surface_(nullptr)
 {
-    //
+    typedef BrushFeature BF;
+    BF::FeatureBits bits;
+    bits.set(BF::WIDTH);
+    bits.set(BF::COLOR);
+    bits.set(BF::THICKNESS);
+    features_ = bits;
 }
 
 AbstractBrush::~AbstractBrush()
@@ -42,88 +54,117 @@ void AbstractBrush::setShortcut(QKeySequence key)
     shortcut_ = key;
 }
 
-void AbstractBrush::start(const QPointF &st, qreal pressure)
+int AbstractBrush::width() const
 {
-    leftOverDistance = 0;
-    drawPoint(st, pressure);
-    lastPoint_ = st;
+    return width_;
 }
 
-void AbstractBrush::lineTo(const QPointF &st, qreal pressure)
+void AbstractBrush::setWidth(int width)
 {
-    if(lastPoint_.isNull()){
-        start(st, pressure);
-        return;
-    }
-    this->drawLine(lastPoint_, st, leftOverDistance, pressure);
-    lastPoint_ = st;
+    width_ = qBound<int>(BFL::WIDTH_MIN, width, BFL::WIDTH_MAX);
+    settings_.insert("width", width_);
+    updateCursor(width);
+}
+int AbstractBrush::thickness() const
+{
+    return thickness_;
 }
 
-QColor AbstractBrush::color()
+void AbstractBrush::setThickness(int thickness)
 {
-    return mainColor;
+    thickness_ = qBound<int>(BFL::THICKNESS_MIN, thickness, BFL::THICKNESS_MAX);
+    settings_.insert("thickness", thickness_);
 }
 
-void AbstractBrush::setColor(const QColor &c)
-{
-    mainColor = c;
-}
-
-int AbstractBrush::hardness()
-{
-    return hardness_;
-}
-
-void AbstractBrush::setHardness(int h)
-{
-    hardness_ = h;
-}
-
-LayerPointer AbstractBrush::surface()
+Surface AbstractBrush::surface() const
 {
     return surface_;
 }
 
-void AbstractBrush::setSurface(LayerPointer p)
+void AbstractBrush::setSurface(Surface surface)
 {
-    surface_ = p;
+    surface_ = surface;
 }
 
-void AbstractBrush::end()
+bool AbstractBrush::support(const BrushFeature::FEATURE &f)
 {
+    return features_.support(f);
 }
 
-void AbstractBrush::drawPoint(const QPointF &, qreal pressure)
+BrushFeature AbstractBrush::features()
 {
-    //
+    return features_;
 }
 
-void AbstractBrush::drawLine(const QPointF &,
-                      const QPointF &,
-                      qreal &, qreal pressure)
+BrushSettings AbstractBrush::settings() const
 {
-    //
+    return settings_;
+}
+
+void AbstractBrush::setSettings(const BrushSettings &settings)
+{
+    const BrushSettings& s = settings;
+    QVariantMap colorMap = settings["color"].toMap();
+    QColor color(colorMap["red"].toInt(),
+            colorMap["green"].toInt(),
+            colorMap["blue"].toInt());
+    setColor(color);
+    setWidth(s.value("width", width_).toInt());
+    setThickness(s.value("thickness", thickness_).toInt());
+    settings_ = s;
+}
+
+BrushSettings AbstractBrush::defaultSettings() const
+{
+    BrushSettings s;
+    s.insert("width", 10);
+    s.insert("thickness", BFL::THICKNESS_MAX);
+    QVariantMap color;
+    color.insert("red", 0);
+    color.insert("green", 0);
+    color.insert("blue", 0);
+    s.insert("color", color);
+    return s;
 }
 
 void AbstractBrush::updateCursor(int w)
 {
+    if(w <4) {
+        cursor_ = QCursor(Qt::CrossCursor);
+        return;
+    }
     int frame = w+2+w%2; // +2 for a border padding
-    QPixmap img(frame, frame);
-    img.fill(Qt::transparent);
-    QPainter painter(&img);
-    painter.drawEllipse(0, 0, w, w);
-    if (w > 10)
-        painter.drawPoint(frame/2, frame/2);
-    cursor_ = QCursor(img, frame/2, frame/2);
+    const int half_frame = frame>>1;
+    QPixmap pixmap;
+    if(QPixmapCache::find(QString("brush_cursor_%1").arg(frame), &pixmap)){
+        cursor_ = QCursor(pixmap, half_frame, half_frame);
+    } else {
+        QPoint circle_center(half_frame, half_frame);
+        QPixmap img(frame, frame);
+        img.fill(Qt::transparent);
+        QPainter painter(&img);
+        painter.drawEllipse(circle_center, w>>1, w>>1);
+        painter.setRenderHint(QPainter::Antialiasing, false);
+        QPen white_pen(Qt::white);
+        painter.setPen(white_pen);
+        painter.drawEllipse(circle_center, (w>>1)-1, (w>>1)-1);
+        cursor_ = QCursor(img, half_frame, half_frame);
+        QPixmapCache::insert(QString("brush_cursor_%1").arg(frame), img);
+    }
+
 }
 
-QPointF AbstractBrush::lastPoint()
+QColor AbstractBrush::color() const
 {
-    return lastPoint_;
+    return color_;
 }
 
-
-void AbstractBrush::setLastPoint(const QPointF &p)
+void AbstractBrush::setColor(const QColor &color)
 {
-    lastPoint_ = p;
+    color_ = color;
+    QVariantMap colorMap;
+    colorMap.insert("red", color_.red());
+    colorMap.insert("green", color_.green());
+    colorMap.insert("blue", color_.blue());
+    settings_.insert("color", colorMap);
 }

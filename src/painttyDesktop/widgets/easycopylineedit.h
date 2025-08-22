@@ -2,6 +2,7 @@
 #define EASYCOPYLINEEDIT_H
 
 #include <QLineEdit>
+#include <QEnterEvent>
 
 class EasyCopyLineEdit : public QLineEdit
 {
@@ -14,7 +15,7 @@ signals:
 public slots:
 
 protected:
-    void enterEvent(QEvent * event) Q_DECL_OVERRIDE;    
+    void enterEvent(QEnterEvent * event) Q_DECL_OVERRIDE;    
 };
 
 #endif // EASYCOPYLINEEDIT_H

@@ -1,0 +1,135 @@
+name: PR Build
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  # 使用 stateoftheartio/qt6 Docker 镜像的构建任务
+  build-docker:
+    runs-on: ubuntu-22.04
+    container:
+      image: stateoftheartio/qt6:6.6-gcc-aqt
+      options: --user root
+      
+    steps:
+    - name: Setup container permissions
+      run: |
+        # 确保 GitHub Actions 运行器有正确的权限
+        chown -R 1001:1001 /__w
+        chmod -R 755 /__w
+        
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install development dependencies
+      run: |
+        apt update
+        # 安装基础构建工具
+        apt install -y build-essential
+        # 安装GUI相关开发库
+        apt install -y libgl1-mesa-dev libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 libxcb-xinput0 libxcb-xfixes0
+        # 安装额外开发库
+        apt install -y libfontconfig1-dev libfreetype6-dev libx11-dev libx11-xcb-dev libxext-dev libxfixes-dev libxi-dev libxrender-dev libxcb1-dev libxcb-glx0-dev libxcb-keysyms1-dev libxcb-image0-dev libxcb-shm0-dev libxcb-icccm4-dev libxcb-sync-dev libxcb-xfixes0-dev libxcb-shape0-dev libxcb-randr0-dev libxcb-render-util0-dev libxcb-util-dev libxcb-xinerama0-dev libxcb-xkb-dev libxkbcommon-dev libxkbcommon-x11-dev
+        # 安装构建脚本和打包工具需要的依赖
+        apt install -y bc dpkg-dev lsb-release git
+        
+    - name: Setup build directory and permissions
+      run: |
+        echo "=== Setting up build directory ==="
+        # 创建构建目录
+        mkdir -p /__w/painttyWidget/build
+        # 确保 GitHub Actions 运行器有写入权限
+        chown -R 1001:1001 /__w/painttyWidget
+        chmod -R 755 /__w/painttyWidget
+        
+    - name: Setup Qt6 environment
+      run: |
+        echo "=== Setting up Qt6 environment in stateoftheartio/qt6 Docker ==="
+        
+        # 设置 Qt6 环境变量
+        export QT_SELECT=qt6
+        export QMAKESPEC=linux-g++
+        export PATH="/opt/Qt/6.6.0/gcc_64/bin:$PATH"
+        export LD_LIBRARY_PATH="/opt/Qt/6.6.0/gcc_64/lib:$LD_LIBRARY_PATH"
+        
+        # 验证 Qt6 安装
+        echo "=== Qt6 Environment Verification ==="
+        which qmake || echo "qmake not found in PATH"
+        qmake --version || echo "qmake version check failed"
+        echo "Qt version: $(qmake -query QT_VERSION 2>/dev/null || echo 'Unknown')"
+        echo "Qt install prefix: $(qmake -query QT_INSTALL_PREFIX 2>/dev/null || echo 'Unknown')"
+        echo "Qt install libs: $(qmake -query QT_INSTALL_LIBS 2>/dev/null || echo 'Unknown')"
+        echo "Qt install bins: $(qmake -query QT_INSTALL_BINS 2>/dev/null || echo 'Unknown')"
+        
+        # 保存环境变量供后续步骤使用
+        echo "QT_SELECT=qt6" >> $GITHUB_ENV
+        echo "QMAKESPEC=linux-g++" >> $GITHUB_ENV
+        
+    - name: Make build script executable  
+      run: chmod +x ./src/painttyDesktop/build.sh
+      
+    - name: Clean any potential macOS-specific paths from build script
+      run: |
+        echo "=== Cleaning build script ==="
+        # 移除macOS特定的Qt路径（如果存在）
+        sed -i 's|export PATH=\$PATH:/Users/.*||g' src/painttyDesktop/build.sh || true
+        # 显示修改后的脚本前几行
+        head -20 src/painttyDesktop/build.sh
+        
+    - name: Run build script with clean flag
+      run: |
+        echo "=== Starting Build Process in stateoftheartio/qt6 Docker ==="
+        # 使用设置好的 Qt6 环境
+        export QT_SELECT=qt6
+        export QMAKESPEC=linux-g++
+        export PATH="/opt/Qt/6.6.0/gcc_64/bin:$PATH"
+        export LD_LIBRARY_PATH="/opt/Qt/6.6.0/gcc_64/lib:$LD_LIBRARY_PATH"
+        
+        echo "Environment variables:"
+        echo "QT_SELECT=$QT_SELECT"
+        echo "QMAKESPEC=$QMAKESPEC"  
+        echo "PATH=$PATH"
+        echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
+        
+        # 运行构建脚本
+        ./src/painttyDesktop/build.sh --clean
+        
+    - name: Verify build results
+      run: |
+        echo "=== Build Verification ==="
+        if [ -d "build" ]; then
+          echo "Build directory contents:"
+          ls -la build/
+          echo "=== Looking for executables ==="
+          find build/ -type f -executable -ls || echo "No executables found"
+          find build/ -name "*paint*" -ls || echo "No paint files found"
+          find build/ -name "*.exe" -o -name "*mrpaint*" -o -name "*MrPaint*" -ls || echo "No target executable found"
+          echo "=== Looking for shared libraries ==="
+          find build/ -name "*.so*" -ls || echo "No shared libraries found"
+          echo "=== Looking for packages ==="
+          find build/ -name "*.deb" -ls || echo "No deb packages found"
+        else
+          echo "Build directory not found!"
+          exit 1
+        fi
+        
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      if: success()
+      with:
+        name: painttywidget-qt6-stateoftheart-${{ github.run_number }}
+        path: build/
+        retention-days: 7
+        
+    - name: Upload build logs and debugging info
+      uses: actions/upload-artifact@v4  
+      if: always()
+      with:
+        name: build-logs-qt6-stateoftheart-${{ github.run_number }}
+        path: |
+          *.log
+          src/painttyDesktop/build.sh
+          painttyWidget.pro
+          src/painttyDesktop/package_deb.sh
+        retention-days: 3

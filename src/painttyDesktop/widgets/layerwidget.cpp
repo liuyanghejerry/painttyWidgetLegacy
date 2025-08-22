@@ -27,7 +27,7 @@ LayerWidget::LayerWidget(QWidget *parent) :
     wid->setLayout(layout_);
     layout_->addStretch(1);
     layout_->setContentsMargins(0,0,0,0);
-    layout_->setMargin(0);
+    layout_->setContentsMargins(0, 0, 0, 0);
     layout_->setSpacing(0);
 
     scrollArea_->setWidget(wid);
@@ -44,7 +44,7 @@ QSize LayerWidget::sizeHint () const
 
 QSize LayerWidget::minimumSizeHint () const
 {
-    return QSize(100, 20);
+    return QSize(100, 20*5);
 }
 
 int LayerWidget::itemCount()
