@@ -9,14 +9,11 @@
 #include <QMapIterator>
 #include <QComboBox>
 #include <QKeySequenceEdit>
-#include <QHeaderView>
-#include <QDateTime>
 #include "configuredialog.h"
 #include "ui_configuredialog.h"
 #include "../common/common.h"
 #include "../misc/shortcutmanager.h"
 #include "../misc/singleton.h"
-#include "../common/room-info-manager.h"
 
 ConfigureDialog::ConfigureDialog(QWidget *parent) :
     QDialog(parent),
@@ -34,7 +31,6 @@ ConfigureDialog::ConfigureDialog(QWidget *parent) :
     initShortcutList();
     initServerSettings();
     initUi();
-    initMyRoomsTab();
 
     connect(this, &ConfigureDialog::accepted,
             this, &ConfigureDialog::acceptConfigure);
@@ -52,7 +48,6 @@ void ConfigureDialog::readSettings()
     selectedLanguage = settings.value("global/language").toString();
     msg_notify = settings.value("chat/msg_notify", true).toBool();
     auto_disable_ime = settings.value("canvas/auto_disable_ime", true).toBool();
-    // TODO: v3笔刷成熟后可以默认为true
     enable_tablet = settings.value("canvas/enable_tablet", false).toBool();
     use_default_server = settings.value("global/server/use_default", true).toBool();
     addr = settings.value("global/server/addr").toString();
@@ -91,10 +86,10 @@ void ConfigureDialog::initShortcutList()
     {
         iterator.next();
         QTreeWidgetItem *shortcutItem = new QTreeWidgetItem(categoryItem);
-        QVariantMap singleEntry = iterator.value()  //we get QVariant for a single QVariantMap entry
-                .toMap();                           //we get QVariantMap for a single entry
-        QKeySequence sequence = singleEntry.value("key")    //we get QVariant for a QKeySequence
-                .value<QKeySequence>();                     //we get QKeySequence
+        QVariantMap singleEntry = iterator.value()
+                .toMap();
+        QKeySequence sequence = singleEntry.value("key")
+                .value<QKeySequence>();
         ShortcutManager::ShortcutType type =
                 ShortcutManager::ShortcutType(singleEntry.value("type").toInt());
         shortcutItem->setText(0, singleEntry.value("description").toString());
@@ -144,68 +139,7 @@ void ConfigureDialog::initUi()
         cacheDir.removeRecursively();
     });
 
-    // TODO: v3笔刷成熟后可以放开
     ui->enable_tablet->setDisabled(true);
-}
-
-void ConfigureDialog::initMyRoomsTab()
-{
-    // 初始化我的房间表格
-    ui->myRoomsTable->setColumnCount(2);
-    QStringList headers;
-    headers << tr("房间名称") << tr("创建时间");
-    ui->myRoomsTable->setHorizontalHeaderLabels(headers);
-    ui->myRoomsTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
-    // ui->myRoomsTable->setSortingEnabled(true);
-    // ui->myRoomsTable->sortByColumn(1, Qt::DescendingOrder);
-    
-    // 连接信号槽
-    connect(ui->refreshMyRoomsButton, &QPushButton::clicked,
-            this, &ConfigureDialog::refreshMyRooms);
-    
-    // 初始状态
-    ui->myRoomsStatusLabel->setText(tr("点击刷新按钮获取您的房间列表"));
-    refreshMyRooms();
-}
-
-void ConfigureDialog::refreshMyRooms()
-{
-    // 使用RoomInfoManager获取本地房间列表
-    RoomInfoManager& roomInfoManager = RoomInfoManager::instance();
-    myRoomsInfo = roomInfoManager.listMyRooms();
-    
-    qDebug() << "refreshMyRooms: 找到" << myRoomsInfo.size() << "个本地房间";
-    
-    // 更新UI显示
-    updateMyRoomsTable();
-}
-
-void ConfigureDialog::updateMyRoomsTable()
-{
-    ui->myRoomsTable->clearContents();
-    ui->myRoomsTable->setRowCount(0);
-    ui->myRoomsTable->setSortingEnabled(false);
-    
-    int row = 0;
-    for (const auto& roomInfo : myRoomsInfo) {
-        ui->myRoomsTable->insertRow(row);
-        
-        // 房间名称
-        QTableWidgetItem* nameItem = new QTableWidgetItem(roomInfo->roomName);
-        nameItem->setTextAlignment(Qt::AlignCenter);
-        ui->myRoomsTable->setItem(row, 0, nameItem);
-        
-        // 创建时间（从本地缓存获取）
-        QTableWidgetItem* timeItem = new QTableWidgetItem("N/A");
-        timeItem->setTextAlignment(Qt::AlignCenter);
-        ui->myRoomsTable->setItem(row, 1, timeItem);
-        
-        row++;
-    }
-    
-    ui->myRoomsTable->setSortingEnabled(true);
-    ui->refreshMyRoomsButton->setEnabled(true);
-    ui->myRoomsStatusLabel->setText(tr("找到 %1 个房间").arg(row));
 }
 
 
@@ -253,8 +187,7 @@ void ConfigureDialog::acceptConfigure()
                     ShortcutManager::ShortcutType(oldEntry.value("type").toInt());
             ShortcutManager::ShortcutType newType =
                     ShortcutManager::ShortcutType(shortcutItem->data(2, Qt::UserRole).toInt());
-            if (oldSequence != newSequence || oldType != newType) //we compare old sequence with new one
-                //to see if we need restart and set new value.
+            if (oldSequence != newSequence || oldType != newType)
             {
                 needRestart = true;
                 Singleton<ShortcutManager>::instance()
@@ -350,10 +283,6 @@ QWidget* ShortcutDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
         return new QKeySequenceEdit(parent);
     else if (index.column() == 2)
     {
-        //        QComboBox *comboBox = new QComboBox(parent);
-        //        comboBox->addItems(QStringList() << tr("Immediately")
-        //                           << tr("When Release"));
-        //        return comboBox;
         return 0;
     }
     else

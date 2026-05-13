@@ -75,85 +75,8 @@
      </item>
     </layout>
    </widget>
-  </widget>
-  <widget class="QDockWidget" name="dockWidget_2">
-   <property name="windowTitle">
-    <string>Chat</string>
-   </property>
-   <attribute name="dockWidgetArea">
-    <number>2</number>
-   </attribute>
-   <widget class="QWidget" name="dockWidgetContents_2">
-    <layout class="QGridLayout" name="gridLayout">
-     <property name="leftMargin">
-      <number>2</number>
-     </property>
-     <property name="topMargin">
-      <number>2</number>
-     </property>
-     <property name="rightMargin">
-      <number>2</number>
-     </property>
-     <property name="bottomMargin">
-      <number>2</number>
-     </property>
-     <property name="spacing">
-      <number>2</number>
-     </property>
-     <item row="0" column="0">
-      <widget class="QTextEdit" name="textEdit">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-         <horstretch>3</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
-       <property name="textInteractionFlags">
-        <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse|Qt::TextBrowserInteraction|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="MemberListWidget" name="memberList">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-         <horstretch>1</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0" colspan="2">
-      <layout class="QHBoxLayout" name="horizontalLayout">
-       <property name="spacing">
-        <number>2</number>
-       </property>
-       <item>
-        <widget class="IRCLineEdit" name="lineEdit">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>1</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pushButton">
-         <property name="text">
-          <string>Send</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-    </layout>
    </widget>
-  </widget>
-  <widget class="QDockWidget" name="dockWidget_3">
+   <widget class="QDockWidget" name="dockWidget_3">
    <property name="windowTitle">
     <string>Layers</string>
    </property>
@@ -216,36 +139,24 @@
     <addaction name="action_About_Mr_Paint"/>
     <addaction name="actionAbout_Qt"/>
    </widget>
-   <widget class="QMenu" name="menu_View">
-    <property name="title">
-     <string>&amp;View</string>
-    </property>
-    <addaction name="actionReset_View"/>
-   </widget>
-   <widget class="QMenu" name="menu_Room">
-    <property name="title">
-     <string>&amp;Room</string>
-    </property>
-    <widget class="QMenu" name="menuClear_Canvas">
+    <widget class="QMenu" name="menu_View">
      <property name="title">
-      <string>Clear Canvas</string>
+      <string>&amp;View</string>
      </property>
-     <addaction name="actionAll_Layers"/>
+     <addaction name="actionReset_View"/>
     </widget>
-    <addaction name="menuClear_Canvas"/>
-    <addaction name="actionClose_Room"/>
-   </widget>
-   <widget class="QMenu" name="menu_Edit">
-    <property name="title">
-     <string>&amp;Edit</string>
-    </property>
-    <addaction name="actionConfiguration"/>
-   </widget>
-   <addaction name="menu_File"/>
-   <addaction name="menu_Edit"/>
-   <addaction name="menu_Room"/>
-   <addaction name="menu_View"/>
-   <addaction name="menu_About"/>
+    <widget class="QMenu" name="menu_Edit">
+     <property name="title">
+      <string>&amp;Edit</string>
+     </property>
+     <addaction name="actionClear_All_Layers"/>
+     <addaction name="separator"/>
+     <addaction name="actionConfiguration"/>
+    </widget>
+    <addaction name="menu_File"/>
+    <addaction name="menu_Edit"/>
+    <addaction name="menu_View"/>
+    <addaction name="menu_About"/>
   </widget>
   <widget class="QDockWidget" name="dockWidget_4">
    <property name="windowTitle">
@@ -330,26 +241,21 @@
     <string>Nothing Here</string>
    </property>
   </action>
-  <action name="actionClose_Room">
-   <property name="text">
-    <string>Close Room</string>
-   </property>
-  </action>
-  <action name="actionAll_Layers">
-   <property name="text">
-    <string>All Layers</string>
-   </property>
-  </action>
-  <action name="actionConfiguration">
-   <property name="text">
-    <string>Configuration</string>
-   </property>
-  </action>
-  <action name="actionExport_to_PSD">
-   <property name="text">
-    <string>Export to PSD File</string>
-   </property>
-  </action>
+   <action name="actionConfiguration">
+    <property name="text">
+     <string>Configuration</string>
+    </property>
+   </action>
+   <action name="actionClear_All_Layers">
+    <property name="text">
+     <string>Clear All Layers</string>
+    </property>
+   </action>
+   <action name="actionExport_to_PSD">
+    <property name="text">
+     <string>Export to PSD File</string>
+    </property>
+   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -388,16 +294,11 @@
    <extends>QGraphicsView</extends>
    <header>canvascontainer.h</header>
   </customwidget>
-  <customwidget>
-   <class>MemberListWidget</class>
-   <extends>QListWidget</extends>
-   <header>memberlistwidget.h</header>
-  </customwidget>
-  <customwidget>
-   <class>IRCLineEdit</class>
-   <extends>QLineEdit</extends>
-   <header>irclineedit.h</header>
-  </customwidget>
+   <customwidget>
+    <class>IRCLineEdit</class>
+    <extends>QLineEdit</extends>
+    <header>irclineedit.h</header>
+   </customwidget>
 
  </customwidgets>
  <resources>

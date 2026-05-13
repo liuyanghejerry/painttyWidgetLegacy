@@ -4,16 +4,11 @@
 #include <QDialog>
 #include <QAbstractItemModel>
 #include <QItemDelegate>
-#include <QTableWidget>
-#include <QTableWidgetItem>
 #include <QHash>
-#include <QJsonObject>
 
 class ShortcutModel;
 class QTreeWidgetItem;
 class ShortcutDelegate;
-class SSEClientSocket;
-struct RoomInfo;
 
 namespace Ui {
 class ConfigureDialog;
@@ -39,20 +34,14 @@ private:
     bool use_default_server;
     QString addr;
 
-    // 我的房间相关
-    QList<QSharedPointer<RoomInfo>> myRoomsInfo;
-
     void readSettings();
     void initLanguageList();
     void initShortcutList();
     void initServerSettings();
     void initUi();
-    void initMyRoomsTab();
-    void updateMyRoomsTable();
 
 private slots:
     void acceptConfigure();
-    void refreshMyRooms();
 };
 
 

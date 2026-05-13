@@ -6,7 +6,6 @@
 #include "../paintingTools/brush/abstractbrushv3.h"
 #include "../misc/layermanager.h"
 #include "canvasbackend.h"
-#include "../common/network/sse-clientsocket.h"
 
 typedef QSharedPointer<AbstractBrush> BrushPointer;
 typedef QSharedPointer<AbstractBrushV3> BrushPointerV3;
@@ -68,18 +67,14 @@ public slots:
     QList<QImage> layerImages() const;
     void pause();
 
-    void onLoginCompleted(const QString &roomName,
-                          const QString &remoteArchiveSign,
-                          SSEClientSocket *clientSocket);
+    void initCanvasWithArchive(const QString &roomName);
     void saveCanvasToCache();
     void loadCanvasFromCache();
     void setArchiveLoading(bool loading);
 
-    // 新增：画布快照管理方法
     void exportCanvasSnapshot();
     void restoreCanvasFromSnapshot();
 
-    // 新增V3笔刷支持
     void changeBrushV3(const QString &name);
     BrushPointerV3 brushV3Factory(const QString &name);
     bool isCurrentBrushV3() const;
@@ -90,9 +85,6 @@ signals:
     void newBrushSettings(const QVariantMap &map);
     void historyComplete();
     void newPaintAction(const QVariantMap m);
-    void requestSortedMembers(CanvasBackend::MemberSectionIndex index
-                               = CanvasBackend::MemberSectionIndex::Count);
-    void requestClearMembers();
     void canvasExported(const QPixmap& pic);
     void parsePaused();
 protected:
@@ -106,19 +98,8 @@ protected:
     void focusOutEvent(QFocusEvent * event);
 
 private slots:
-    // 新增：archive加载状态处理槽函数
     void onArchiveLoadingStarted();
     void onArchiveRenderFinished();
-    // 新增：本地和远程archive处理槽函数
-    void onLocalArchiveLoadingStarted();
-    void onLocalArchiveRenderFinished();
-    void onRemoteArchiveLoadingStarted();
-    void onRemoteArchiveRenderFinished();
-    // 新增：其他槽函数
-    void onCanvasSaveCompleted();
-    void onRequestSortedMembers();
-    void onCachedCanvasLoaded();
-    // 恢复绘图相关槽函数
     void remoteDrawPoint(const QPoint &point,
                          const QVariantMap &brushSettings,
                          const QString &layer,
@@ -134,7 +115,6 @@ private slots:
                          const QVariantMap &brushSettings,
                          const QString &layer,
                          const QString clientid);
-    void onMembersSorted(const QList<CanvasBackend::MemberSection> &list);
 
 private:
     void drawLineTo(const QPoint &endPoint, qreal pressure=1.0);
@@ -147,7 +127,6 @@ private:
     QImage appendAuthorSignature(QImage target);
     BrushPointer brushFactory(const QString &name);
     void setBrushFeature(const QString& key, const QVariant& value);
-    void drawAuthorTips(QPainter &painter, const QPoint &pos, const QString &name);
     void updateBrushV3StrokesOnGoing();
     void updateBrushV3StrokesOnDone();
 
@@ -169,8 +148,8 @@ private:
     QList<QPoint> stackPoints;
     int layerNameCounter;
     BrushPointer brush_;
-    BrushPointerV3 brushV3_; // 新增V3笔刷
-    bool useV3Brush_; // 标记当前是否使用V3笔刷
+    BrushPointerV3 brushV3_;
+    bool useV3Brush_;
     bool shareColor_;
     bool jitterCorrection_;
     int jitterCorrectionLevel_;
@@ -179,12 +158,8 @@ private:
     QHash<QString, BrushPointer> localBrush;
     CanvasBackend* backend_;
     QThread *worker_;
-    QList<CanvasBackend::MemberSection> author_list_;
     QVariantList action_buffer_;
     bool archive_loading_;
-
-    // 客户端套接字引用
-    SSEClientSocket* clientSocket_;
 };
 
 #endif // CANVAS_H

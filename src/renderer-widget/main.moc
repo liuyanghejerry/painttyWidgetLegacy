@@ -1,23 +1,26 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'main.cpp'
 **
-** Created by: The Qt Meta Object Compiler version 68 (Qt 6.8.2)
+** Created by: The Qt Meta Object Compiler version 68 (Qt 6.6.3)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
 #include <QtCore/qmetatype.h>
 
+#if __has_include(<QtCore/qtmochelpers.h>)
 #include <QtCore/qtmochelpers.h>
+#else
+QT_BEGIN_MOC_NAMESPACE
+#endif
+
 
 #include <memory>
 
-
-#include <QtCore/qxptype_traits.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'main.cpp' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 68
-#error "This file was generated using the moc from 6.8.2. It"
+#error "This file was generated using the moc from 6.6.3. It"
 #error "cannot be used with the include files from this version of Qt."
 #error "(The moc has changed too much.)"
 #endif
@@ -30,19 +33,30 @@ QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 QT_WARNING_DISABLE_GCC("-Wuseless-cast")
 namespace {
-struct qt_meta_tag_ZN12CanvasWidgetE_t {};
-} // unnamed namespace
-
 
 #ifdef QT_MOC_HAS_STRINGDATA
-static constexpr auto qt_meta_stringdata_ZN12CanvasWidgetE = QtMocHelpers::stringData(
+struct qt_meta_stringdata_CLASSCanvasWidgetENDCLASS_t {};
+constexpr auto qt_meta_stringdata_CLASSCanvasWidgetENDCLASS = QtMocHelpers::stringData(
     "CanvasWidget"
 );
-#else  // !QT_MOC_HAS_STRINGDATA
-#error "qtmochelpers.h not found or too old."
-#endif // !QT_MOC_HAS_STRINGDATA
+#else  // !QT_MOC_HAS_STRING_DATA
+struct qt_meta_stringdata_CLASSCanvasWidgetENDCLASS_t {
+    uint offsetsAndSizes[2];
+    char stringdata0[13];
+};
+#define QT_MOC_LITERAL(ofs, len) \
+    uint(sizeof(qt_meta_stringdata_CLASSCanvasWidgetENDCLASS_t::offsetsAndSizes) + ofs), len 
+Q_CONSTINIT static const qt_meta_stringdata_CLASSCanvasWidgetENDCLASS_t qt_meta_stringdata_CLASSCanvasWidgetENDCLASS = {
+    {
+        QT_MOC_LITERAL(0, 12)   // "CanvasWidget"
+    },
+    "CanvasWidget"
+};
+#undef QT_MOC_LITERAL
+#endif // !QT_MOC_HAS_STRING_DATA
+} // unnamed namespace
 
-Q_CONSTINIT static const uint qt_meta_data_ZN12CanvasWidgetE[] = {
+Q_CONSTINIT static const uint qt_meta_data_CLASSCanvasWidgetENDCLASS[] = {
 
  // content:
       12,       // revision
@@ -60,11 +74,11 @@ Q_CONSTINIT static const uint qt_meta_data_ZN12CanvasWidgetE[] = {
 
 Q_CONSTINIT const QMetaObject CanvasWidget::staticMetaObject = { {
     QMetaObject::SuperData::link<QWidget::staticMetaObject>(),
-    qt_meta_stringdata_ZN12CanvasWidgetE.offsetsAndSizes,
-    qt_meta_data_ZN12CanvasWidgetE,
+    qt_meta_stringdata_CLASSCanvasWidgetENDCLASS.offsetsAndSizes,
+    qt_meta_data_CLASSCanvasWidgetENDCLASS,
     qt_static_metacall,
     nullptr,
-    qt_incomplete_metaTypeArray<qt_meta_tag_ZN12CanvasWidgetE_t,
+    qt_incomplete_metaTypeArray<qt_meta_stringdata_CLASSCanvasWidgetENDCLASS_t,
         // Q_OBJECT / Q_GADGET
         QtPrivate::TypeAndForceComplete<CanvasWidget, std::true_type>
     >,
@@ -73,10 +87,9 @@ Q_CONSTINIT const QMetaObject CanvasWidget::staticMetaObject = { {
 
 void CanvasWidget::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
-    auto *_t = static_cast<CanvasWidget *>(_o);
-    (void)_t;
-    (void)_c;
+    (void)_o;
     (void)_id;
+    (void)_c;
     (void)_a;
 }
 
@@ -88,7 +101,7 @@ const QMetaObject *CanvasWidget::metaObject() const
 void *CanvasWidget::qt_metacast(const char *_clname)
 {
     if (!_clname) return nullptr;
-    if (!strcmp(_clname, qt_meta_stringdata_ZN12CanvasWidgetE.stringdata0))
+    if (!strcmp(_clname, qt_meta_stringdata_CLASSCanvasWidgetENDCLASS.stringdata0))
         return static_cast<void*>(this);
     return QWidget::qt_metacast(_clname);
 }
@@ -99,19 +112,30 @@ int CanvasWidget::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     return _id;
 }
 namespace {
-struct qt_meta_tag_ZN22PredefinedCanvasWidgetE_t {};
-} // unnamed namespace
-
 
 #ifdef QT_MOC_HAS_STRINGDATA
-static constexpr auto qt_meta_stringdata_ZN22PredefinedCanvasWidgetE = QtMocHelpers::stringData(
+struct qt_meta_stringdata_CLASSPredefinedCanvasWidgetENDCLASS_t {};
+constexpr auto qt_meta_stringdata_CLASSPredefinedCanvasWidgetENDCLASS = QtMocHelpers::stringData(
     "PredefinedCanvasWidget"
 );
-#else  // !QT_MOC_HAS_STRINGDATA
-#error "qtmochelpers.h not found or too old."
-#endif // !QT_MOC_HAS_STRINGDATA
+#else  // !QT_MOC_HAS_STRING_DATA
+struct qt_meta_stringdata_CLASSPredefinedCanvasWidgetENDCLASS_t {
+    uint offsetsAndSizes[2];
+    char stringdata0[23];
+};
+#define QT_MOC_LITERAL(ofs, len) \
+    uint(sizeof(qt_meta_stringdata_CLASSPredefinedCanvasWidgetENDCLASS_t::offsetsAndSizes) + ofs), len 
+Q_CONSTINIT static const qt_meta_stringdata_CLASSPredefinedCanvasWidgetENDCLASS_t qt_meta_stringdata_CLASSPredefinedCanvasWidgetENDCLASS = {
+    {
+        QT_MOC_LITERAL(0, 22)   // "PredefinedCanvasWidget"
+    },
+    "PredefinedCanvasWidget"
+};
+#undef QT_MOC_LITERAL
+#endif // !QT_MOC_HAS_STRING_DATA
+} // unnamed namespace
 
-Q_CONSTINIT static const uint qt_meta_data_ZN22PredefinedCanvasWidgetE[] = {
+Q_CONSTINIT static const uint qt_meta_data_CLASSPredefinedCanvasWidgetENDCLASS[] = {
 
  // content:
       12,       // revision
@@ -129,11 +153,11 @@ Q_CONSTINIT static const uint qt_meta_data_ZN22PredefinedCanvasWidgetE[] = {
 
 Q_CONSTINIT const QMetaObject PredefinedCanvasWidget::staticMetaObject = { {
     QMetaObject::SuperData::link<QWidget::staticMetaObject>(),
-    qt_meta_stringdata_ZN22PredefinedCanvasWidgetE.offsetsAndSizes,
-    qt_meta_data_ZN22PredefinedCanvasWidgetE,
+    qt_meta_stringdata_CLASSPredefinedCanvasWidgetENDCLASS.offsetsAndSizes,
+    qt_meta_data_CLASSPredefinedCanvasWidgetENDCLASS,
     qt_static_metacall,
     nullptr,
-    qt_incomplete_metaTypeArray<qt_meta_tag_ZN22PredefinedCanvasWidgetE_t,
+    qt_incomplete_metaTypeArray<qt_meta_stringdata_CLASSPredefinedCanvasWidgetENDCLASS_t,
         // Q_OBJECT / Q_GADGET
         QtPrivate::TypeAndForceComplete<PredefinedCanvasWidget, std::true_type>
     >,
@@ -142,10 +166,9 @@ Q_CONSTINIT const QMetaObject PredefinedCanvasWidget::staticMetaObject = { {
 
 void PredefinedCanvasWidget::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
-    auto *_t = static_cast<PredefinedCanvasWidget *>(_o);
-    (void)_t;
-    (void)_c;
+    (void)_o;
     (void)_id;
+    (void)_c;
     (void)_a;
 }
 
@@ -157,7 +180,7 @@ const QMetaObject *PredefinedCanvasWidget::metaObject() const
 void *PredefinedCanvasWidget::qt_metacast(const char *_clname)
 {
     if (!_clname) return nullptr;
-    if (!strcmp(_clname, qt_meta_stringdata_ZN22PredefinedCanvasWidgetE.stringdata0))
+    if (!strcmp(_clname, qt_meta_stringdata_CLASSPredefinedCanvasWidgetENDCLASS.stringdata0))
         return static_cast<void*>(this);
     return QWidget::qt_metacast(_clname);
 }
@@ -168,12 +191,10 @@ int PredefinedCanvasWidget::qt_metacall(QMetaObject::Call _c, int _id, void **_a
     return _id;
 }
 namespace {
-struct qt_meta_tag_ZN15BrushTestWidgetE_t {};
-} // unnamed namespace
-
 
 #ifdef QT_MOC_HAS_STRINGDATA
-static constexpr auto qt_meta_stringdata_ZN15BrushTestWidgetE = QtMocHelpers::stringData(
+struct qt_meta_stringdata_CLASSBrushTestWidgetENDCLASS_t {};
+constexpr auto qt_meta_stringdata_CLASSBrushTestWidgetENDCLASS = QtMocHelpers::stringData(
     "BrushTestWidget",
     "onOutlineChanged",
     "",
@@ -190,11 +211,66 @@ static constexpr auto qt_meta_stringdata_ZN15BrushTestWidgetE = QtMocHelpers::st
     "setupUI",
     "setupBrush"
 );
-#else  // !QT_MOC_HAS_STRINGDATA
-#error "qtmochelpers.h not found or too old."
-#endif // !QT_MOC_HAS_STRINGDATA
+#else  // !QT_MOC_HAS_STRING_DATA
+struct qt_meta_stringdata_CLASSBrushTestWidgetENDCLASS_t {
+    uint offsetsAndSizes[30];
+    char stringdata0[16];
+    char stringdata1[17];
+    char stringdata2[1];
+    char stringdata3[6];
+    char stringdata4[17];
+    char stringdata5[17];
+    char stringdata6[6];
+    char stringdata7[19];
+    char stringdata8[15];
+    char stringdata9[22];
+    char stringdata10[14];
+    char stringdata11[20];
+    char stringdata12[13];
+    char stringdata13[8];
+    char stringdata14[11];
+};
+#define QT_MOC_LITERAL(ofs, len) \
+    uint(sizeof(qt_meta_stringdata_CLASSBrushTestWidgetENDCLASS_t::offsetsAndSizes) + ofs), len 
+Q_CONSTINIT static const qt_meta_stringdata_CLASSBrushTestWidgetENDCLASS_t qt_meta_stringdata_CLASSBrushTestWidgetENDCLASS = {
+    {
+        QT_MOC_LITERAL(0, 15),  // "BrushTestWidget"
+        QT_MOC_LITERAL(16, 16),  // "onOutlineChanged"
+        QT_MOC_LITERAL(33, 0),  // ""
+        QT_MOC_LITERAL(34, 5),  // "index"
+        QT_MOC_LITERAL(40, 16),  // "onTextureChanged"
+        QT_MOC_LITERAL(57, 16),  // "onSpacingChanged"
+        QT_MOC_LITERAL(74, 5),  // "value"
+        QT_MOC_LITERAL(80, 18),  // "onSmoothingChanged"
+        QT_MOC_LITERAL(99, 14),  // "onWidthChanged"
+        QT_MOC_LITERAL(114, 21),  // "onRandomPointsChanged"
+        QT_MOC_LITERAL(136, 13),  // "onClearCanvas"
+        QT_MOC_LITERAL(150, 19),  // "onClearHistoryPaths"
+        QT_MOC_LITERAL(170, 12),  // "onTabChanged"
+        QT_MOC_LITERAL(183, 7),  // "setupUI"
+        QT_MOC_LITERAL(191, 10)   // "setupBrush"
+    },
+    "BrushTestWidget",
+    "onOutlineChanged",
+    "",
+    "index",
+    "onTextureChanged",
+    "onSpacingChanged",
+    "value",
+    "onSmoothingChanged",
+    "onWidthChanged",
+    "onRandomPointsChanged",
+    "onClearCanvas",
+    "onClearHistoryPaths",
+    "onTabChanged",
+    "setupUI",
+    "setupBrush"
+};
+#undef QT_MOC_LITERAL
+#endif // !QT_MOC_HAS_STRING_DATA
+} // unnamed namespace
 
-Q_CONSTINIT static const uint qt_meta_data_ZN15BrushTestWidgetE[] = {
+Q_CONSTINIT static const uint qt_meta_data_CLASSBrushTestWidgetENDCLASS[] = {
 
  // content:
       12,       // revision
@@ -238,11 +314,11 @@ Q_CONSTINIT static const uint qt_meta_data_ZN15BrushTestWidgetE[] = {
 
 Q_CONSTINIT const QMetaObject BrushTestWidget::staticMetaObject = { {
     QMetaObject::SuperData::link<QWidget::staticMetaObject>(),
-    qt_meta_stringdata_ZN15BrushTestWidgetE.offsetsAndSizes,
-    qt_meta_data_ZN15BrushTestWidgetE,
+    qt_meta_stringdata_CLASSBrushTestWidgetENDCLASS.offsetsAndSizes,
+    qt_meta_data_CLASSBrushTestWidgetENDCLASS,
     qt_static_metacall,
     nullptr,
-    qt_incomplete_metaTypeArray<qt_meta_tag_ZN15BrushTestWidgetE_t,
+    qt_incomplete_metaTypeArray<qt_meta_stringdata_CLASSBrushTestWidgetENDCLASS_t,
         // Q_OBJECT / Q_GADGET
         QtPrivate::TypeAndForceComplete<BrushTestWidget, std::true_type>,
         // method 'onOutlineChanged'
@@ -280,8 +356,9 @@ Q_CONSTINIT const QMetaObject BrushTestWidget::staticMetaObject = { {
 
 void BrushTestWidget::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
-    auto *_t = static_cast<BrushTestWidget *>(_o);
     if (_c == QMetaObject::InvokeMetaMethod) {
+        auto *_t = static_cast<BrushTestWidget *>(_o);
+        (void)_t;
         switch (_id) {
         case 0: _t->onOutlineChanged((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
         case 1: _t->onTextureChanged((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
@@ -307,7 +384,7 @@ const QMetaObject *BrushTestWidget::metaObject() const
 void *BrushTestWidget::qt_metacast(const char *_clname)
 {
     if (!_clname) return nullptr;
-    if (!strcmp(_clname, qt_meta_stringdata_ZN15BrushTestWidgetE.stringdata0))
+    if (!strcmp(_clname, qt_meta_stringdata_CLASSBrushTestWidgetENDCLASS.stringdata0))
         return static_cast<void*>(this);
     return QWidget::qt_metacast(_clname);
 }
@@ -321,8 +398,7 @@ int BrushTestWidget::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         if (_id < 11)
             qt_static_metacall(this, _c, _id, _a);
         _id -= 11;
-    }
-    if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
+    } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
         if (_id < 11)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
         _id -= 11;

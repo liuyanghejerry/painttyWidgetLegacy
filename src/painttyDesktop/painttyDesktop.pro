@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 DEFINES += PAINTTY_DEV
-QT       += core gui network widgets concurrent
+QT       += core gui widgets concurrent
 
 DEFINES += PAINTTY_DESKTOP
 
@@ -49,7 +49,6 @@ SOURCES += main.cpp\
     widgets/canvas.cpp \
     misc/layermanager.cpp \
     widgets/colorwheel.cpp \
-    widgets/roomlistdialog.cpp \
     widgets/colorgriditem.cpp \
     widgets/colorgrid.cpp \
     widgets/flowlayout.cpp \
@@ -61,11 +60,9 @@ SOURCES += main.cpp\
     misc/layer.cpp \
     widgets/colorspinboxgroup.cpp \
     widgets/colorbox.cpp \
-    widgets/newroomwindow.cpp \
     widgets/aboutdialog.cpp \
     misc/singleshortcut.cpp \
     widgets/canvascontainer.cpp \
-    widgets/memberlistwidget.cpp \
     paintingTools/brush/brushmanager.cpp \
     widgets/brushsettingswidget.cpp \
     widgets/helpdialog.cpp \
@@ -77,19 +74,12 @@ SOURCES += main.cpp\
     misc/platformextend.cpp \
     misc/shortcutmanager.cpp \
     widgets/configuredialog.cpp\
-    common/network/sse-clientsocket.cpp \
-    common/network/sse-connection.cpp \
-    common/network/sse-event-parser.cpp \
-    common/network/known-error.cpp \
-    common/room-info-manager.cpp \
     misc/archivefile.cpp \
     widgets/clearlineedit.cpp \
-    widgets/roomsharebar.cpp \
     widgets/easycopylineedit.cpp \
     widgets/gradualbox.cpp \
     widgets/canvasbackend.cpp \
     widgets/irclineedit.cpp \
-    widgets/waitupdaterdialog.cpp \
     paintingTools/brush/abstractbrush.cpp \
     paintingTools/brush/abstractbrushv3.cpp \
     paintingTools/brush/basic-stamp.cpp \
@@ -105,7 +95,6 @@ SOURCES += main.cpp\
     paintingTools/brush/basicbrushv3-simd.cpp \
     paintingTools/brush/basic-stamp-simd.cpp \
     widgets/panoramarotator.cpp \
-    widgets/networkindicator.cpp \
     misc/psdexport.cpp
 
 
@@ -113,7 +102,6 @@ HEADERS  += widgets/mainwindow.h \
     widgets/canvas.h \
     misc/layermanager.h \
     widgets/colorwheel.h \
-    widgets/roomlistdialog.h \
     widgets/colorgriditem.h \
     widgets/colorgrid.h \
     widgets/flowlayout.h \
@@ -125,12 +113,10 @@ HEADERS  += widgets/mainwindow.h \
     misc/layer.h \
     widgets/colorspinboxgroup.h \
     widgets/colorbox.h \
-    widgets/newroomwindow.h \
     widgets/aboutdialog.h \
     common/common.h \
     misc/singleshortcut.h \
     widgets/canvascontainer.h \
-    widgets/memberlistwidget.h \
     misc/router.h \
     widgets/brushsettingswidget.h \
     widgets/helpdialog.h \
@@ -142,18 +128,12 @@ HEADERS  += widgets/mainwindow.h \
     misc/call_once.h \
     misc/shortcutmanager.h \
     widgets/configuredialog.h\
-    common/network/sse-clientsocket.h \
-    common/network/sse-connection.h \
-    common/network/sse-event-parser.h \
-    common/room-info-manager.h \
     misc/archivefile.h \
     widgets/clearlineedit.h \
-    widgets/roomsharebar.h \
     widgets/easycopylineedit.h \
     widgets/gradualbox.h \
     widgets/irclineedit.h \
     widgets/canvasbackend.h \
-    widgets/waitupdaterdialog.h \
     paintingTools/brush/brushmanager.h \
     paintingTools/brush/abstractbrush.h \
     paintingTools/brush/abstractbrushv3.h \
@@ -171,18 +151,14 @@ HEADERS  += widgets/mainwindow.h \
     paintingTools/brush/basicbrushv3-simd.h \
     paintingTools/brush/basic-stamp-simd.h \
     widgets/panoramarotator.h \
-    widgets/networkindicator.h \
     misc/psdexport.h
 
 FORMS    += widgets/mainwindow.ui \
-    widgets/roomlistdialog.ui \
     widgets/colorspinboxgroup.ui \
     widgets/colorbox.ui \
-    widgets/newroomwindow.ui \
     widgets/aboutdialog.ui \
     widgets/helpdialog.ui \
-    widgets/configuredialog.ui \
-    widgets/waitupdaterdialog.ui
+    widgets/configuredialog.ui
 
 TRANSLATIONS += translation/paintty_zh_CN.ts \ #Simplified Chinese
     translation/paintty_zh_TW.ts \ #Traditional Chinese

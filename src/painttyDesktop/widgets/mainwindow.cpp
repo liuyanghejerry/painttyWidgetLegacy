@@ -9,21 +9,11 @@
 #include <QEventLoop>
 #include <QFile>
 #include <QFileDialog>
-#include <QHostAddress>
-#include <QJsonArray>
-#include <QJsonObject>
-#include <QJsonValue>
-#include <QLineEdit>
 #include <QMessageBox>
-#include <QProcess>
-#include <QProcessEnvironment>
 #include <QProgressDialog>
-#include <QRegularExpression>
-#include <QScrollBar>
 #include <QActionGroup>
 #include <QSettings>
 #include <QShortcut>
-#include <QTableWidgetItem>
 #include <QTimer>
 #include <QToolBar>
 #include <QToolButton>
@@ -31,15 +21,10 @@
 #include <QThread>
 #include <QApplication>
 #include <QTextStream>
-#include <QTextCursor>
-#include <QTextEdit>
 #include <QPushButton>
 
 #include "../common/common.h"
-#include "../common/network/sse-clientsocket.h"
 #include "../misc/archivefile.h"
-#include "../common/network/known-error.h"
-#include "../misc/platformextend.h"
 #include "../misc/psdexport.h"
 #include "../misc/shortcutmanager.h"
 #include "../misc/singleshortcut.h"
@@ -52,52 +37,27 @@
 #include "brushsettingswidget.h"
 #include "colorgrid.h"
 #include "configuredialog.h"
-#include "gradualbox.h"
 #include "layeritem.h"
 #include "layerwidget.h"
-#include "networkindicator.h"
-#include "roomsharebar.h"
 #include "colorbox.h"
-#include "memberlistwidget.h"
-#include "../common/room-info-manager.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    roomInfoManager_(nullptr),
-    clientSocket_(nullptr),
     lastBrushAction(nullptr),
     brushSettingControl_(nullptr),
     toolbar_(nullptr),
     brushActionGroup_(nullptr),
     colorPickerButton_(nullptr),
-    moveToolButton_(nullptr),
-    networkIndicator_(nullptr),
-    onlineListTimer_(nullptr)
+    moveToolButton_(nullptr)
 {
     ui->setupUi(this);
-
-    // 使用全局单例的房间信息管理器
-    roomInfoManager_ = &RoomInfoManager::instance();
     init();
 }
 
 MainWindow::~MainWindow()
 {
     qDebug() << "MainWindow::~MainWindow";
-
-    // 停止定时器
-    if (onlineListTimer_) {
-        onlineListTimer_->stop();
-    }
-
-    // 先断开网络连接，避免在对象销毁过程中产生错误
-    if (clientSocket_) {
-        clientSocket_->disconnect();
-    }
-
-    // 等待一小段时间，确保网络操作完成
-    QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
     delete ui;
 }
@@ -115,7 +75,7 @@ void MainWindow::stylize()
 
 void MainWindow::init()
 {
-    // 设置初始窗口标题，房间名将在加入房间后更新
+    // 设置初始窗口标题
     setWindowTitle(tr("Mr.Paint"));
 
     // 创建快捷键管理器
@@ -136,11 +96,6 @@ void MainWindow::init()
             ui->centralWidget, &CanvasContainer::setRotation);
     connect(ui->centralWidget, &CanvasContainer::rotated,
             ui->panorama, &PanoramaWidget::setRotation);
-
-    connect(ui->lineEdit,&QLineEdit::returnPressed,
-            this,&MainWindow::onSendPressed);
-    connect(ui->pushButton,&QPushButton::clicked,
-            this,&MainWindow::onSendPressed);
 
     connect(ui->canvas, &Canvas::newBrushSettings,
             this, &MainWindow::onBrushSettingsChanged);
@@ -178,20 +133,12 @@ void MainWindow::init()
             static_cast<void (CanvasContainer::*)(const QPointF&)>
             (&CanvasContainer::centerOn));
 
-    connect(ui->memberList, &MemberListWidget::memberGetKicked,
-            this, &MainWindow::requestKickUser);
-
     layerWidgetInit();
     colorGridInit();
     statusBarInit();
     toolbarInit();
     viewInit();
     shortcutInit();
-    socketInit();
-
-    // 初始化在线列表定时器
-    onlineListTimer_ = new QTimer(this);
-    connect(onlineListTimer_, &QTimer::timeout, this, &MainWindow::onOnlineListTimer);
 }
 
 void MainWindow::layerWidgetInit()
@@ -420,63 +367,10 @@ void MainWindow::toolbarInit()
     brushSettingToolbar->addWidget(brushSettingWidget);
 
     changeToBrush("BasicBrush");
-
-    // for room share - 修改为使用 SSE 客户端的 URL 生成
-    QToolBar* roomShareToolbar = new QToolBar(tr("Room Share"), this);
-    roomShareToolbar->setObjectName("RoomShareToolbar");
-    this->addToolBar(Qt::TopToolBarArea, roomShareToolbar);
-    RoomShareBar* rsb = new RoomShareBar(this);
-    // SSE 客户端暂时不提供 URL 生成功能，使用占位符
-    rsb->setAddress("SSE Client - URL generation not implemented");
-    roomShareToolbar->addWidget(rsb);
 }
 
 void MainWindow::statusBarInit()
 {
-    networkIndicator_ = new NetworkIndicator(this);
-    this->statusBar()->addPermanentWidget(networkIndicator_);
-}
-
-void MainWindow::requestCloseRoom()
-{
-    if (!clientSocket_->isRoomOwner()) {
-        QMessageBox::warning(this,
-                         tr("Warning"),
-                         tr("You are not the room owner, you can't close the room."),
-                         QMessageBox::Close);
-        return;
-    }
-    QMessageBox::StandardButton reply;
-    reply = QMessageBox::warning(this,
-                         tr("Warning"),
-                         tr("You are closing the room.\n"
-                            "Your paintings will be lost if you don't save them.\n"
-                            "Are you sure you want to close the room?"),
-                         QMessageBox::Yes | QMessageBox::No);
-    if (reply == QMessageBox::Yes) {
-        clientSocket_->requestCloseRoom();
-    }
-}
-
-void MainWindow::requestKickUser(const QString& id)
-{
-    if (!clientSocket_->isRoomOwner()) {
-      QMessageBox::warning(
-          this, tr("Warning"),
-          tr("You are not the room owner, you can't kick user."),
-          QMessageBox::Close);
-      return;
-    }
-    QMessageBox::StandardButton reply;
-    reply = QMessageBox::warning(this,
-                         tr("Warning"),
-                         tr("You are kicking someone.\n"
-                            "He/She may never be allowed to join the room again.\n"
-                            "Are you sure you want to kick user?"),
-                         QMessageBox::Yes | QMessageBox::No);
-    if (reply == QMessageBox::Yes) {
-        clientSocket_->requestKickUser(id);
-    }
 }
 
 void MainWindow::shortcutInit()
@@ -499,9 +393,7 @@ void MainWindow::shortcutInit()
             &QApplication::aboutQt);
     connect(ui->actionExport_to_PSD, &QAction::triggered,
             this, &MainWindow::exportToPSD);
-    connect(ui->actionClose_Room, &QAction::triggered,
-            this, &MainWindow::requestCloseRoom);
-    connect(ui->actionAll_Layers, &QAction::triggered,
+    connect(ui->actionClear_All_Layers, &QAction::triggered,
             this, &MainWindow::clearAllLayer);
     connect(ui->actionConfiguration, &QAction::triggered,
             [](){
@@ -525,356 +417,6 @@ void MainWindow::shortcutInit()
         this->ui->centralWidget->setRotation(0);
         this->ui->centralWidget->setScaleFactor(1);
     });
-}
-
-void MainWindow::socketInit()
-{
-    // 创建SSE客户端套接字
-    clientSocket_ = new SSEClientSocket(roomInfoManager_, this);
-    qDebug() << "[MainWindow] 创建SSE客户端套接字"<<clientSocket_;
-
-    connect(clientSocket_, &SSEClientSocket::newMessage, this,
-            &MainWindow::onNewMessage);
-    
-    // 连接用户主动操作的错误信号（带重试按钮的对话框）
-    connect(clientSocket_, &SSEClientSocket::requestLoginFailed, this,
-            &MainWindow::onRequestLoginFailed);
-    connect(clientSocket_, &SSEClientSocket::requestChatMessageFailed, this,
-            &MainWindow::onRequestChatMessageFailed);
-    connect(clientSocket_, &SSEClientSocket::requestDrawDataFailed, this,
-            &MainWindow::onRequestDrawDataFailed);
-    connect(clientSocket_, &SSEClientSocket::requestClearCanvasFailed, this,
-            &MainWindow::onRequestClearCanvasFailed);
-    connect(clientSocket_, &SSEClientSocket::requestCheckoutFailed, this,
-            &MainWindow::onRequestCheckoutFailed);
-    connect(clientSocket_, &SSEClientSocket::requestCloseRoomFailed, this,
-            &MainWindow::onRequestCloseRoomFailed);
-    connect(clientSocket_, &SSEClientSocket::requestKickUserFailed, this,
-            &MainWindow::onRequestKickUserFailed);
-    
-    // 连接自动操作的错误信号（GradualBox提示）
-    connect(clientSocket_, &SSEClientSocket::requestOnlineListFailed, this,
-            &MainWindow::onRequestOnlineListFailed);
-
-    // 添加对 notify 事件的连接
-    connect(clientSocket_, &SSEClientSocket::getNotified, this,
-            &MainWindow::onNotify);
-
-    // 添加其他重要的信号连接
-    connect(clientSocket_, &SSEClientSocket::getKicked, this,
-            &MainWindow::onKicked);
-    connect(clientSocket_, &SSEClientSocket::delayGet, this,
-            &MainWindow::onDelayGet);
-    connect(clientSocket_, &SSEClientSocket::layerAllCleared, this,
-            &MainWindow::onAllLayerCleared);
-    connect(clientSocket_, &SSEClientSocket::memberListFetched, this,
-            &MainWindow::onMemberlistFetched);
-    connect(clientSocket_, &SSEClientSocket::roomAboutToClose, this,
-            &MainWindow::onAboutToClose);
-
-    // 添加对 newClientId 信号的连接
-    connect(clientSocket_, &SSEClientSocket::newClientId, this,
-            &MainWindow::onNewClientId);
-
-    connect(clientSocket_, &SSEClientSocket::roomJoined, this,
-            &MainWindow::onRoomJoined);
-
-    connect(clientSocket_, &SSEClientSocket::roomOfflined, this,
-            &MainWindow::onServerDisconnected);
-
-    connect(clientSocket_, &SSEClientSocket::roomExited, this,
-            &MainWindow::onRoomExited);
-
-    connect(clientSocket_, &SSEClientSocket::loginCompleted, this,
-            &MainWindow::onLoginCompleted);
-
-    // 重连相关信号连接
-    connect(clientSocket_, &SSEClientSocket::reconnectionStarted, this,
-            &MainWindow::onReconnectionStarted);
-    connect(clientSocket_, &SSEClientSocket::reconnectionSucceeded, this,
-            &MainWindow::onReconnectionSucceeded);
-    connect(clientSocket_, &SSEClientSocket::reconnectionFailed, this,
-            &MainWindow::onReconnectionFailed);
-    connect(clientSocket_, &SSEClientSocket::reconnectionCompleted, this,
-            &MainWindow::onReconnectionCompleted);
-}
-
-void MainWindow::tryJoinRoom(const RoomConnectionInfo& roomInfo)
-{
-  // 如果有房间信息，自动连接到房间
-  if (!roomInfo.roomName.isEmpty() && !roomInfo.webAddress.isEmpty()) {
-    // 设置用户名
-    clientSocket_->setUserName(roomInfo.nickname);
-
-    // 连接到房间
-    qDebug() << "[MainWindow] 连接到房间" << clientSocket_;
-    clientSocket_->tryJoinRoom(roomInfo.webAddress, roomInfo.roomName,
-                               roomInfo.password);
-
-    // 更新窗口标题
-    setWindowTitle(roomInfo.roomName + tr(" - Mr.Paint"));
-  } else {
-    qDebug() << "房间信息不完整，无法连接";
-  }
-}
-
-void MainWindow::onRoomJoined()
-{
-    qDebug() << "成功加入房间";
-
-    // 更新窗口标题
-    QString roomName = clientSocket_->roomName();
-    if (!roomName.isEmpty()) {
-        setWindowTitle(roomName + tr(" - Mr.Paint"));
-    }
-
-    ui->centralWidget->setCanvas(ui->canvas);
-
-    // 注意：画布尺寸设置已移至登录完成后，因为此时房间信息更完整
-
-    // 房间加入时启动定时器
-    startOnlineListTimer();
-}
-
-void MainWindow::onRoomExited()
-{
-    qDebug() << "已退出房间";
-    // 房间退出时停止定时器
-    stopOnlineListTimer();
-}
-
-void MainWindow::onLoginCompleted(const QString &roomName, const QString &remoteArchiveSign)
-{
-    qDebug() << "[MainWindow] 登录完成，房间:" << roomName << "远程archive签名:" << remoteArchiveSign;
-
-    // 通知 Canvas 登录完成，开始数据同步
-    if (ui->canvas) {
-        ui->canvas->onLoginCompleted(roomName, remoteArchiveSign, clientSocket_);
-    }
-}
-
-void MainWindow::onServerDisconnected()
-{
-    GradualBox::showText(tr("Server Connection Failed."));
-    ui->canvas->setEnabled(false);
-
-    // 停止周期性在线列表获取定时器
-    stopOnlineListTimer();
-    clientSocket_->stopHeartbeat();
-}
-
-// 新增：重连相关槽函数实现
-void MainWindow::onReconnectionStarted()
-{
-    qDebug() << "[MainWindow] 开始重连";
-
-    // 设置Canvas为loading状态
-    if (ui->canvas) {
-        ui->canvas->setArchiveLoading(true);
-    }
-
-    // 在聊天框显示重连提示
-    if (ui->textEdit) {
-        QTextCursor c = ui->textEdit->textCursor();
-        c.movePosition(QTextCursor::End);
-        ui->textEdit->setTextCursor(c);
-        ui->textEdit->insertHtml(QString("<span style='color: orange;'>%1</span>")
-                                .arg(tr("Connection interrupted, reconnecting...")));
-        ui->textEdit->verticalScrollBar()->setValue(ui->textEdit->verticalScrollBar()->maximum());
-        ui->textEdit->insertPlainText("\n");
-    }
-
-    // 更新网络指示器
-    if (networkIndicator_) {
-        networkIndicator_->setLevel(NetworkIndicator::LEVEL::UNKNOWN);
-    }
-}
-
-void MainWindow::onReconnectionSucceeded()
-{
-    qDebug() << "[MainWindow] 重连成功";
-
-    // 在聊天框显示重连成功提示
-    if (ui->textEdit) {
-        QTextCursor c = ui->textEdit->textCursor();
-        c.movePosition(QTextCursor::End);
-        ui->textEdit->setTextCursor(c);
-        ui->textEdit->insertHtml(QString("<span style='color: green;'>%1</span>")
-                                .arg(tr("Reconnection successful, synchronizing data...")));
-        ui->textEdit->verticalScrollBar()->setValue(ui->textEdit->verticalScrollBar()->maximum());
-        ui->textEdit->insertPlainText("\n");
-    }
-
-    // 注意：Canvas的loading状态将在数据同步完成后解除
-}
-
-void MainWindow::onReconnectionFailed(const QString &reason)
-{
-    qDebug() << "[MainWindow] 重连失败:" << reason;
-
-    // 在聊天框显示重连失败提示
-    if (ui->textEdit) {
-        QTextCursor c = ui->textEdit->textCursor();
-        c.movePosition(QTextCursor::End);
-        ui->textEdit->setTextCursor(c);
-        ui->textEdit->insertHtml(QString("<span style='color: red;'>%1</span>")
-                                .arg(tr("Reconnection failed: %1").arg(reason)));
-        ui->textEdit->verticalScrollBar()->setValue(ui->textEdit->verticalScrollBar()->maximum());
-        ui->textEdit->insertPlainText("\n");
-    }
-
-    // 解除Canvas loading状态（重连失败）
-    if (ui->canvas) {
-        ui->canvas->setArchiveLoading(false);
-    }
-
-    // 更新网络指示器
-    if (networkIndicator_) {
-        networkIndicator_->setLevel(NetworkIndicator::LEVEL::NONE);
-    }
-}
-
-void MainWindow::onReconnectionCompleted()
-{
-    qDebug() << "[MainWindow] 重连完成，数据同步结束";
-
-    // 在聊天框显示重连完成提示
-    if (ui->textEdit) {
-        QTextCursor c = ui->textEdit->textCursor();
-        c.movePosition(QTextCursor::End);
-        ui->textEdit->setTextCursor(c);
-        ui->textEdit->insertHtml(QString("<span style='color: green;'>%1</span>")
-                                .arg(tr("Reconnection completed, you can continue drawing")));
-        ui->textEdit->verticalScrollBar()->setValue(ui->textEdit->verticalScrollBar()->maximum());
-        ui->textEdit->insertPlainText("\n");
-    }
-
-    // 解除Canvas loading状态（重连完成）
-    if (ui->canvas) {
-        ui->canvas->setArchiveLoading(false);
-    }
-
-    // 重新启动在线列表定时器
-    startOnlineListTimer();
-
-    // 重新启动心跳
-    if (clientSocket_) {
-        clientSocket_->enableHeartbeat(true);
-    }
-}
-
-void MainWindow::onAboutToClose()
-{
-    QMessageBox::warning(this,
-                         tr("Closing"),
-                         tr("Warning, the room owner has "
-                            "closed the room. This room will close"
-                            " when everyone leaves.\n"
-                            "Save your work if you like it!"));
-}
-
-void MainWindow::onAllLayerCleared()
-{
-    ui->canvas->clearAllLayer();
-}
-
-void MainWindow::onMemberlistFetched(const QHash<QString, QVariantList> &list)
-{
-    ui->memberList->setMemberList(list);
-//    ui->statusBar->showMessage(tr("Online List Refreshed."),
-//                               2000);
-}
-
-void MainWindow::onNotify(const QString &content)
-{
-    if (content.isEmpty()) {
-        return;
-    }
-
-    // 安全检查
-    if (!ui || !ui->textEdit) {
-        qWarning() << "[MainWindow] onNotify: ui or textEdit is null";
-        return;
-    }
-
-    QTextCursor c = ui->textEdit->textCursor();
-    c.movePosition(QTextCursor::End);
-    ui->textEdit->setTextCursor(c);
-    ui->textEdit->insertHtml(content);
-    ui->textEdit->verticalScrollBar()
-            ->setValue(ui->textEdit->verticalScrollBar()
-                       ->maximum());
-    ui->textEdit->insertPlainText("\n");
-
-    // 收到通知后，重新获取在线列表
-    if (clientSocket_) {
-        clientSocket_->requestOnlinelist();
-    }
-}
-
-void MainWindow::onKicked()
-{
-    GradualBox::showText(tr("You've been kicked by room owner."), true, 3000);
-}
-
-void MainWindow::onDelayGet(const int delay)
-{
-    typedef NetworkIndicator::LEVEL NL;
-    if(delay < 0){
-        networkIndicator_->setLevel(NL::UNKNOWN);
-        return;
-    }
-    if(delay > 60){
-        networkIndicator_->setLevel(NL::NONE);
-        return;
-    }
-    if(delay > 20){
-        networkIndicator_->setLevel(NL::LOW);
-        return;
-    }
-    if(delay > 10){
-        networkIndicator_->setLevel(NL::MEDIUM);
-        return;
-    }
-    if(delay < 10){
-        networkIndicator_->setLevel(NL::GOOD);
-        return;
-    }
-}
-
-
-
-void MainWindow::onNewMessage(const QString &content)
-{
-    QTextCursor c = ui->textEdit->textCursor();
-    c.movePosition(QTextCursor::End);
-    ui->textEdit->setTextCursor(c);
-    ui->textEdit->insertPlainText(content);
-    ui->textEdit->verticalScrollBar()
-            ->setValue(ui->textEdit->verticalScrollBar()
-                       ->maximum());
-
-    QSettings settings(GlobalDef::SETTINGS_NAME,
-                       QSettings::defaultFormat(),
-                       qApp);
-    bool msg_notify = settings.value("chat/msg_notify", true).toBool();
-    if(!this->isActiveWindow() && msg_notify)
-        PlatformExtend::notify(this);
-}
-
-void MainWindow::onSendPressed()
-{
-    QString string(ui->lineEdit->text());
-    if(string.isEmpty() || string.length()>256){
-        qDebug()<<"Warnning: text too long or empty.";
-        return;
-    }
-    // 修改消息发送方式，SSE 客户端使用 sendChatMessage
-    QString messageContent = string;
-    if (clientSocket_) {
-        clientSocket_->sendChatMessage(messageContent);
-    }
-    ui->lineEdit->clear();
 }
 
 void MainWindow::onColorGridDroped(int id)
@@ -1000,29 +542,6 @@ void MainWindow::changeToBrush(const QString &brushName)
     // onBrushSettingsChanged(ui->canvas->brushSettings());
 }
 
-void MainWindow::remoteAddLayer(const QString &layerName)
-{
-    if( layerName.isEmpty() ){
-        return;
-    }
-
-    LayerItem *item = new LayerItem;
-    QIcon visibility(":/iconset/ui/visibility-on.png");
-    visibility.addFile(":/iconset/ui/visibility-off.png",
-                       QSize(),
-                       QIcon::Selected,
-                       QIcon::On);
-    item->setVisibleIcon(visibility);
-    QIcon lock(":/iconset/ui/lock.png");
-    lock.addFile(":/iconset/ui/unlock.png",
-                 QSize(),
-                 QIcon::Selected,
-                 QIcon::On);
-    item->setLockIcon(lock);
-    item->setLabel(layerName);
-    ui->layerWidget->addItem(item);
-}
-
 void MainWindow::addLayer(const QString &layerName)
 {
     QString name = layerName;
@@ -1077,37 +596,20 @@ void MainWindow::clearLayer(const QString &name)
                                         QMessageBox::Yes|QMessageBox::No);
     if(result == QMessageBox::Yes){
         ui->canvas->clearLayer(name);
-        // SSE 客户端暂时不支持单层清空，显示提示信息
-        QMessageBox::information(this,
-                                 tr("Notice"),
-                                 tr("Layer clearing command sent to canvas.\n"
-                                    "Server-side layer clearing is not yet implemented "
-                                    "in the SSE client version."));
     }
 }
 
 void MainWindow::clearAllLayer()
 {
-    if (!clientSocket_->isRoomOwner()) {
-        QMessageBox::warning(this,
-                         tr("Warning"),
-                         tr("You are not the room owner, you can't close the room."),
-                         QMessageBox::Close);
-        return;
-    }
     auto result = QMessageBox::question(this,
                                         tr("OMG"),
                                         tr("You're going to clear ALL LAYERS"
-                                           ". All of work in this room"
+                                           ". All of work on the canvas"
                                            "will be deleted and CANNOT be undone.\n"
                                            "Do you really want to do so?"),
                                         QMessageBox::Yes|QMessageBox::No);
     if(result == QMessageBox::Yes){
-        if (clientSocket_) {
-            clientSocket_->clearCanvas();
-        } else {
-            qDebug() << "[MainWindow] 未连接到房间，无法清空画布";
-        }
+        ui->canvas->clearAllLayer();
     }
 }
 
@@ -1121,12 +623,7 @@ void MainWindow::closeEvent( QCloseEvent * event )
 {
     ui->canvas->pause();
 
-    // 停止定时器
-    if (onlineListTimer_) {
-        onlineListTimer_->stop();
-    }
-
-    // 新增：在关闭前保存画布快照
+    // 在关闭前保存画布快照
     if (ui->canvas) {
         qDebug() << "[MainWindow] 关闭窗口前保存画布快照";
         ui->canvas->exportCanvasSnapshot();
@@ -1136,16 +633,7 @@ void MainWindow::closeEvent( QCloseEvent * event )
         QThread::msleep(100);
     }
 
-    // 先断开网络连接，避免在对象销毁过程中产生错误
-    if (clientSocket_) {
-        clientSocket_->disconnect();
-    }
-
-    // 等待一小段时间，确保网络操作完成
-    QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-
-    QProgressDialog dialog(tr("Waiting for sync, please do not close.\n"\
-                              "This will cost you 1 minute at most."),
+    QProgressDialog dialog(tr("Saving, please wait..."),
                            QString(),
                            0, 0, this);
     dialog.setWindowModality(Qt::ApplicationModal);
@@ -1161,9 +649,6 @@ void MainWindow::closeEvent( QCloseEvent * event )
                       ui->colorGrid->dataExport());
     settings.setValue("mainwindow/view",
                       saveState());
-
-    // 保存房间信息（用于程序重启时复用Archive信息）
-    roomInfoManager_->saveRoomInfoToSettings();
 
     settings.sync();
 
@@ -1315,123 +800,4 @@ bool MainWindow::regShortcut(const QKeySequence& k, T func)
     connect(shortcut, &QShortcut::activated,
             func);
     return true;
-}
-
-void MainWindow::onOnlineListTimer()
-{
-    // 检查是否仍然连接到房间
-    if (!clientSocket_ || clientSocket_->roomName().isEmpty() || clientSocket_->getClientIdOfCurrentRoom().isEmpty()) {
-        qDebug() << "[MainWindow] 定时器触发但未连接到房间，停止定时器";
-        stopOnlineListTimer();
-        return;
-    }
-
-    // 周期性获取在线列表
-    qDebug() << "[MainWindow] 定时器触发：获取在线列表，房间:" << clientSocket_->roomName();
-    clientSocket_->requestOnlinelist();
-}
-
-void MainWindow::startOnlineListTimer()
-{
-    if (onlineListTimer_ && !onlineListTimer_->isActive()) {
-        // 检查是否已经连接到房间
-        if (clientSocket_ && !clientSocket_->roomName().isEmpty() && !clientSocket_->getClientIdOfCurrentRoom().isEmpty()) {
-            onlineListTimer_->start(10000); // 每10秒执行一次
-            qDebug() << "[MainWindow] 启动周期性在线列表获取定时器，房间:" << clientSocket_->roomName();
-        } else {
-            qDebug() << "[MainWindow] 未连接到房间，跳过启动定时器";
-        }
-    }
-}
-
-void MainWindow::stopOnlineListTimer()
-{
-    if (onlineListTimer_ && onlineListTimer_->isActive()) {
-        onlineListTimer_->stop();
-        qDebug() << "[MainWindow] 停止周期性在线列表获取定时器";
-    }
-}
-
-void MainWindow::onNewClientId(const QString &clientId)
-{
-    roomInfoManager_->updateClientIdOfRoom(clientSocket_->roomName(), clientId);
-}
-
-// ==================== 用户主动操作错误处理（带重试按钮的对话框）====================
-
-void MainWindow::onRequestLoginFailed(const QString &errorMessage)
-{
-    QMessageBox::StandardButton reply = QMessageBox::critical(this, tr("Login Failed"),
-        tr("An error occurred while logging into the room:\n%1\n\nWould you like to retry?").arg(errorMessage),
-        QMessageBox::Retry | QMessageBox::Cancel);
-    
-    if (reply == QMessageBox::Retry) {
-        // 重新尝试登录
-        QString roomName = clientSocket_->roomName();
-        QString nickname = clientSocket_->nickname();
-        if (!roomName.isEmpty() && !nickname.isEmpty()) {
-            clientSocket_->connectToRoom(roomName, nickname);
-        }
-    }
-}
-
-void MainWindow::onRequestChatMessageFailed(const QString &errorMessage)
-{
-    QMessageBox::critical(this, tr("Send Message Failed"),
-        tr("An error occurred while sending chat message:\n%1\n\nPlease try again later.").arg(errorMessage),
-        QMessageBox::Ok);
-}
-
-void MainWindow::onRequestDrawDataFailed(const QString &errorMessage)
-{
-    QMessageBox::critical(this, tr("Send Drawing Data Failed"),
-        tr("An error occurred while sending drawing data:\n%1\n\nPlease try again later.").arg(errorMessage),
-        QMessageBox::Ok);
-}
-
-void MainWindow::onRequestClearCanvasFailed(const QString &errorMessage)
-{
-    QMessageBox::StandardButton reply = QMessageBox::critical(this, tr("Clear Canvas Failed"),
-        tr("An error occurred while clearing canvas:\n%1\n\nWould you like to retry?").arg(errorMessage),
-        QMessageBox::Retry | QMessageBox::Cancel);
-    
-    if (reply == QMessageBox::Retry) {
-        clientSocket_->clearCanvas();
-    }
-}
-
-void MainWindow::onRequestCheckoutFailed(const QString &errorMessage)
-{
-    QMessageBox::StandardButton reply = QMessageBox::critical(this, tr("Renew Room Failed"),
-        tr("An error occurred while renewing room:\n%1\n\nWould you like to retry?").arg(errorMessage),
-        QMessageBox::Retry | QMessageBox::Cancel);
-    
-    if (reply == QMessageBox::Retry) {
-        clientSocket_->requestCheckout();
-    }
-}
-
-void MainWindow::onRequestCloseRoomFailed(const QString &errorMessage)
-{
-    QMessageBox::StandardButton reply = QMessageBox::critical(this, tr("Close Room Failed"),
-        tr("An error occurred while closing room:\n%1\n\nWould you like to retry?").arg(errorMessage),
-        QMessageBox::Retry | QMessageBox::Cancel);
-    
-    if (reply == QMessageBox::Retry) {
-        clientSocket_->requestCloseRoom();
-    }
-}
-
-void MainWindow::onRequestKickUserFailed(const QString &errorMessage)
-{
-    QMessageBox::critical(this, tr("Kick User Failed"),
-        tr("An error occurred while kicking user:\n%1\n\nPlease try again later").arg(errorMessage),
-        QMessageBox::Ok);
-}
-
-// ==================== 自动操作错误处理（GradualBox提示）====================
-
-void MainWindow::onRequestOnlineListFailed(const QString &errorMessage)
-{
-    GradualBox::showText(tr("Failed to get online list: %1").arg(errorMessage), true, 3000);
 }
