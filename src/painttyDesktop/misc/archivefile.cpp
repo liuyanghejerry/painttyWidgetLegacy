@@ -154,26 +154,6 @@ bool ArchiveFile::isLineCountValid() const
     return line_count_ > 0;
 }
 
-void ArchiveFile::syncWithRemote(const QString &remoteSignature, quint64 remoteLineCount)
-{
-    qDebug() << "[ArchiveFile] 同步远端数据 - 远端签名:" << remoteSignature 
-             << "远端行数:" << remoteLineCount
-             << "本地签名:" << signature_
-             << "本地行数:" << line_count_;
-    
-    if(remoteSignature != signature_) {
-        // 签名不一致，需要重置
-        resetForNewSignature(remoteSignature);
-        emit dataSyncRequired(remoteSignature, remoteLineCount);
-    } else if(remoteLineCount > line_count_) {
-        // 签名一致但本地数据落后，需要追加数据
-        emit dataSyncRequired(remoteSignature, remoteLineCount);
-    } else {
-        // 数据一致
-        emit dataSyncCompleted();
-    }
-}
-
 void ArchiveFile::resetForNewSignature(const QString &signature)
 {
     qDebug() << "[ArchiveFile] 重置为新签名:" << signature;

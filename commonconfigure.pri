@@ -7,7 +7,6 @@ OBJECTS_DIR = $$DESTDIR/$$TARGET
 
 
 INCLUDEPATH += $$PWD/src/common \
-               $$PWD/src/common/network \
                $$PWD/src/painttyDesktop/misc \
                $$PWD/src/painttyDesktop/paintingTools \
                $$PWD/src/painttyDesktop/paintingTools/brush \

@@ -49,8 +49,6 @@ public:
     // 客户端身份管理
     void setLocalClientId(const QString& clientId);
     QString localClientId() const;
-    void setLocalNickname(const QString& nickname);
-    QString localNickname() const;
 
     // ArchiveFile管理方法
     void initializeArchiveFile(const QString &roomName);
@@ -104,7 +102,6 @@ signals:
 
 private:
     QString cached_clientid_;
-    QString local_nickname_;
     bool archive_loaded_;
     bool is_parsed_signal_sent;
     bool pause_;

@@ -33,8 +33,7 @@ public:
     bool isSignatureValid() const;
     bool isLineCountValid() const;
     
-    // 新增：数据同步方法
-    void syncWithRemote(const QString &remoteSignature, quint64 remoteLineCount);
+    // 数据同步方法
     void resetForNewSignature(const QString &newSignature);
     void appendArchiveData(const QByteArray &data);
     
@@ -47,8 +46,6 @@ public:
 signals:
     void newSignature(const QString&);
     void lineCountChanged(quint64 newCount);
-    void dataSyncRequired(const QString &remoteSignature, quint64 remoteLineCount);
-    void dataSyncCompleted();
     
 public slots:
     void setName(const QString &name);

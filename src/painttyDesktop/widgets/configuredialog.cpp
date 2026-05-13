@@ -18,7 +18,6 @@
 ConfigureDialog::ConfigureDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::ConfigureDialog),
-    msg_notify(false),
     auto_disable_ime(false),
     skip_replay(false),
     use_droid_font(false),
@@ -46,7 +45,6 @@ void ConfigureDialog::readSettings()
     QSettings settings(GlobalDef::SETTINGS_NAME,
                        QSettings::defaultFormat());
     selectedLanguage = settings.value("global/language").toString();
-    msg_notify = settings.value("chat/msg_notify", true).toBool();
     auto_disable_ime = settings.value("canvas/auto_disable_ime", true).toBool();
     enable_tablet = settings.value("canvas/enable_tablet", false).toBool();
     use_default_server = settings.value("global/server/use_default", true).toBool();
@@ -127,7 +125,6 @@ void ConfigureDialog::initServerSettings()
 
 void ConfigureDialog::initUi()
 {
-    ui->msg_notify_checkbox->setChecked(msg_notify);
     ui->auto_disable_ime_checkbox->setChecked(auto_disable_ime);
     ui->enable_tablet->setChecked(enable_tablet);
     ui->skip_replay->setChecked(skip_replay);
@@ -198,13 +195,6 @@ void ConfigureDialog::acceptConfigure()
         }
     }
     Singleton<ShortcutManager>::instance().saveToConfigure();
-
-    //save msg notify settings
-    if (ui->msg_notify_checkbox->isChecked() != msg_notify)
-    {
-        settings.setValue("chat/msg_notify", ui->msg_notify_checkbox->isChecked());
-        needRestart = true;
-    }
 
     //save auto disable IME settings
     if (ui->auto_disable_ime_checkbox->isChecked() != auto_disable_ime)

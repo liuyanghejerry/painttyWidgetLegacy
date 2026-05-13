@@ -26,10 +26,6 @@ CanvasBackend::CanvasBackend(QObject *parent)
         cached_clientid_ = QUuid::createUuid().toString(QUuid::WithoutBraces);
         settings.setValue("local/clientId", cached_clientid_);
     }
-    local_nickname_ = settings.value("local/nickname").toString();
-    if (local_nickname_.isEmpty()) {
-        local_nickname_ = QString("User");
-    }
 }
 
 void CanvasBackend::setLocalClientId(const QString& clientId)
@@ -42,18 +38,6 @@ void CanvasBackend::setLocalClientId(const QString& clientId)
 QString CanvasBackend::localClientId() const
 {
     return cached_clientid_;
-}
-
-void CanvasBackend::setLocalNickname(const QString& nickname)
-{
-    local_nickname_ = nickname;
-    QSettings settings(GlobalDef::SETTINGS_NAME, QSettings::defaultFormat());
-    settings.setValue("local/nickname", nickname);
-}
-
-QString CanvasBackend::localNickname() const
-{
-    return local_nickname_;
 }
 
 CanvasBackend::~CanvasBackend()

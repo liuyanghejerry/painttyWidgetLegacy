@@ -25,7 +25,6 @@ public:
 private:
     Ui::ConfigureDialog *ui;
     QString selectedLanguage;
-    bool msg_notify;
     bool auto_disable_ime;
     bool enable_tablet;
     bool skip_replay;

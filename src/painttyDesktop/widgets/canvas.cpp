@@ -558,7 +558,6 @@ void Canvas::sendAction()
     QVariantMap store;
     store.insert("layer", currentLayer());
     store.insert("clientid", backend_->localClientId());
-    store.insert("name", backend_->localNickname());
     store.insert("type", "data");
     store.insert("brush", brushSettings());
     store.insert("action", "block");

@@ -289,15 +289,10 @@
    <header>panoramawidget.h</header>
    <container>1</container>
   </customwidget>
-  <customwidget>
-   <class>CanvasContainer</class>
-   <extends>QGraphicsView</extends>
-   <header>canvascontainer.h</header>
-  </customwidget>
    <customwidget>
-    <class>IRCLineEdit</class>
-    <extends>QLineEdit</extends>
-    <header>irclineedit.h</header>
+    <class>CanvasContainer</class>
+    <extends>QGraphicsView</extends>
+    <header>canvascontainer.h</header>
    </customwidget>
 
  </customwidgets>

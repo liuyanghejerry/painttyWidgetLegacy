@@ -79,7 +79,6 @@ SOURCES += main.cpp\
     widgets/easycopylineedit.cpp \
     widgets/gradualbox.cpp \
     widgets/canvasbackend.cpp \
-    widgets/irclineedit.cpp \
     paintingTools/brush/abstractbrush.cpp \
     paintingTools/brush/abstractbrushv3.cpp \
     paintingTools/brush/basic-stamp.cpp \
@@ -132,7 +131,6 @@ HEADERS  += widgets/mainwindow.h \
     widgets/clearlineedit.h \
     widgets/easycopylineedit.h \
     widgets/gradualbox.h \
-    widgets/irclineedit.h \
     widgets/canvasbackend.h \
     paintingTools/brush/brushmanager.h \
     paintingTools/brush/abstractbrush.h \
