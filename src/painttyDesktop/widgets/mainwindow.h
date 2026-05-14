@@ -43,6 +43,12 @@ public slots:
     void onCanvasToolComplete();
     void changeToBrush(const QString& brushName);
 
+    /* project management */
+    void newProject(int width, int height);
+    bool openProject(const QString &filePath);
+    bool saveProject();
+    bool saveProjectAs();
+
     /* layer operations */
     void addLayer(const QString &name = QString());
     void deleteLayer();
@@ -78,6 +84,11 @@ private:
     QToolButton *colorPickerButton_;
     QToolButton *moveToolButton_;
     QHash<QString, bool> keyMap_;
+    QString currentProjectPath_;
+
+    bool saveToFile(const QString &filePath);
+    bool loadFromFile(const QString &filePath);
+    bool promptSaveIfDirty();
 
 private slots:
     void onColorGridDroped(int);
@@ -87,6 +98,10 @@ private slots:
     void onColorPickerPressed(bool c);
     void onMoveToolPressed(bool c);
     void onPanoramaRefresh();
+    void onNewProject();
+    void onOpenProject();
+    void onSaveProject();
+    void onSaveProjectAs();
 };
 
 #endif // MAINWINDOW_H

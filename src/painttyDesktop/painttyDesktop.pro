@@ -46,6 +46,7 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
     widgets/mainwindow.cpp \
+    widgets/newprojectdialog.cpp \
     widgets/canvas.cpp \
     misc/layermanager.cpp \
     widgets/colorwheel.cpp \
@@ -98,6 +99,7 @@ SOURCES += main.cpp\
 
 
 HEADERS  += widgets/mainwindow.h \
+    widgets/newprojectdialog.h \
     widgets/canvas.h \
     misc/layermanager.h \
     widgets/colorwheel.h \

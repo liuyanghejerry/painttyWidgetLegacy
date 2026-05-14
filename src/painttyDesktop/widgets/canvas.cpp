@@ -35,9 +35,9 @@ Canvas::Canvas(QWidget *parent) :
     QWidget(parent),
     m_tabletEnabled(false),
     control_mode_(UNKNOWN),
-    canvasSize(QSize(720, 480)),
-    layers(canvasSize),
-    image(canvasSize, QImage::Format_ARGB32_Premultiplied),
+    canvasSize_(QSize(720, 480)),
+    layers(canvasSize_),
+    image(canvasSize_, QImage::Format_ARGB32_Premultiplied),
     layerNameCounter(0),
     useV3Brush_(false),
     shareColor_(true),
@@ -54,7 +54,7 @@ Canvas::Canvas(QWidget *parent) :
 
     setMouseTracking(true);
     setFocusPolicy(Qt::WheelFocus);
-    resize(canvasSize);
+    resize(canvasSize_);
 
     BrushPointer p1(new BasicBrush);
     p1->setSettings(p1->defaultSettings());
@@ -122,7 +122,7 @@ QImage Canvas::currentCanvas()
 
 QImage Canvas::allCanvas()
 {
-    QImage exp(canvasSize, QImage::Format_ARGB32_Premultiplied);
+    QImage exp(canvasSize_, QImage::Format_ARGB32_Premultiplied);
     exp.fill(Qt::white);
     QPainter painter(&exp);
     int count = layers.count();
@@ -746,6 +746,17 @@ void Canvas::clearAllLayer()
     update();
 }
 
+void Canvas::setLayerContent(int index, const QImage &image)
+{
+    LayerPointer layer = layers.layerFrom(index);
+    if (layer.isNull() || image.isNull())
+        return;
+    layer->clear();
+    QPainter painter(layer->imagePtr());
+    painter.drawImage(0, 0, image);
+    update();
+}
+
 void Canvas::lockLayer(const QString &name)
 {
     layers.layerFrom(name)->lock();
@@ -1116,10 +1127,10 @@ void Canvas::paintEvent(QPaintEvent *event)
 
 void Canvas::resizeEvent(QResizeEvent *event)
 {
-    if(event->size() != canvasSize)
+    if(event->size() != canvasSize_)
         return;
     QSize newSize = event->size();
-    canvasSize = newSize;
+    canvasSize_ = newSize;
     layers.resizeLayers(newSize);
     QImage newImage(newSize, QImage::Format_ARGB32_Premultiplied);
     newImage.fill(Qt::transparent);
@@ -1131,12 +1142,32 @@ void Canvas::resizeEvent(QResizeEvent *event)
     QWidget::resizeEvent(event);
 }
 
+void Canvas::setCanvasSize(const QSize &size)
+{
+    if (size == canvasSize_ || !size.isValid())
+        return;
+
+    canvasSize_ = size;
+    layers.resizeLayers(size);
+
+    QImage newImage(size, QImage::Format_ARGB32_Premultiplied);
+    newImage.fill(Qt::transparent);
+    {
+        QPainter painter(&newImage);
+        painter.drawImage(QPoint(0, 0), image);
+    }
+    image = newImage;
+
+    resize(size);
+    update();
+}
+
 QSize Canvas::sizeHint() const
 {
-    return canvasSize;
+    return canvasSize_;
 }
 
 QSize Canvas::minimumSizeHint() const
 {
-    return canvasSize;
+    return canvasSize_;
 }

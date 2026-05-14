@@ -33,6 +33,8 @@ public:
     bool isJitterCorrectionEnabled() const;
     bool tabletEnabled() const {return m_tabletEnabled; }
     bool isArchiveLoading() const { return archive_loading_; }
+    QSize canvasSize() const { return canvasSize_; }
+    void setCanvasSize(const QSize &size);
 
     virtual QSize sizeHint () const;
     virtual QSize minimumSizeHint () const;
@@ -61,6 +63,7 @@ public slots:
     void moveLayerUp(const QString &name);
     void moveLayerDown(const QString &name);
     void layerSelected(const QString &name);
+    void setLayerContent(int index, const QImage &image);
     void changeBrush(const QString &name);
     void onColorPicker(bool in);
     void onMoveTool(bool in);
@@ -140,7 +143,7 @@ private:
 
     bool m_tabletEnabled;
     CONTROL_MODE control_mode_;
-    QSize canvasSize;
+    QSize canvasSize_;
     LayerManager layers;
     QImage image;
     QImage *currentImage;

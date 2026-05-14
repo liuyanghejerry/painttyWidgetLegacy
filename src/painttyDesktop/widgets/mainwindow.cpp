@@ -6,9 +6,13 @@
 #include <QCloseEvent>
 #include <QCryptographicHash>
 #include <QDateTime>
+#include <QDir>
 #include <QEventLoop>
 #include <QFile>
 #include <QFileDialog>
+#include <QFileInfo>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QMessageBox>
 #include <QProgressDialog>
 #include <QActionGroup>
@@ -32,6 +36,7 @@
 #include "../paintingTools/brush/brushmanager.h"
 #include "canvas.h"
 #include "canvascontainer.h"
+#include "newprojectdialog.h"
 #include "panoramawidget.h"
 #include "aboutdialog.h"
 #include "brushsettingswidget.h"
@@ -377,6 +382,14 @@ void MainWindow::shortcutInit()
 {
     connect(ui->action_Quit, &QAction::triggered,
             this, &MainWindow::close);
+    connect(ui->actionNew, &QAction::triggered,
+            this, &MainWindow::onNewProject);
+    connect(ui->actionOpen, &QAction::triggered,
+            this, &MainWindow::onOpenProject);
+    connect(ui->actionSave, &QAction::triggered,
+            this, &MainWindow::onSaveProject);
+    connect(ui->actionSave_As, &QAction::triggered,
+            this, &MainWindow::onSaveProjectAs);
     connect(ui->actionExport_All, &QAction::triggered,
             this, &MainWindow::exportAllToFile);
     connect(ui->actionExport_Visiable, &QAction::triggered,
@@ -756,6 +769,223 @@ void MainWindow::about()
 {
     AboutDialog dialog(this);
     dialog.exec();
+}
+
+void MainWindow::onNewProject()
+{
+    if (!promptSaveIfDirty())
+        return;
+
+    NewProjectDialog dialog(this);
+    if (dialog.exec() == QDialog::Accepted) {
+        newProject(dialog.canvasWidth(), dialog.canvasHeight());
+    }
+}
+
+void MainWindow::newProject(int width, int height)
+{
+    currentProjectPath_.clear();
+    ui->canvas->setCanvasSize(QSize(width, height));
+    ui->canvas->clearAllLayer();
+    setWindowTitle(tr("Mr.Paint - Untitled"));
+}
+
+void MainWindow::onOpenProject()
+{
+    if (!promptSaveIfDirty())
+        return;
+
+    QString filePath = QFileDialog::getExistingDirectory(
+        this,
+        tr("Open Project"),
+        QString(),
+        QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks
+    );
+
+    if (filePath.isEmpty())
+        return;
+
+    QFileInfo fi(filePath);
+    QString metadataPath = filePath + "/metadata.json";
+    if (fi.suffix() == "paintty" || QFile::exists(metadataPath)) {
+        openProject(filePath);
+    } else {
+        QMessageBox::warning(this, tr("Invalid Project"),
+                             tr("The selected directory is not a valid Mr.Paint project."));
+    }
+}
+
+bool MainWindow::openProject(const QString &filePath)
+{
+    if (loadFromFile(filePath)) {
+        currentProjectPath_ = filePath;
+        setWindowTitle(tr("Mr.Paint - %1").arg(QFileInfo(filePath).fileName()));
+        return true;
+    }
+    return false;
+}
+
+void MainWindow::onSaveProject()
+{
+    if (currentProjectPath_.isEmpty()) {
+        onSaveProjectAs();
+    } else {
+        saveToFile(currentProjectPath_);
+    }
+}
+
+bool MainWindow::saveProject()
+{
+    if (currentProjectPath_.isEmpty())
+        return false;
+    return saveToFile(currentProjectPath_);
+}
+
+void MainWindow::onSaveProjectAs()
+{
+    QString filePath = QFileDialog::getSaveFileName(
+        this,
+        tr("Save Project As"),
+        QString(),
+        tr("Mr.Paint Projects (*.paintty)")
+    );
+
+    if (filePath.isEmpty())
+        return;
+
+    if (filePath.endsWith(".paintty", Qt::CaseInsensitive))
+        filePath.chop(8);
+    filePath += ".paintty";
+
+    if (saveToFile(filePath)) {
+        currentProjectPath_ = filePath;
+        setWindowTitle(tr("Mr.Paint - %1").arg(QFileInfo(filePath).fileName()));
+    }
+}
+
+bool MainWindow::saveProjectAs()
+{
+    if (currentProjectPath_.isEmpty())
+        return false;
+    onSaveProjectAs();
+    return !currentProjectPath_.isEmpty();
+}
+
+bool MainWindow::saveToFile(const QString &filePath)
+{
+    QDir projectDir(filePath);
+
+    if (projectDir.exists()) {
+        if (!projectDir.removeRecursively()) {
+            QMessageBox::critical(this, tr("Save Failed"),
+                                  tr("Could not overwrite existing project directory."));
+            return false;
+        }
+    }
+    if (!projectDir.mkpath(".")) {
+        QMessageBox::critical(this, tr("Save Failed"),
+                              tr("Could not create project directory:\n%1").arg(filePath));
+        return false;
+    }
+
+    QSize size = ui->canvas->canvasSize();
+    QJsonObject metadata;
+    metadata["version"] = 1;
+    metadata["canvasWidth"] = size.width();
+    metadata["canvasHeight"] = size.height();
+    metadata["created"] = QDateTime::currentDateTime().toString(Qt::ISODate);
+
+    QFile metadataFile(filePath + "/metadata.json");
+    if (!metadataFile.open(QIODevice::WriteOnly)) {
+        QMessageBox::critical(this, tr("Save Failed"),
+                              tr("Could not write project metadata."));
+        return false;
+    }
+    metadataFile.write(QJsonDocument(metadata).toJson());
+    metadataFile.close();
+
+    QDir imagesDir(filePath + "/images");
+    imagesDir.mkpath(".");
+
+    QList<QImage> images = ui->canvas->layerImages();
+    for (int i = 0; i < images.size(); ++i) {
+        QString imagePath = QString("%1/images/layer_%2.png").arg(filePath).arg(i);
+        if (!images[i].save(imagePath, "PNG")) {
+            qWarning() << "[MainWindow] Failed to save layer image:" << imagePath;
+        }
+    }
+
+    qDebug() << "[MainWindow] Project saved to:" << filePath
+             << "canvas:" << size << "layers:" << images.size();
+    return true;
+}
+
+bool MainWindow::loadFromFile(const QString &filePath)
+{
+    QFile metadataFile(filePath + "/metadata.json");
+    if (!metadataFile.open(QIODevice::ReadOnly)) {
+        QMessageBox::critical(this, tr("Load Failed"),
+                              tr("Could not read project metadata:\n%1").arg(filePath));
+        return false;
+    }
+
+    QJsonParseError parseError;
+    QJsonDocument doc = QJsonDocument::fromJson(metadataFile.readAll(), &parseError);
+    metadataFile.close();
+
+    if (parseError.error != QJsonParseError::NoError || !doc.isObject()) {
+        QMessageBox::critical(this, tr("Load Failed"),
+                              tr("Invalid project metadata: %1").arg(parseError.errorString()));
+        return false;
+    }
+
+    QJsonObject metadata = doc.object();
+    int width = metadata.value("canvasWidth").toInt(720);
+    int height = metadata.value("canvasHeight").toInt(480);
+
+    if (width < 1 || height < 1 || width > 10000 || height > 10000) {
+        QMessageBox::critical(this, tr("Load Failed"),
+                              tr("Invalid canvas dimensions in project file."));
+        return false;
+    }
+
+    ui->canvas->setCanvasSize(QSize(width, height));
+    ui->canvas->clearAllLayer();
+
+    QString imagesPath = filePath + "/images";
+    QDir imagesDir(imagesPath);
+
+    if (imagesDir.exists()) {
+        QStringList filters;
+        filters << "layer_*.png";
+        QStringList imageFiles = imagesDir.entryList(filters, QDir::Files, QDir::Name);
+
+        int canvasCount = ui->canvas->count();
+
+        for (int i = 0; i < imageFiles.size(); ++i) {
+            QString imagePath = imagesDir.filePath(imageFiles[i]);
+            QImage img(imagePath);
+            if (img.isNull()) {
+                qWarning() << "[MainWindow] Failed to load layer image:" << imagePath;
+                continue;
+            }
+
+            if (i >= canvasCount) {
+                addLayer();
+            }
+
+            ui->canvas->setLayerContent(i, img);
+        }
+    }
+
+    qDebug() << "[MainWindow] Project loaded from:" << filePath
+             << "canvas:" << width << "x" << height;
+    return true;
+}
+
+bool MainWindow::promptSaveIfDirty()
+{
+    return true;
 }
 
 template<typename T, typename U>
