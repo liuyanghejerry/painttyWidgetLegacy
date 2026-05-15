@@ -47,7 +47,6 @@ Canvas::Canvas(QWidget *parent) :
     worker_(new QThread(this)),
     archive_loading_(false)
 {
-    setAttribute(Qt::WA_StaticContents);
     brush_ = BrushPointer(new BasicBrush);
     brush_->setSettings(brush_->defaultSettings());
     updateCursor();
