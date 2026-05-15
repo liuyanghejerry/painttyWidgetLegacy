@@ -144,6 +144,9 @@ void MainWindow::init()
     toolbarInit();
     viewInit();
     shortcutInit();
+
+    // 将 Canvas 注册到 CanvasContainer 的 scene 中，启用滚动条和视图管理
+    ui->centralWidget->setCanvas(ui->canvas);
 }
 
 void MainWindow::layerWidgetInit()
