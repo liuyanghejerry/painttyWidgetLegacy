@@ -22,8 +22,12 @@ CanvasContainer::CanvasContainer(QWidget *parent) :
 {
     setCacheMode(QGraphicsView::CacheBackground);
     setAlignment(Qt::AlignTop | Qt::AlignLeft);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    setDragMode(QGraphicsView::ScrollHandDrag);
     scene = new QGraphicsScene(this);
     setScene(scene);
+    setSceneRect(0, 0, 720, 480); // default canvas size
 
     auto rc = [&](){
         emit rectChanged(visualRect().toRect());
@@ -51,15 +55,21 @@ void CanvasContainer::setCanvas(QWidget *canvas)
     }
     proxy = scene->addWidget(canvas);
     
-    // 确保 proxy 创建成功后再安装事件过滤器
     if (proxy && proxy->widget()) {
         canvas->installEventFilter(this);
         if (viewport()) {
-            viewport()->installEventFilter(this); //at this time, viewport is available, so we intall event filter to send tablet event
+            viewport()->installEventFilter(this);
         }
     } else {
         qWarning() << "CanvasContainer::setCanvas: failed to create proxy widget";
     }
+
+    // Force scene rect update after proxy is created
+    QTimer::singleShot(0, this, [this]() {
+        if (proxy) {
+            setSceneRect(scene->itemsBoundingRect());
+        }
+    });
 }
 
 void CanvasContainer::setScaleFactor(qreal factor)
