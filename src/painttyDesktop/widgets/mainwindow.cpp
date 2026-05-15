@@ -788,6 +788,7 @@ void MainWindow::newProject(int width, int height)
     ui->canvas->setCanvasSize(QSize(width, height));
     ui->canvas->clearAllLayer();
     setWindowTitle(tr("Mr.Paint - Untitled"));
+    onPanoramaRefresh();
 }
 
 void MainWindow::onOpenProject()
@@ -820,6 +821,7 @@ bool MainWindow::openProject(const QString &filePath)
     if (loadFromFile(filePath)) {
         currentProjectPath_ = filePath;
         setWindowTitle(tr("Mr.Paint - %1").arg(QFileInfo(filePath).fileName()));
+        onPanoramaRefresh();
         return true;
     }
     return false;
