@@ -7,8 +7,11 @@
 #include <QThread>
 #include <QDebug>
 #include <QDateTime>
+#include <QFileDialog>
 #include "common/common.h"
 #include "widgets/mainwindow.h"
+#include "widgets/welcomedialog.h"
+#include "widgets/newprojectdialog.h"
 
 namespace mainOnly
 {
@@ -88,7 +91,6 @@ void initFonts()
     QStringList strList(QFontDatabase::applicationFontFamilies(ret));
     if (strList.count() > 0){
         QFont fontThis(strList.at(0));
-        //        fontThis.setPointSize(9);
         if(qApp->font().pointSize() == -1){
             fontThis.setPixelSize(qApp->font().pixelSize());
         }else{
@@ -104,14 +106,13 @@ void customMessageHandler(QtMsgType type, const QMessageLogContext &context, con
     QThread *currentThread = QThread::currentThread();
     QString threadName = currentThread->objectName();
     if (threadName.isEmpty()) {
-        // 为主线程设置特殊名称
         if (currentThread == QApplication::instance()->thread()) {
             threadName = "MainThread";
         } else {
             threadName = QString("Thread-%1").arg((quintptr)currentThread->currentThreadId());
         }
     }
-    
+
     QString level;
     switch (type) {
         case QtDebugMsg:
@@ -130,14 +131,13 @@ void customMessageHandler(QtMsgType type, const QMessageLogContext &context, con
             level = "?";
             break;
     }
-    
-    // 提取文件名（去掉路径）
+
     QString fileName = QString(context.file);
     int lastSlash = fileName.lastIndexOf('/');
     if (lastSlash != -1) {
         fileName = fileName.mid(lastSlash + 1);
     }
-    
+
     QString timestamp = QDateTime::currentDateTime().toString("hh:mm:ss.zzz");
     QString logMessage = QString("[%1][%2][%3] %4:%5 - %6")
                         .arg(level)
@@ -146,9 +146,9 @@ void customMessageHandler(QtMsgType type, const QMessageLogContext &context, con
                         .arg(fileName)
                         .arg(context.line)
                         .arg(msg);
-    
+
     fprintf(stderr, "%s\n", qPrintable(logMessage));
-    
+
     if (type == QtFatalMsg) {
         abort();
     }
@@ -174,7 +174,35 @@ int main(int argc, char *argv[])
     mainOnly::initTranslation();
     mainOnly::initFonts();
 
+    // Show welcome dialog
+    WelcomeDialog welcome;
+    if (welcome.exec() != QDialog::Accepted)
+        return 0;
+
     MainWindow w;
+
+    if (welcome.userChoice() == WelcomeDialog::NewProject) {
+        // Show new project dialog
+        NewProjectDialog newDlg;
+        if (newDlg.exec() != QDialog::Accepted)
+            return 0;
+        w.newProject(newDlg.canvasWidth(), newDlg.canvasHeight());
+    } else {
+        // Open existing project
+        QString filePath = welcome.selectedRecentFile();
+        if (filePath.isEmpty()) {
+            filePath = QFileDialog::getExistingDirectory(
+                nullptr,
+                QObject::tr("Open Project"),
+                QString(),
+                QFileDialog::ShowDirsOnly
+            );
+        }
+        if (filePath.isEmpty())
+            return 0;
+        w.openProject(filePath);
+    }
+
     w.showMaximized();
     return a.exec();
 }
