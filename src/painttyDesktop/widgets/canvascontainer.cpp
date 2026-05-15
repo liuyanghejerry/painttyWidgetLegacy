@@ -278,6 +278,10 @@ bool CanvasContainer::eventFilter(QObject *object, QEvent *event)
     if (object == proxy->widget()
             && event->type() == QEvent::CursorChange)
         proxy->setCursor(proxy->widget()->cursor());
+    if (object == proxy->widget()
+            && event->type() == QEvent::Resize) {
+        setSceneRect(scene->itemsBoundingRect());
+    }
     if (object == viewport()) //process tablet event
     {
         if (event->type() == QEvent::TabletPress
