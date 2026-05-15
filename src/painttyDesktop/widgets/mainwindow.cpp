@@ -147,6 +147,7 @@ void MainWindow::init()
 
     // 将 Canvas 注册到 CanvasContainer 的 scene 中，启用滚动条和视图管理
     ui->centralWidget->setCanvas(ui->canvas);
+    ui->centralWidget->resetView();
 }
 
 void MainWindow::layerWidgetInit()
@@ -791,6 +792,7 @@ void MainWindow::newProject(int width, int height)
     ui->canvas->setCanvasSize(QSize(width, height));
     ui->canvas->clearAllLayer();
     setWindowTitle(tr("Mr.Paint - Untitled"));
+    ui->centralWidget->resetView();
     onPanoramaRefresh();
 }
 
@@ -824,6 +826,7 @@ bool MainWindow::openProject(const QString &filePath)
     if (loadFromFile(filePath)) {
         currentProjectPath_ = filePath;
         setWindowTitle(tr("Mr.Paint - %1").arg(QFileInfo(filePath).fileName()));
+        ui->centralWidget->resetView();
         onPanoramaRefresh();
         return true;
     }

@@ -31,6 +31,7 @@ public slots:
     void scaleBy(qreal factor);
     void setRotation(int degree);
     void rotateBy(int deg);
+    void resetView();
 
 private:
     QGraphicsScene *scene;

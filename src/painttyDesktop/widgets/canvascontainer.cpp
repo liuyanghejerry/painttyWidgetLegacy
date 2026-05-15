@@ -69,6 +69,19 @@ void CanvasContainer::setScaleFactor(qreal factor)
     setScaleFactorInternal(factor);
 }
 
+void CanvasContainer::resetView()
+{
+    if (!proxy)
+        return;
+    proxy->setScale(1.0);
+    proxy->setRotation(0);
+    setSceneRect(scene->itemsBoundingRect());
+    QGraphicsView::centerOn(proxy);
+    emit scaled(1.0);
+    emit rotated(0);
+    emit rectChanged(visualRect().toRect());
+}
+
 qreal CanvasContainer::currentScaleFactor() const
 {
     if (proxy)
