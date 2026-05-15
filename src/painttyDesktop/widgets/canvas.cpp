@@ -54,7 +54,7 @@ Canvas::Canvas(QWidget *parent) :
 
     setMouseTracking(true);
     setFocusPolicy(Qt::WheelFocus);
-    resize(canvasSize_);
+    setFixedSize(canvasSize_);
 
     BrushPointer p1(new BasicBrush);
     p1->setSettings(p1->defaultSettings());
@@ -1158,7 +1158,7 @@ void Canvas::setCanvasSize(const QSize &size)
     }
     image = newImage;
 
-    resize(size);
+    setFixedSize(size);
     update();
 }
 
