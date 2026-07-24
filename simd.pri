@@ -12,6 +12,11 @@ linux {
     DEFINES -= PAINTTY_USE_SIMD
 }
 
+win32 {
+    DEFINES -= PAINTTY_USE_SIMD
+    warning("SIMD not supported on Windows (MSVC lacks <experimental/simd>)")
+}
+
 PAINTTY_USE_SIMD {
     # SIMD支持
     QMAKE_CXXFLAGS += -march=native -msse2 -mavx -mavx2
