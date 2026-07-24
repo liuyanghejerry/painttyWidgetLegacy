@@ -1,0 +1,87 @@
+name: CI Build
+
+on:
+  push:
+    branches: [ "main", "master", "develop", "feature/**" ]
+  pull_request:
+    branches: [ "main", "master", "develop" ]
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-22.04
+          - macos-13        # x86_64
+          - macos-14        # Apple Silicon
+          - windows-2022
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.6.0'
+          modules: 'qtconcurrent'
+          cache: true
+
+      - name: Install Linux system dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgl1-mesa-dev \
+            libxkbcommon-x11-0 \
+            libxcb-icccm4 libxcb-image0 libxcb-keysyms1 \
+            libxcb-render-util0 libxcb-xinerama0 \
+            libxcb-xinput0 libxcb-xfixes0 \
+            libfontconfig1-dev libfreetype6-dev \
+            libx11-dev libx11-xcb-dev libxext-dev \
+            libxfixes-dev libxi-dev libxrender-dev \
+            libxcb1-dev libxcb-glx0-dev libxcb-keysyms1-dev \
+            libxcb-image0-dev libxcb-shm0-dev \
+            libxcb-icccm4-dev libxcb-sync-dev \
+            libxcb-xfixes0-dev libxcb-shape0-dev \
+            libxcb-randr0-dev libxcb-render-util0-dev \
+            libxcb-util-dev libxcb-xinerama0-dev \
+            libxcb-xkb-dev libxkbcommon-dev
+
+      - name: Build (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          mkdir -p build && cd build
+          qmake ../painttyWidget.pro
+          make -j$(nproc)
+
+      - name: Build (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          mkdir -p build && cd build
+          qmake ../painttyWidget.pro
+          make -j$(sysctl -n hw.logicalcpu)
+
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          mkdir build
+          cd build
+          qmake ../painttyWidget.pro
+          nmake
+
+      - name: Verify build output (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: |
+          echo "=== Build output ==="
+          ls -la build/
+          echo "=== Executables ==="
+          find build/ -type f -executable -ls 2>/dev/null || true
+
+      - name: Verify build output (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Get-ChildItem build/ -Recurse -Name | Select-Object -First 30
