@@ -74,7 +74,6 @@ jobs:
         uses: jurplel/install-qt-action@v3
         with:
           version: '6.6.0'
-          modules: 'qtconcurrent'
 
       - name: Build
         run: |
