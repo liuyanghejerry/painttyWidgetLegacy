@@ -75,6 +75,9 @@ jobs:
         with:
           version: '6.6.0'
 
+      - name: Set up MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
+
       - name: Build
         run: |
           mkdir build
