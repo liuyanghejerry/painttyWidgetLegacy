@@ -45,25 +45,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Qt6 via Homebrew
-        env:
-          HOMEBREW_NO_REQUIRE_TAP_TRUST: 1
-          HOMEBREW_NO_AUTO_UPDATE: 1
+      - name: Install Qt6 (pinned to 6.6.0)
         run: |
-          brew install qt@6
-          QT_PATH="$(brew --prefix qt@6)"
-          echo "Qt6 installed at: $QT_PATH"
-          echo "QT6_PATH=$QT_PATH" >> $GITHUB_ENV
+          python3 -m venv /tmp/qt-venv
+          source /tmp/qt-venv/bin/activate
+          pip install aqtinstall
+          aqt install-qt mac desktop 6.6.0 clang_64 -O /tmp/Qt
+          echo "/tmp/Qt/6.6.0/macos/bin" >> $GITHUB_PATH
 
       - name: Build
         run: |
-          export PATH="$QT6_PATH/bin:$PATH"
           mkdir -p build && cd build
-          echo "=== qmake version ==="
-          qmake --version
-          echo "=== Running qmake ==="
           qmake ../painttyWidget.pro
-          echo "=== Running make ==="
           make -j$(sysctl -n hw.logicalcpu)
 
       - name: Verify build
@@ -77,17 +70,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
       - name: Install Qt6
-        shell: pwsh
-        run: |
-          pip install aqtinstall
-          aqt install-qt windows desktop 6.6.0 win64_msvc2022_64 -O C:\Qt
-          "C:\Qt\6.6.0\msvc2022_64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: '6.6.0'
+          modules: 'qtconcurrent'
 
       - name: Build
         run: |
