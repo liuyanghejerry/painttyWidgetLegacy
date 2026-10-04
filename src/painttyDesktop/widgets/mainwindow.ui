@@ -267,7 +267,7 @@
      <string>&amp;New</string>
     </property>
     <property name="shortcut">
-     <string>Ctrl+N</string>
+     <string notr="true">Ctrl+N</string>
     </property>
    </action>
    <action name="actionOpen">
@@ -275,7 +275,7 @@
      <string>&amp;Open...</string>
     </property>
     <property name="shortcut">
-     <string>Ctrl+O</string>
+     <string notr="true">Ctrl+O</string>
     </property>
    </action>
    <action name="actionSave">
@@ -283,7 +283,7 @@
      <string>&amp;Save</string>
     </property>
     <property name="shortcut">
-     <string>Ctrl+S</string>
+     <string notr="true">Ctrl+S</string>
     </property>
    </action>
    <action name="actionSave_As">
@@ -291,7 +291,7 @@
      <string>Save &amp;As...</string>
     </property>
     <property name="shortcut">
-     <string>Ctrl+Shift+S</string>
+     <string notr="true">Ctrl+Shift+S</string>
     </property>
    </action>
  </widget>

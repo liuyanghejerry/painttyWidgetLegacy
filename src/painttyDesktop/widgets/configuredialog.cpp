@@ -53,6 +53,9 @@ void ConfigureDialog::initLanguageList()
     QStringList qmList = qmDir.entryList(QStringList() << "paintty_*.qm",
                                          QDir::Files);
     ui->languageComboBox->addItem(tr("System Default"), QString());
+    ui->languageComboBox->addItem(QLocale(QLocale::English).nativeLanguageName(), QStringLiteral("en"));
+    if (selectedLanguage == QStringLiteral("en"))
+        ui->languageComboBox->setCurrentIndex(1);
     for (QString &qmFile: qmList)
     {
         qmFile.remove(QRegularExpression(".?paintty_", QRegularExpression::CaseInsensitiveOption));

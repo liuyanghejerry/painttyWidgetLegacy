@@ -4,13 +4,17 @@
 #include <QCloseEvent>
 #include <QFile>
 #include <QFileDialog>
+#include <QDrag>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QSettings>
+#include <QScopeGuard>
 #include <QTemporaryDir>
 #include <QTimer>
+#include <QToolBar>
+#include <QTranslator>
 #include <QUndoStack>
 #include <QGraphicsScene>
 #include <QGraphicsProxyWidget>
@@ -26,6 +30,7 @@
 #include "widgets/configuredialog.h"
 #include "widgets/layerwidget.h"
 #include "widgets/mainwindow.h"
+#include "widgets/panoramaview.h"
 
 namespace {
 Canvas *canvasOf(MainWindow &window)
@@ -73,6 +78,128 @@ class LocalTests : public QObject
 {
     Q_OBJECT
 private slots:
+    void panoramaCentersAcrossPixelRatios_data()
+    {
+        QTest::addColumn<qreal>("pixelRatio");
+        QTest::newRow("standard") << qreal(1);
+        QTest::newRow("fractional") << qreal(1.5);
+        QTest::newRow("retina") << qreal(2);
+    }
+
+    void panoramaCentersAcrossPixelRatios()
+    {
+        QFETCH(qreal, pixelRatio);
+        PanoramaView view;
+        QPixmap preview(400, 200);
+        preview.fill(Qt::red);
+        preview.setDevicePixelRatio(pixelRatio);
+        view.resize(200, 160);
+        view.show();
+        QTest::qWait(20);
+        view.onImageChange(preview, QRect());
+        QSignalSpy navigation(&view, &PanoramaView::moveTo);
+        for (const auto &size : {QSize(200, 160), QSize(160, 240)}) {
+            view.resize(size);
+            QTest::qWait(20);
+            const auto rendered = view.grab().toImage().scaled(size, Qt::IgnoreAspectRatio, Qt::FastTransformation);
+            QRect colored;
+            for (int y = 0; y < rendered.height(); ++y)
+                for (int x = 0; x < rendered.width(); ++x)
+                    if (rendered.pixelColor(x, y) == QColor(Qt::red))
+                        colored = colored.united(QRect(x, y, 1, 1));
+            const QSize expected(size.width(), size.width() / 2);
+            QCOMPARE(colored.size(), expected);
+            const QRect centered(QPoint(0, (size.height() - expected.height()) / 2), expected);
+            QCOMPARE(colored, centered);
+            navigation.clear();
+            QTest::mouseClick(&view, Qt::LeftButton, Qt::NoModifier, QPoint(size.width() / 2, size.height() / 2));
+            QCOMPARE(navigation.size(), 1);
+            const auto point = navigation.first().first().toPointF();
+            const auto logicalSize = preview.deviceIndependentSize();
+            QVERIFY(qAbs(point.x() - logicalSize.width() / 2) < 0.01);
+            QVERIFY(qAbs(point.y() - logicalSize.height() / 2) < 0.01);
+        }
+    }
+
+    void toolbarsSurviveRestoredMaximizedLayout()
+    {
+        QSettings settings(GlobalDef::settingsPath(), QSettings::IniFormat);
+        const auto oldGeometry = settings.value("mainwindow/geometry");
+        const auto oldView = settings.value("mainwindow/view");
+        const auto restoreSettings = qScopeGuard([&]() {
+            for (const auto &entry : {qMakePair(QString("mainwindow/geometry"), oldGeometry),
+                                      qMakePair(QString("mainwindow/view"), oldView)}) {
+                if (entry.second.isValid()) settings.setValue(entry.first, entry.second);
+                else settings.remove(entry.first);
+            }
+        });
+        settings.remove("mainwindow/geometry");
+        settings.remove("mainwindow/view");
+        settings.sync();
+
+        QTranslator translation;
+        QVERIFY(translation.load(":/translation/paintty_zh_CN.qm"));
+        QApplication::installTranslator(&translation);
+        const auto removeTranslation = qScopeGuard([&]() { QApplication::removeTranslator(&translation); });
+
+        // Older versions saved a FileToolbar and dock sizes for a large window.
+        // Restore that layout into a smaller maximized window, then let Qt resize it.
+        {
+            MainWindow previous;
+            if (!previous.findChild<QToolBar *>("FileToolbar")) {
+                auto *legacy = previous.addToolBar("File");
+                legacy->setObjectName("FileToolbar");
+                legacy->addAction(previous.findChild<QAction *>("actionNew"));
+            }
+            previous.resize(2400, 1400);
+            previous.show();
+            QTest::qWait(50);
+            settings.setValue("mainwindow/view", previous.saveState());
+            previous.hide();
+            previous.resize(1100, 570);
+            previous.setWindowState(Qt::WindowMaximized);
+            settings.setValue("mainwindow/geometry", previous.saveGeometry());
+            settings.sync();
+        }
+
+        MainWindow window;
+        window.showMaximized();
+        QTest::qWait(200);
+        const auto toolbars = window.findChildren<QToolBar *>(QString(), Qt::FindDirectChildrenOnly);
+        QVERIFY(!toolbars.isEmpty());
+        for (auto *toolbar : toolbars) {
+            QVERIFY2(window.toolBarArea(toolbar) != Qt::NoToolBarArea, qPrintable(toolbar->objectName()));
+        }
+        for (auto *toolbar : toolbars) {
+            const QPoint start(5, toolbar->height() / 2);
+            const QPoint end(5, toolbar->height() + 120);
+            QMouseEvent press(QEvent::MouseButtonPress, start, toolbar->mapToGlobal(start),
+                              Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);
+            QApplication::sendEvent(toolbar, &press);
+            // Wayland uses a nested platform drag loop. Cancel the synthetic drag
+            // without requiring a real pointer grab from the desktop compositor.
+            QTimer cancelDrag;
+            cancelDrag.setSingleShot(true);
+            connect(&cancelDrag, &QTimer::timeout, this, []() { QDrag::cancel(); });
+            if (QApplication::platformName().startsWith("wayland")) cancelDrag.start(500);
+            QMouseEvent move(QEvent::MouseMove, end, toolbar->mapToGlobal(end),
+                             Qt::NoButton, Qt::LeftButton, Qt::NoModifier);
+            QApplication::sendEvent(toolbar, &move);
+            cancelDrag.stop();
+            QMouseEvent release(QEvent::MouseButtonRelease, end, toolbar->mapToGlobal(end),
+                                Qt::LeftButton, Qt::NoButton, Qt::NoModifier);
+            QApplication::sendEvent(toolbar, &release);
+            window.resetView();
+            QTest::qWait(50);
+            QVERIFY2(window.toolBarArea(toolbar) != Qt::NoToolBarArea, qPrintable(toolbar->objectName()));
+        }
+        window.resetView();
+        QTest::qWait(50);
+        for (auto *toolbar : toolbars) {
+            QVERIFY2(window.toolBarArea(toolbar) != Qt::NoToolBarArea, qPrintable(toolbar->objectName()));
+        }
+    }
+
     void roundTrip()
     {
         QTemporaryDir directory;

@@ -55,10 +55,33 @@ QTDIR="$HOME/develop/Qt/6.6.3/gcc_64" ./scripts/build-linux.sh --debug --jobs 8
 设置保存在系统的用户配置目录：Linux 默认为 `~/.config/Paintty/MrPaint/mrpaint.ini`。
 首次运行会导入工作目录中已有的本地偏好；旧的服务器与重放设置不会被导入。
 
+## 界面翻译
+
+偏好设置中可选择系统默认、English、简体中文、繁體中文或日本語。
+语言修改在下次启动时生效。应用翻译及 Qt 标准按钮、文件对话框等控件的翻译
+都嵌入程序资源，便携包无需额外安装语言文件。
+
+翻译源文件为 `src/painttyDesktop/translation/paintty_*.ts`，对应的 `.qm` 编译文件
+也随源码维护。新增或修改界面文案时，在项目根目录执行：
+
+```bash
+export QTDIR="$HOME/develop/Qt/6.6.3/gcc_64"
+"$QTDIR/bin/lupdate" src/painttyDesktop/painttyDesktop.pro -no-obsolete -locations absolute
+# 用 Qt Linguist 或文本编辑器补齐 .ts 词条，再生成程序实际使用的文件：
+"$QTDIR/bin/lrelease" -nounfinished src/painttyDesktop/translation/paintty_*.ts
+./scripts/build-linux.sh --jobs 8
+```
+
+Windows 使用同一套 Qt Linguist 工具（`lupdate.exe`、`lrelease.exe`）。
+Linux 的 `lupdate` 工具还需要 Qt 的 `qtdeclarative` 安装包，应用本身仍只使用
+Core、Gui、Widgets。内置的 `qt_*.qm` 来自 Qt 6.6.3 的 `qtbase_*.qm`，覆盖
+这三个模块；更新 Qt 版本时应同步替换，以保持标准控件翻译与 SDK 一致。
+
 ## 验证
 
 QtTest 回归测试覆盖图层往返保存、覆盖失败保护、损坏文件、旧格式层序、撤销重做、
-未保存关闭提示、取消另存为、鼠标和 Pressure Brush 笔画、图层锁定与本地偏好。
+未保存关闭提示、取消另存为、鼠标和 Pressure Brush 笔画、图层锁定与本地偏好，
+以及旧窗口布局恢复后的工具栏拖动、高 DPI 导航预览居中和点击定位。
 测试使用临时项目和独立的配置命名空间，不写入 Mr.Paint 的用户偏好。
 
 ```bash

@@ -27,7 +27,7 @@ PanoramaView::PanoramaView(QWidget *parent) :
 
 QSize PanoramaView::sizeHint() const
 {
-    return image_.size();
+    return image_.deviceIndependentSize().toSize();
 }
 
 QSize PanoramaView::minimumSizeHint() const
@@ -55,48 +55,48 @@ void PanoramaView::onRectChange(const QRect &r)
 QPixmap PanoramaView::drawViewport()
 {
     QPixmap p = sized_img_;
-    if(p.isNull()){
+    if(p.isNull() || full_img_.isNull()){
         return p;
     }
-    const QRect &r = viewport_;
     QPainter painter(&p);
     QPen pen;
     pen.setColor(this->palette().color(QPalette::Text));
     pen.setWidth(1);
     painter.setPen(pen);
-    qreal delta = p.width()/qreal(full_img_.width());
-    QPointF topleft(r.topLeft() * delta);
-    QRect thumbRect = QRectF(topleft,
-                             r.size() * delta).toRect();
-    thumbRect.setRight(qMin(thumbRect.right(), p.width() - 2));
-    thumbRect.setBottom(qMin(thumbRect.bottom(), p.height() - 2));
-
-    painter.drawRect(thumbRect);
+    const QSizeF fullSize = full_img_.deviceIndependentSize();
+    const QSizeF thumbnailSize = p.deviceIndependentSize();
+    const qreal scaleX = thumbnailSize.width() / fullSize.width();
+    const qreal scaleY = thumbnailSize.height() / fullSize.height();
+    QRectF thumbRect(viewport_.x() * scaleX, viewport_.y() * scaleY,
+                     viewport_.width() * scaleX, viewport_.height() * scaleY);
+    // Keep the outline inside the thumbnail, in logical widget coordinates.
+    thumbRect = thumbRect.intersected(QRectF(QPointF(), thumbnailSize).adjusted(0.5, 0.5, -0.5, -0.5));
+    if (!thumbRect.isEmpty()) painter.drawRect(thumbRect);
     return p;
 }
 
 void PanoramaView::thumbnail()
 {
     if(full_img_.isNull()){
+        sized_img_ = QPixmap();
         return;
     }
-    qreal delta = qMin(qreal(preferSize_.width()) / full_img_.width(),
-                       qreal(preferSize_.height()) / full_img_.height());
-    sized_img_ = full_img_.scaled(full_img_.width() * delta,
-                                  full_img_.height() * delta,
-                                  Qt::IgnoreAspectRatio,
-                                  Qt::SmoothTransformation);
+    // QPixmap::scaled takes physical pixels; the widget size is logical.
+    sized_img_ = full_img_.scaled(preferSize_ * full_img_.devicePixelRatio(),
+                                  Qt::KeepAspectRatio, Qt::SmoothTransformation);
+}
+
+QRectF PanoramaView::thumbnailRect() const
+{
+    const QSizeF thumbnailSize = sized_img_.deviceIndependentSize();
+    return QRectF(QPointF((width() - thumbnailSize.width()) / 2,
+                         (height() - thumbnailSize.height()) / 2), thumbnailSize);
 }
 
 void PanoramaView::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
-    QSize whole = this->size();
-    int left = whole.width() - image_.width();
-    left /= 2;
-    int top = whole.height() - image_.height();
-    top /= 2;
-    painter.drawPixmap(left, top, image_);
+    painter.drawPixmap(thumbnailRect().topLeft(), image_);
 }
 
 void PanoramaView::resizeEvent(QResizeEvent * event)
@@ -114,15 +114,12 @@ void PanoramaView::resizeEvent(QResizeEvent * event)
 
 void PanoramaView::navigateTo(const QPoint &p)
 {
-    QSize whole = this->size();
-    int left = whole.width() - image_.width();
-    left /= 2;
-    int top = whole.height() - image_.height();
-    top /= 2;
-
-    qreal delta = qreal(full_img_.width())/sized_img_.width();
-    QPointF miniPoint(p-QPoint(left, top));
-    QPointF realPoint = miniPoint * delta;
+    if (full_img_.isNull() || sized_img_.isNull()) return;
+    const QRectF thumbnail = thumbnailRect();
+    const QPointF miniPoint = QPointF(p) - thumbnail.topLeft();
+    const QSizeF fullSize = full_img_.deviceIndependentSize();
+    const QPointF realPoint(miniPoint.x() * fullSize.width() / thumbnail.width(),
+                            miniPoint.y() * fullSize.height() / thumbnail.height());
 
     emit moveTo(realPoint);
 }

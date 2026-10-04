@@ -156,11 +156,9 @@ FORMS    += widgets/mainwindow.ui \
     widgets/helpdialog.ui \
     widgets/configuredialog.ui
 
-TRANSLATIONS += translation/paintty_zh_CN.ts \ #Simplified Chinese
-    translation/paintty_zh_TW.ts \ #Traditional Chinese
-#    translation/paintty_zh_HK.ts \
-#    translation/paintty_zh_MO.ts
-    translation/paintty_ja.ts #Japanese
+TRANSLATIONS += translation/paintty_zh_CN.ts \
+    translation/paintty_zh_TW.ts \
+    translation/paintty_ja.ts
 
 RESOURCES += resources.qrc
 

@@ -164,8 +164,10 @@ void MainWindow::init()
     colorGridInit();
     statusBarInit();
     toolbarInit();
-    viewInit();
     shortcutInit();
+    // Restore only after every toolbar has been created. Qt can reapply a
+    // maximized window's restored layout while the window is being shown.
+    viewInit();
 
     // 将 Canvas 注册到 CanvasContainer 的 scene 中，启用滚动条和视图管理
     ui->centralWidget->setCanvas(ui->canvas);
@@ -419,13 +421,13 @@ void MainWindow::shortcutInit()
         const QString path = QFileDialog::getExistingDirectory(this, tr("Open Legacy Project"), lastProjectDirectory());
         if (!path.isEmpty()) openProject(path);
     });
-    auto *fileToolbar = addToolBar(tr("File"));
-    fileToolbar->setObjectName("FileToolbar");
-    fileToolbar->addActions({ui->actionNew, ui->actionOpen, ui->actionSave});
-
     auto *layerMenu = new QMenu(tr("&Layer"), this);
     ui->menuBar->insertMenu(ui->menu_View->menuAction(), layerMenu);
     auto *layerToolbar = new QToolBar(tr("Layers"), ui->layerWidget->parentWidget());
+    layerToolbar->setObjectName("LayerToolbar");
+    // This toolbar belongs to the layer panel, not QMainWindow's docking layout.
+    layerToolbar->setMovable(false);
+    layerToolbar->setFloatable(false);
     ui->layerWidget->parentWidget()->layout()->addWidget(layerToolbar);
     auto addLayerAction = [this, layerMenu, layerToolbar](const QString &text, const QString &name, auto callback) {
         auto *action = layerMenu->addAction(text);

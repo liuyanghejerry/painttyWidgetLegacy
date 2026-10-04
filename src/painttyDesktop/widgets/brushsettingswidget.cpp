@@ -30,13 +30,13 @@ BrushSettingsWidget::BrushSettingsWidget(QWidget *parent) :
     mixinSpinBox = new QSpinBox(this);
     
     // 新增压感笔刷控件
-    smoothnessLabel = new QLabel(tr("平滑度"), this);
+    smoothnessLabel = new QLabel(tr("Smoothness"), this);
     smoothnessSlider = new QSlider(this);
     smoothnessSpinBox = new QSpinBox(this);
-    pressureCurveLabel = new QLabel(tr("压感曲线"), this);
+    pressureCurveLabel = new QLabel(tr("Pressure Curve"), this);
     pressureCurveSlider = new QSlider(this);
     pressureCurveSpinBox = new QSpinBox(this);
-    tiltSensitivityLabel = new QLabel(tr("倾角灵敏度"), this);
+    tiltSensitivityLabel = new QLabel(tr("Tilt Sensitivity"), this);
     tiltSensitivitySlider = new QSlider(this);
     tiltSensitivitySpinBox = new QSpinBox(this);
 

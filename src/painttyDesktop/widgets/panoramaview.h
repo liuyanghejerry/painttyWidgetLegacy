@@ -32,6 +32,7 @@ private:
     QRect viewport_;
     QPixmap drawViewport();
     void thumbnail();
+    QRectF thumbnailRect() const;
     void navigateTo(const QPoint &p);
 };
 

@@ -15,7 +15,7 @@ sudo apt install -y build-essential python3-venv libgl-dev libxkbcommon-dev \
 python3 -m venv "$HOME/.local/share/paintty-aqt"
 "$HOME/.local/share/paintty-aqt/bin/python" -m pip install aqtinstall==3.3.0
 "$HOME/.local/share/paintty-aqt/bin/aqt" install-qt linux desktop 6.6.3 gcc_64 \
-    -O "$HOME/develop/Qt" --archives qtbase qttools qttranslations qtwayland icu
+    -O "$HOME/develop/Qt" --archives qtbase qttools qttranslations qtdeclarative qtwayland icu
 
 ./scripts/build-linux.sh --jobs 8
 ./build/build/mrpaint
@@ -23,6 +23,7 @@ python3 -m venv "$HOME/.local/share/paintty-aqt"
 
 `icu` 是 Qt 官方二进制所需的 ICU 56 配套库，不能直接用系统的新版 ICU 替代。
 当前单人版编译使用 Core、Gui 和 Widgets，均包含在 `qtbase` 中。
+`qtdeclarative` 用于满足 Qt Linguist 的 `lupdate` 工具依赖，应用本身不依赖 QML。
 aqt 的命令选项参考其[官方文档](https://aqtinstall.readthedocs.io/en/latest/cli.html)。
 
 构建脚本默认从 `$HOME/develop/Qt/6.6.3/gcc_64` 查找 Qt，可通过 `QTDIR` 覆盖。

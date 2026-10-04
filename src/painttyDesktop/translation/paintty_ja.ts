@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="ja_JP">
+<TS version="2.1" language="ja_JP" sourcelanguage="en">
 <context>
     <name>AboutDialog</name>
     <message>
@@ -10,12 +10,8 @@
     </message>
     <message>
         <location filename="../widgets/aboutdialog.ui" line="26"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Mr.Paint is a free software for paint-chat. However, it&apos;s in alpha state.&lt;/p&gt;&lt;p&gt;If you have any questions about Mr.Paint, please visit &lt;a href=&quot;http://mrspaint.com&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;our site&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Mr.Paint version: %1&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Copyright Information:&lt;/p&gt;&lt;p&gt;painttyWidget : The client of Mr.Paint built with Qt&lt;/p&gt;&lt;p&gt;Copyright (C) 2013 Project Paintty&lt;/p&gt;&lt;p&gt;This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.&lt;/p&gt;&lt;p&gt;This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.&lt;/p&gt;&lt;p&gt;You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&lt;p&gt;Mr.Paint is a free software for paint-chat. However, it&apos;s in alpha state.&lt;/p&gt;&lt;p&gt;If you have any questions about Mr.Paint, please visit &lt;a href=&quot;http://mrspaint.com&quot;&gt;our site&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;Copyright Information:&lt;/p&gt;&lt;p&gt;painttyWidget : The client of Mr.Paint built with Qt&lt;/p&gt;&lt;p&gt;Copyright (C) 2013 Project Paintty&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.&lt;/p&gt;&lt;p&gt;This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.&lt;/p&gt;&lt;p&gt;You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA&lt;/p&gt;</source>
-        <translation type="vanished">&lt;p&gt;チャエ君は無料の絵茶用のソフトです。まだ試作の段階ですが、&lt;/p&gt;&lt;p&gt;ご質問があれば、&lt;a href=&quot;http://mrspaint.com&quot;&gt;私達のサイト&lt;/a&gt;からお願いいたします&lt;/p&gt;&lt;p&gt;著作権情報：&lt;/p&gt;&lt;p&gt;painttyWidget : The client of Mr.Paint built with Qt&lt;/p&gt;&lt;p&gt;Copyright (C) 2013 Project Paintty&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.&lt;/p&gt;&lt;p&gt;This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.&lt;/p&gt;&lt;p&gt;You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA&lt;/p&gt;</translation>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Mr.Paint is a free, offline digital painting program for one artist.&lt;/p&gt;&lt;p&gt;Create layered paintings, save editable .paintty projects, and export PNG or PSD images. Your drawings stay on your computer.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Mr.Paint version: %1&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Copyright Information:&lt;/p&gt;&lt;p&gt;painttyWidget Legacy: Local painting with Qt&lt;/p&gt;&lt;p&gt;Copyright (C) 2013 Project Paintty&lt;/p&gt;&lt;p&gt;This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.&lt;/p&gt;&lt;p&gt;This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.&lt;/p&gt;&lt;p&gt;You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head /&gt;&lt;body&gt;&lt;p&gt;Mr.Paint は、一人で制作するための無料のオフラインデジタルペイントソフトです。&lt;/p&gt;&lt;p&gt;レイヤーを使って絵を描き、編集可能な .paintty プロジェクトとして保存したり、PNG や PSD 画像に書き出したりできます。作品はお使いのコンピューター内に保存されます。&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Mr.Paint バージョン: %1&lt;/span&gt;&lt;/p&gt;&lt;p&gt;著作権情報:&lt;/p&gt;&lt;p&gt;painttyWidget Legacy: Qt を使用したローカルのペイントソフト&lt;/p&gt;&lt;p&gt;Copyright (C) 2013 Project Paintty&lt;/p&gt;&lt;p&gt;このライブラリーは自由ソフトウェアです。フリーソフトウェア財団が公開した GNU 劣等一般公衆利用許諾契約書（バージョン 2.1、またはそれ以降の任意のバージョン）の条件に従って、再配布および変更できます。&lt;/p&gt;&lt;p&gt;このライブラリーは有用であることを期待して配布されていますが、いかなる保証もありません。商品性または特定の目的への適合性についても保証されません。詳細は GNU 劣等一般公衆利用許諾契約書をご覧ください。&lt;/p&gt;&lt;p&gt;このライブラリーには GNU 劣等一般公衆利用許諾契約書の写しが付属しているはずです。付属していない場合は、Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA までご連絡ください。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
 </context>
 <context>
@@ -33,37 +29,37 @@
     <message>
         <location filename="../widgets/brushsettingswidget.cpp" line="19"/>
         <source>Thickness</source>
-        <translation type="unfinished"></translation>
+        <translation>濃度</translation>
     </message>
     <message>
         <location filename="../widgets/brushsettingswidget.cpp" line="22"/>
         <source>Water</source>
-        <translation type="unfinished"></translation>
+        <translation>水分量</translation>
     </message>
     <message>
         <location filename="../widgets/brushsettingswidget.cpp" line="25"/>
         <source>Extend</source>
-        <translation type="unfinished"></translation>
+        <translation>色の伸び</translation>
     </message>
     <message>
         <location filename="../widgets/brushsettingswidget.cpp" line="28"/>
         <source>Mixin</source>
-        <translation type="unfinished"></translation>
+        <translation>混色</translation>
     </message>
     <message>
         <location filename="../widgets/brushsettingswidget.cpp" line="33"/>
-        <source>平滑度</source>
-        <translation type="unfinished"></translation>
+        <source>Smoothness</source>
+        <translation>滑らかさ</translation>
     </message>
     <message>
         <location filename="../widgets/brushsettingswidget.cpp" line="36"/>
-        <source>压感曲线</source>
-        <translation type="unfinished"></translation>
+        <source>Pressure Curve</source>
+        <translation>筆圧カーブ</translation>
     </message>
     <message>
         <location filename="../widgets/brushsettingswidget.cpp" line="39"/>
-        <source>倾角灵敏度</source>
-        <translation type="unfinished"></translation>
+        <source>Tilt Sensitivity</source>
+        <translation>傾き感度</translation>
     </message>
 </context>
 <context>
@@ -81,7 +77,7 @@
     <message>
         <location filename="../widgets/colorbox.ui" line="29"/>
         <source>The color spin box group contains spin box about colors.</source>
-        <translation>カラースライダーには、数字で色を選ばれます。</translation>
+        <translation>数値で色を調整できます。</translation>
     </message>
 </context>
 <context>
@@ -94,7 +90,7 @@
     <message>
         <location filename="../widgets/colorgriditem.cpp" line="26"/>
         <source>Tint</source>
-        <translation>色の追加</translation>
+        <translation>現在の色を追加</translation>
     </message>
     <message>
         <location filename="../widgets/colorgriditem.cpp" line="27"/>
@@ -158,174 +154,93 @@
     <message>
         <location filename="../widgets/configuredialog.ui" line="14"/>
         <source>Configuration</source>
-        <translation type="unfinished">設定</translation>
+        <translation>設定</translation>
     </message>
     <message>
         <location filename="../widgets/configuredialog.ui" line="24"/>
         <source>General</source>
-        <translation type="unfinished"></translation>
+        <translation>一般</translation>
     </message>
     <message>
         <location filename="../widgets/configuredialog.ui" line="30"/>
         <source>&amp;Language:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/configuredialog.ui" line="71"/>
-        <source>Clear Cache</source>
-        <translation type="unfinished"></translation>
+        <translation>言語(&amp;L):</translation>
     </message>
     <message>
         <location filename="../widgets/configuredialog.ui" line="43"/>
         <source>Custom Font:</source>
-        <translation type="unfinished"></translation>
+        <translation>カスタムフォント:</translation>
     </message>
     <message>
         <location filename="../widgets/configuredialog.ui" line="50"/>
         <source>Use Droid Sans Font</source>
-        <translation type="unfinished"></translation>
+        <translation>Droid Sans フォントを使用</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.ui" line="80"/>
-        <location filename="../widgets/configuredialog.ui" line="101"/>
+        <location filename="../widgets/configuredialog.ui" line="65"/>
+        <location filename="../widgets/configuredialog.ui" line="86"/>
         <source>Shortcut</source>
-        <translation type="unfinished"></translation>
+        <translation>ショートカット</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.ui" line="96"/>
+        <location filename="../widgets/configuredialog.ui" line="81"/>
         <source>Name</source>
-        <translation type="unfinished"></translation>
+        <translation>名前</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.ui" line="106"/>
+        <location filename="../widgets/configuredialog.ui" line="91"/>
         <source>Type</source>
-        <translation type="unfinished"></translation>
+        <translation>種類</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.ui" line="114"/>
+        <location filename="../widgets/configuredialog.ui" line="99"/>
         <source>Double click the shortcut and press your shortcut keys.</source>
-        <translation type="unfinished"></translation>
+        <translation>変更するショートカットをダブルクリックし、割り当てるキーを押してください。</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.ui" line="125"/>
-        <source>Server</source>
-        <translation type="unfinished"></translation>
+        <location filename="../widgets/configuredialog.ui" line="110"/>
+        <source>Drawing</source>
+        <translation>描画</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.ui" line="188"/>
+        <location filename="../widgets/configuredialog.ui" line="116"/>
         <source>Enable Tablet Support</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/configuredialog.ui" line="217"/>
-        <source>我的房间</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/configuredialog.ui" line="223"/>
-        <source>您创建的房间列表：</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/configuredialog.ui" line="240"/>
-        <location filename="../widgets/configuredialog.cpp" line="156"/>
-        <source>房间名称</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/configuredialog.ui" line="245"/>
-        <location filename="../widgets/configuredialog.cpp" line="156"/>
-        <source>创建时间</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/configuredialog.ui" line="255"/>
-        <source>刷新列表</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/configuredialog.ui" line="277"/>
-        <location filename="../widgets/configuredialog.cpp" line="167"/>
-        <source>点击刷新按钮获取您的房间列表</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/configuredialog.ui" line="131"/>
-        <source>Use default server</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/configuredialog.ui" line="140"/>
-        <source>address</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/configuredialog.ui" line="157"/>
-        <source>Warning, non-default server may lead to software crush.
-Use at your own risk.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/configuredialog.ui" line="182"/>
-        <source>Experimental Fetures</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/configuredialog.ui" line="64"/>
-        <source>Disable IME when painting (Windows exclusive)</source>
-        <translation type="unfinished"></translation>
+        <translation>ペンタブレットを有効にする</translation>
     </message>
     <message>
         <location filename="../widgets/configuredialog.ui" line="57"/>
-        <source>Message Notification (Windows exclusive)</source>
-        <translation type="unfinished"></translation>
+        <source>Disable IME when painting (Windows exclusive)</source>
+        <translation>描画中は IME を無効にする（Windows のみ）</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.ui" line="195"/>
-        <source>Always skip replay if possible</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/configuredialog.cpp" line="69"/>
+        <location filename="../widgets/configuredialog.cpp" line="55"/>
         <source>System Default</source>
-        <translation type="unfinished">システムのデフォルト</translation>
+        <translation>システムの既定</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.cpp" line="87"/>
+        <location filename="../widgets/configuredialog.cpp" line="76"/>
         <source>Brushes</source>
-        <translation type="unfinished">ブラシ</translation>
+        <translation>ブラシ</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.cpp" line="103"/>
+        <location filename="../widgets/configuredialog.cpp" line="92"/>
         <source>Immediately</source>
-        <translation type="unfinished"></translation>
+        <translation>すぐに実行</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.cpp" line="105"/>
+        <location filename="../widgets/configuredialog.cpp" line="94"/>
         <source>When Release</source>
-        <translation type="unfinished"></translation>
+        <translation>キーを離したときに実行</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.cpp" line="208"/>
-        <source>找到 %1 个房间</source>
-        <translation type="unfinished"></translation>
+        <location filename="../widgets/configuredialog.cpp" line="194"/>
+        <source>Preferences</source>
+        <translation>環境設定</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.cpp" line="325"/>
-        <location filename="../widgets/configuredialog.cpp" line="335"/>
-        <source>Restart</source>
-        <translation type="unfinished">再起動</translation>
-    </message>
-    <message>
-        <location filename="../widgets/configuredialog.cpp" line="326"/>
-        <source>Application must restart to enable some of the settings.
-Do you want to restart right now?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/configuredialog.cpp" line="336"/>
-        <source>New settings will be applied on next start.</source>
-        <translation type="unfinished"></translation>
+        <location filename="../widgets/configuredialog.cpp" line="195"/>
+        <source>Language, font and shortcut changes will apply the next time you start Mr.Paint.</source>
+        <translation>言語、フォント、ショートカットの変更は、次回 Mr.Paint を起動したときに適用されます。</translation>
     </message>
 </context>
 <context>
@@ -339,19 +254,14 @@ Do you want to restart right now?</source>
 <context>
     <name>LayerLabel</name>
     <message>
-        <location filename="../widgets/layerlabel.cpp" line="10"/>
-        <source>layer </source>
-        <translation>レイヤー </translation>
-    </message>
-    <message>
-        <location filename="../widgets/layerlabel.cpp" line="106"/>
-        <source>Layer Name</source>
-        <translation>レイヤー名</translation>
+        <location filename="../widgets/layerlabel.cpp" line="107"/>
+        <source>Rename Layer</source>
+        <translation>レイヤー名を変更</translation>
     </message>
     <message>
         <location filename="../widgets/layerlabel.cpp" line="107"/>
-        <source>Input your desire layer name here</source>
-        <translation>ここに希望するレイヤー名を入力してください</translation>
+        <source>Layer name:</source>
+        <translation>レイヤー名:</translation>
     </message>
 </context>
 <context>
@@ -364,16 +274,16 @@ Do you want to restart right now?</source>
     <message>
         <location filename="../widgets/layerwidgetheader.cpp" line="21"/>
         <source>Opacity: </source>
-        <translation>不透明度：</translation>
+        <translation>不透明度: </translation>
     </message>
 </context>
 <context>
     <name>MainWindow</name>
     <message>
         <location filename="../widgets/mainwindow.ui" line="14"/>
-        <location filename="../widgets/mainwindow.cpp" line="119"/>
+        <location filename="../widgets/mainwindow.cpp" line="107"/>
         <source>Mr.Paint</source>
-        <translation>チャエ君</translation>
+        <translation>Mr.Paint</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.ui" line="34"/>
@@ -382,1307 +292,748 @@ Do you want to restart right now?</source>
     </message>
     <message>
         <location filename="../widgets/mainwindow.ui" line="81"/>
-        <source>Chat</source>
-        <translation>チャット</translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.ui" line="147"/>
-        <source>Send</source>
-        <translation>送信</translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.ui" line="158"/>
+        <location filename="../widgets/mainwindow.cpp" line="426"/>
+        <location filename="../widgets/mainwindow.cpp" line="658"/>
         <source>Layers</source>
         <translation>レイヤー</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="197"/>
+        <location filename="../widgets/mainwindow.ui" line="120"/>
         <source>&amp;File</source>
         <translation>ファイル(&amp;F)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="201"/>
+        <location filename="../widgets/mainwindow.ui" line="129"/>
         <source>Export...</source>
         <translation>書き出し...</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="214"/>
+        <location filename="../widgets/mainwindow.ui" line="143"/>
         <source>&amp;About</source>
         <translation>ヘルプ(&amp;A)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="221"/>
+        <location filename="../widgets/mainwindow.ui" line="150"/>
         <source>&amp;View</source>
-        <translation>ウィンドウ(&amp;V)</translation>
+        <translation>表示(&amp;V)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="227"/>
-        <source>&amp;Room</source>
-        <translation>ルーム(&amp;R)</translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.ui" line="231"/>
+        <location filename="../widgets/mainwindow.cpp" line="706"/>
         <source>Clear Canvas</source>
-        <translation>全消し</translation>
+        <translation>キャンバスをクリア</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="240"/>
+        <location filename="../widgets/mainwindow.ui" line="156"/>
         <source>&amp;Edit</source>
         <translation>編集(&amp;E)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="252"/>
+        <location filename="../widgets/mainwindow.ui" line="169"/>
         <source>Panorama</source>
         <translation>ナビゲーター</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="290"/>
+        <location filename="../widgets/mainwindow.ui" line="207"/>
         <source>Export All to File</source>
-        <translation>全てのレイヤー画像を書き出し</translation>
+        <translation>すべてのレイヤーをファイルに書き出す</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="295"/>
+        <location filename="../widgets/mainwindow.ui" line="212"/>
         <source>Export Visible To File</source>
-        <translation>表示レイヤーを書き出し</translation>
+        <translation>表示レイヤーをファイルに書き出す</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="300"/>
+        <location filename="../widgets/mainwindow.ui" line="217"/>
         <source>&amp;Quit</source>
-        <translation>退室(&amp;Q)</translation>
+        <translation>終了(&amp;Q)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="305"/>
+        <location filename="../widgets/mainwindow.ui" line="222"/>
         <source>About Mr.Paint</source>
-        <translation>チャエ君について</translation>
+        <translation>Mr.Paint について</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="310"/>
+        <location filename="../widgets/mainwindow.ui" line="227"/>
         <source>About Qt</source>
-        <translation>Qtについて</translation>
+        <translation>Qt について</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="315"/>
+        <location filename="../widgets/mainwindow.ui" line="232"/>
         <source>Export Visible To ClipBorad</source>
-        <translation>表示レイヤーをコピー</translation>
+        <translation>表示レイヤーをクリップボードにコピー</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="320"/>
+        <location filename="../widgets/mainwindow.ui" line="237"/>
         <source>Export All To Clipboard</source>
-        <translation>全てのレイヤー画像をコピー</translation>
+        <translation>すべてのレイヤーをクリップボードにコピー</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="325"/>
+        <location filename="../widgets/mainwindow.ui" line="242"/>
         <source>Reset View</source>
-        <translation>すべてのツール配置を初期化</translation>
+        <translation>表示をリセット</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="330"/>
+        <location filename="../widgets/mainwindow.ui" line="247"/>
         <source>Nothing Here</source>
-        <translation>べつに</translation>
+        <translation>項目なし</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="345"/>
+        <location filename="../widgets/mainwindow.ui" line="252"/>
         <source>Configuration</source>
         <translation>設定</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="350"/>
+        <location filename="../widgets/mainwindow.ui" line="257"/>
+        <source>Clear All Layers</source>
+        <translation>すべてのレイヤーをクリア</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.ui" line="262"/>
         <source>Export to PSD File</source>
-        <translation type="unfinished"></translation>
+        <translation>PSD ファイルに書き出す</translation>
     </message>
     <message>
-        <source>English</source>
-        <translation type="obsolete">イギリス</translation>
+        <location filename="../widgets/mainwindow.ui" line="267"/>
+        <source>&amp;New</source>
+        <translation>新規(&amp;N)</translation>
     </message>
     <message>
-        <source>Simplified Chinese</source>
-        <translation type="obsolete">簡体中国語</translation>
+        <location filename="../widgets/mainwindow.ui" line="275"/>
+        <source>&amp;Open...</source>
+        <translation>開く(&amp;O)...</translation>
     </message>
     <message>
-        <source>Traditional Chinese</source>
-        <translation type="obsolete">正体中国語</translation>
+        <location filename="../widgets/mainwindow.ui" line="283"/>
+        <source>&amp;Save</source>
+        <translation>保存(&amp;S)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="335"/>
-        <source>Close Room</source>
-        <translation>ルームを閉じる</translation>
+        <location filename="../widgets/mainwindow.ui" line="291"/>
+        <source>Save &amp;As...</source>
+        <translation>名前を付けて保存(&amp;A)...</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.ui" line="340"/>
-        <source>All Layers</source>
-        <translation>すべてのレイヤー</translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.cpp" line="235"/>
+        <location filename="../widgets/mainwindow.cpp" line="214"/>
         <source>Brushes</source>
         <translation>ブラシ</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="271"/>
-        <location filename="../widgets/mainwindow.cpp" line="301"/>
-        <location filename="../widgets/mainwindow.cpp" line="333"/>
-        <location filename="../widgets/mainwindow.cpp" line="363"/>
+        <location filename="../widgets/mainwindow.cpp" line="251"/>
+        <location filename="../widgets/mainwindow.cpp" line="281"/>
+        <location filename="../widgets/mainwindow.cpp" line="313"/>
+        <location filename="../widgets/mainwindow.cpp" line="343"/>
         <source>%1
 Shortcut: %2</source>
         <translation>%1
-ショートカットキー：%2</translation>
+ショートカットキー: %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="310"/>
+        <location filename="../widgets/mainwindow.cpp" line="290"/>
         <source>Color Picker</source>
         <translation>スポイト</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="340"/>
+        <location filename="../widgets/mainwindow.cpp" line="320"/>
         <source>Move Tool</source>
-        <translation type="unfinished"></translation>
+        <translation>移動ツール</translation>
     </message>
     <message>
-        <source>Tablet</source>
-        <translation type="vanished">タブレット</translation>
-    </message>
-    <message>
-        <source>Draw with Tablet</source>
-        <translation type="vanished">タブレットで描画</translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.cpp" line="383"/>
+        <location filename="../widgets/mainwindow.cpp" line="349"/>
         <source>Brush Settings</source>
         <translation>ブラシ設定</translation>
     </message>
     <message>
+        <location filename="../widgets/mainwindow.cpp" line="398"/>
+        <source>Undo</source>
+        <translation>元に戻す</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="401"/>
+        <source>Redo</source>
+        <translation>やり直す</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="411"/>
+        <source>Open Recent</source>
+        <translation>最近使ったプロジェクトを開く</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="414"/>
+        <source>Import Image as Layer…</source>
+        <translation>画像をレイヤーとして読み込む…</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="418"/>
+        <source>Open Legacy Project Folder…</source>
+        <translation>旧形式のプロジェクトフォルダーを開く…</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="421"/>
+        <source>Open Legacy Project</source>
+        <translation>旧形式のプロジェクトを開く</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="424"/>
+        <source>&amp;Layer</source>
+        <translation>レイヤー(&amp;L)</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="439"/>
+        <source>Add</source>
+        <translation>追加</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="440"/>
+        <source>Delete</source>
+        <translation>削除</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="441"/>
+        <source>Up</source>
+        <translation>上へ</translation>
+    </message>
+    <message>
         <location filename="../widgets/mainwindow.cpp" line="444"/>
-        <location filename="../widgets/mainwindow.cpp" line="451"/>
-        <location filename="../widgets/mainwindow.cpp" line="465"/>
-        <location filename="../widgets/mainwindow.cpp" line="472"/>
-        <location filename="../widgets/mainwindow.cpp" line="1093"/>
-        <source>Warning</source>
-        <translation type="unfinished">警告</translation>
+        <source>Down</source>
+        <translation>下へ</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="445"/>
-        <location filename="../widgets/mainwindow.cpp" line="1094"/>
-        <source>You are not the room owner, you can&apos;t close the room.</source>
-        <translation type="unfinished"></translation>
+        <location filename="../widgets/mainwindow.cpp" line="447"/>
+        <source>Clear Selected Layer</source>
+        <translation>選択したレイヤーをクリア</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="452"/>
-        <source>You are closing the room.
-Your paintings will be lost if you don&apos;t save them.
-Are you sure you want to close the room?</source>
-        <translation type="unfinished"></translation>
+        <location filename="../widgets/mainwindow.cpp" line="450"/>
+        <source>Rename Layer</source>
+        <translation>レイヤー名を変更</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="466"/>
-        <source>You are not the room owner, you can&apos;t kick user.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.cpp" line="473"/>
-        <source>You are kicking someone.
-He/She may never be allowed to join the room again.
-Are you sure you want to kick user?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.cpp" line="1370"/>
-        <source>Login Failed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.cpp" line="1371"/>
-        <source>An error occurred while logging into the room:
-%1
-
-Would you like to retry?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.cpp" line="1386"/>
-        <source>Send Message Failed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.cpp" line="1387"/>
-        <source>An error occurred while sending chat message:
-%1
-
-Please try again later.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.cpp" line="1393"/>
-        <source>Send Drawing Data Failed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.cpp" line="1394"/>
-        <source>An error occurred while sending drawing data:
-%1
-
-Please try again later.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.cpp" line="1400"/>
-        <source>Clear Canvas Failed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.cpp" line="1401"/>
-        <source>An error occurred while clearing canvas:
-%1
-
-Would you like to retry?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.cpp" line="1411"/>
-        <source>Renew Room Failed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.cpp" line="1412"/>
-        <source>An error occurred while renewing room:
-%1
-
-Would you like to retry?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.cpp" line="1422"/>
-        <source>Close Room Failed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.cpp" line="1423"/>
-        <source>An error occurred while closing room:
-%1
-
-Would you like to retry?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.cpp" line="1433"/>
-        <source>Kick User Failed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.cpp" line="1434"/>
-        <source>An error occurred while kicking user:
-%1
-
-Please try again later</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.cpp" line="1442"/>
-        <source>Failed to get online list: %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.cpp" line="1234"/>
-        <source>Exporting...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&amp;Language</source>
-        <translation type="obsolete">言語(&amp;L)</translation>
-    </message>
-    <message>
-        <source>System Default</source>
-        <translation type="obsolete">システムのデフォルト</translation>
-    </message>
-    <message>
-        <source>Restart</source>
-        <translation type="obsolete">再起動</translation>
-    </message>
-    <message>
-        <source>Application must restart to enable new language settings.
-Do you want to restart right now?</source>
-        <translation type="obsolete">新しい言語設定を使うために、ソフトは再起動しなければなりません。
-今すぐ再起動しますか。</translation>
-    </message>
-    <message>
-        <source>Language change will be applied on next start.</source>
-        <translation type="obsolete">言語変換は次の起動から有効になる。</translation>
-    </message>
-    <message>
-        <source>Sorry</source>
-        <translation type="vanished">すみません</translation>
-    </message>
-    <message>
-        <source>Only room owner is authorized to close the room.
-It seems you&apos;re not room manager.</source>
-        <translation type="vanished">家主さんしかこのルームを閉じられませんから、
-貴方樣は家主さんではありません。</translation>
-    </message>
-    <message>
-        <source>Connecting to server...
-</source>
-        <translation type="obsolete">サーバに接続してます...
-</translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.cpp" line="615"/>
-        <location filename="../widgets/mainwindow.cpp" line="628"/>
-        <source> - Mr.Paint</source>
-        <translation>- チャエ君</translation>
-    </message>
-    <message>
-        <source>Server Connected.
-</source>
-        <translation type="obsolete">サーバに接続完了。
-</translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.cpp" line="425"/>
-        <source>Room Share</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Server Connection Failed.
-</source>
-        <translation type="obsolete">サーバに接続が切断されました。
-</translation>
+        <location filename="../widgets/mainwindow.cpp" line="450"/>
+        <source>Choose a unique layer name of 1–256 characters.</source>
+        <translation>他のレイヤーと重複しない、1～256 文字のレイヤー名を入力してください。</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.cpp" line="658"/>
-        <source>Server Connection Failed.</source>
-        <translation type="unfinished"></translation>
+        <source>The maximum number of layers is 256.</source>
+        <translation>レイヤーは最大 256 枚まで作成できます。</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="682"/>
-        <source>Connection interrupted, reconnecting...</source>
-        <translation type="unfinished"></translation>
+        <location filename="../widgets/mainwindow.cpp" line="668"/>
+        <source>Layer %1</source>
+        <translation>レイヤー %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="703"/>
-        <source>Reconnection successful, synchronizing data...</source>
-        <translation type="unfinished"></translation>
+        <location filename="../widgets/mainwindow.cpp" line="683"/>
+        <source>Keep at least one layer in the project.</source>
+        <translation>プロジェクトには少なくとも 1 枚のレイヤーを残してください。</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="721"/>
-        <source>Reconnection failed: %1</source>
-        <translation type="unfinished"></translation>
+        <location filename="../widgets/mainwindow.cpp" line="688"/>
+        <source>Unlock the layer before deleting it.</source>
+        <translation>削除する前にレイヤーのロックを解除してください。</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="747"/>
-        <source>Reconnection completed, you can continue drawing</source>
-        <translation type="unfinished"></translation>
+        <location filename="../widgets/mainwindow.cpp" line="692"/>
+        <source>Delete Layer</source>
+        <translation>レイヤーを削除</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="769"/>
-        <source>Closing</source>
-        <translation>ルームを閉じます</translation>
+        <location filename="../widgets/mainwindow.cpp" line="692"/>
+        <source>Delete layer “%1”?</source>
+        <translation>レイヤー「%1」を削除しますか？</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="770"/>
-        <source>Warning, the room owner has closed the room. This room will close when everyone leaves.
-Save your work if you like it!</source>
-        <translation>警告、家主さんはこのルームを閉じました。誰もいなかったらこのルームを閉じますから、
-自慢な作品を保存するのをお忘れないください。</translation>
+        <location filename="../widgets/mainwindow.cpp" line="699"/>
+        <source>Clear Layer</source>
+        <translation>レイヤーをクリア</translation>
     </message>
     <message>
-        <source>Sorry, it seems you&apos;re notroom owner.</source>
-        <translation type="vanished">申し訳ないが、貴方樣は家主さんではありません。</translation>
+        <location filename="../widgets/mainwindow.cpp" line="699"/>
+        <source>Clear layer “%1”?</source>
+        <translation>レイヤー「%1」をクリアしますか？</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="817"/>
-        <source>You&apos;ve been kicked by room owner.</source>
-        <translation type="unfinished"></translation>
+        <location filename="../widgets/mainwindow.cpp" line="706"/>
+        <source>Clear all unlocked layers?</source>
+        <translation>ロックされていないすべてのレイヤーをクリアしますか？</translation>
     </message>
     <message>
-        <source>Error</source>
-        <translation type="obsolete">エラー</translation>
-    </message>
-    <message>
-        <source>Sorry, an error occurred.
-Error: %1, %2</source>
-        <translation type="obsolete">エラーが発生しました、申し訳ありません。
-エラー: %1，%2</translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.cpp" line="1072"/>
-        <location filename="../widgets/mainwindow.cpp" line="1099"/>
-        <source>OMG</source>
-        <translation>おやまあ</translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.cpp" line="1073"/>
-        <source>You&apos;re going to clear layer %1. All the work of that layerwill be deleted and CANNOT be undone.
-Do you really want to do so?</source>
-        <translation>全消しますか。 %1全てのレイヤーが全消されます、やり直しはできませんので、
-本当にいいですか。</translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.cpp" line="1082"/>
-        <source>Notice</source>
-        <translation type="unfinished">通知</translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.cpp" line="1083"/>
-        <source>Layer clearing command sent to canvas.
-Server-side layer clearing is not yet implemented in the SSE client version.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.cpp" line="1100"/>
-        <source>You&apos;re going to clear ALL LAYERS. All of work in this roomwill be deleted and CANNOT be undone.
-Do you really want to do so?</source>
-        <translation>全消しますか。全てのレイヤーが全消されます、やり直しはできませんので、
-本当にいいですか。</translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.cpp" line="1147"/>
-        <source>Waiting for sync, please do not close.
-This will cost you 1 minute at most.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.cpp" line="1185"/>
+        <location filename="../widgets/mainwindow.cpp" line="726"/>
         <source>Export all to file</source>
-        <translation>全てのレイヤー画像を書き出し</translation>
+        <translation>すべてのレイヤーをファイルに書き出す</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="1187"/>
-        <location filename="../widgets/mainwindow.cpp" line="1205"/>
+        <location filename="../widgets/mainwindow.cpp" line="728"/>
+        <location filename="../widgets/mainwindow.cpp" line="749"/>
         <source>Images (*.png)</source>
         <translation>画像 (*.png)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="1203"/>
+        <location filename="../widgets/mainwindow.cpp" line="740"/>
+        <location filename="../widgets/mainwindow.cpp" line="761"/>
+        <location filename="../widgets/mainwindow.cpp" line="784"/>
+        <source>Export Failed</source>
+        <translation>書き出しに失敗</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="740"/>
+        <location filename="../widgets/mainwindow.cpp" line="761"/>
+        <source>Could not write the image:
+%1</source>
+        <translation>画像を書き込めませんでした:
+%1</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="747"/>
         <source>Export visible part to file</source>
-        <translation>表示レイヤーを書き出し</translation>
+        <translation>表示レイヤーをファイルに書き出す</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="1221"/>
+        <location filename="../widgets/mainwindow.cpp" line="768"/>
         <source>Export contents to psd file</source>
-        <translation type="unfinished"></translation>
+        <translation>PSD ファイルに書き出す</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="1223"/>
+        <location filename="../widgets/mainwindow.cpp" line="770"/>
         <source>Photoshop Images (*.psd)</source>
-        <translation type="unfinished"></translation>
+        <translation>Photoshop 画像 (*.psd)</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="784"/>
+        <source>Could not write the PSD file:
+%1</source>
+        <translation>PSD ファイルを書き込めませんでした:
+%1</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="824"/>
+        <source>Layer 1</source>
+        <translation>レイヤー 1</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="839"/>
+        <source>Open Project</source>
+        <translation>プロジェクトを開く</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="840"/>
+        <location filename="../widgets/mainwindow.cpp" line="883"/>
+        <source>Mr.Paint Projects (*.paintty)</source>
+        <translation>Mr.Paint プロジェクト (*.paintty)</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="849"/>
+        <source>Open Failed</source>
+        <translation>読み込みに失敗</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="849"/>
+        <source>Could not open the project:
+%1</source>
+        <translation>プロジェクトを開けませんでした:
+%1</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="865"/>
+        <source>Project opened</source>
+        <translation>プロジェクトを開きました</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="881"/>
+        <source>Untitled.paintty</source>
+        <translation>無題.paintty</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="883"/>
+        <source>Save Project As</source>
+        <translation>名前を付けてプロジェクトを保存</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="894"/>
+        <source>Save Failed</source>
+        <translation>保存に失敗</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="894"/>
+        <source>Could not save the project:
+%1</source>
+        <translation>プロジェクトを保存できませんでした:
+%1</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="902"/>
+        <source>Project saved</source>
+        <translation>プロジェクトを保存しました</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="909"/>
+        <source>Unsaved Changes</source>
+        <translation>未保存の変更</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="910"/>
+        <source>Save changes to %1 before continuing?</source>
+        <translation>続行する前に「%1」の変更を保存しますか？</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="910"/>
+        <location filename="../widgets/mainwindow.cpp" line="919"/>
+        <location filename="../widgets/mainwindow.cpp" line="934"/>
+        <source>Untitled</source>
+        <translation>無題</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="919"/>
+        <source>%1[*] — Mr.Paint</source>
+        <translation>%1[*] — Mr.Paint</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="923"/>
+        <source>%1 × %2 px · %3 layers</source>
+        <translation>%1 × %2 px · %3 レイヤー</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="965"/>
+        <source>Import Image as Layer</source>
+        <translation>画像をレイヤーとして読み込む</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="966"/>
+        <source>Images (*.png *.jpg *.jpeg *.bmp *.webp)</source>
+        <translation>画像 (*.png *.jpg *.jpeg *.bmp *.webp)</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="973"/>
+        <location filename="../widgets/mainwindow.cpp" line="977"/>
+        <source>Import Failed</source>
+        <translation>読み込みに失敗</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="973"/>
+        <source>The image dimensions are unsupported.</source>
+        <translation>この画像のサイズには対応していません。</translation>
     </message>
 </context>
 <context>
-    <name>MemberListWidget</name>
+    <name>NewProjectDialog</name>
     <message>
-        <location filename="../widgets/memberlistwidget.cpp" line="68"/>
-        <source>Kick</source>
-        <translation type="unfinished"></translation>
+        <location filename="../widgets/newprojectdialog.cpp" line="17"/>
+        <source>New Project</source>
+        <translation>新規プロジェクト</translation>
+    </message>
+    <message>
+        <location filename="../widgets/newprojectdialog.cpp" line="24"/>
+        <source>Preset:</source>
+        <translation>プリセット:</translation>
+    </message>
+    <message>
+        <location filename="../widgets/newprojectdialog.cpp" line="26"/>
+        <source>1280 × 720</source>
+        <translation>1280 × 720</translation>
+    </message>
+    <message>
+        <location filename="../widgets/newprojectdialog.cpp" line="27"/>
+        <source>720 × 480</source>
+        <translation>720 × 480</translation>
+    </message>
+    <message>
+        <location filename="../widgets/newprojectdialog.cpp" line="28"/>
+        <source>1024 × 768</source>
+        <translation>1024 × 768</translation>
+    </message>
+    <message>
+        <location filename="../widgets/newprojectdialog.cpp" line="29"/>
+        <source>1920 × 1080</source>
+        <translation>1920 × 1080</translation>
+    </message>
+    <message>
+        <location filename="../widgets/newprojectdialog.cpp" line="30"/>
+        <source>4096 × 4096</source>
+        <translation>4096 × 4096</translation>
+    </message>
+    <message>
+        <location filename="../widgets/newprojectdialog.cpp" line="40"/>
+        <source>Width:</source>
+        <translation>幅:</translation>
+    </message>
+    <message>
+        <location filename="../widgets/newprojectdialog.cpp" line="41"/>
+        <source>Height:</source>
+        <translation>高さ:</translation>
+    </message>
+    <message>
+        <location filename="../widgets/newprojectdialog.cpp" line="46"/>
+        <source>Canvas Size</source>
+        <translation>キャンバスサイズ</translation>
+    </message>
+    <message>
+        <location filename="../widgets/newprojectdialog.cpp" line="46"/>
+        <source>Choose a canvas up to 64 megapixels.</source>
+        <translation>キャンバスの画素数は 6400 万画素以下にしてください。</translation>
     </message>
 </context>
 <context>
-    <name>NetworkIndicator</name>
+    <name>ProjectFile</name>
     <message>
-        <location filename="../widgets/networkindicator.cpp" line="7"/>
-        <source>- %1</source>
-        <translation type="unfinished"></translation>
+        <location filename="../misc/projectfile.cpp" line="35"/>
+        <source>Invalid canvas size, layer count or selected layer.</source>
+        <translation>キャンバスサイズ、レイヤー数、または選択したレイヤーが無効です。</translation>
     </message>
     <message>
-        <location filename="../widgets/networkindicator.cpp" line="10"/>
-        <location filename="../widgets/networkindicator.cpp" line="75"/>
-        <source>Network speed unknown</source>
-        <translation type="unfinished"></translation>
+        <location filename="../misc/projectfile.cpp" line="41"/>
+        <source>Invalid or duplicate layer name, or mismatched image size.</source>
+        <translation>レイヤー名が無効または重複しているか、画像サイズがキャンバスと一致しません。</translation>
     </message>
     <message>
-        <location filename="../widgets/networkindicator.cpp" line="53"/>
-        <source>Dead</source>
-        <translation type="unfinished"></translation>
+        <location filename="../misc/projectfile.cpp" line="46"/>
+        <source>Project layer images exceed the 1 GiB memory limit.</source>
+        <translation>プロジェクトのレイヤー画像が 1 GiB のメモリー上限を超えています。</translation>
     </message>
     <message>
-        <location filename="../widgets/networkindicator.cpp" line="54"/>
-        <source>Network sucks now</source>
-        <translation type="unfinished"></translation>
+        <location filename="../misc/projectfile.cpp" line="67"/>
+        <source>A layer image has the wrong canvas dimensions.</source>
+        <translation>レイヤー画像のサイズがキャンバスと一致しません。</translation>
     </message>
     <message>
-        <location filename="../widgets/networkindicator.cpp" line="58"/>
-        <source>Bad</source>
-        <translation type="unfinished"></translation>
+        <location filename="../misc/projectfile.cpp" line="77"/>
+        <source>Could not read legacy project metadata.</source>
+        <translation>旧形式のプロジェクトのメタデータを読み込めませんでした。</translation>
     </message>
     <message>
-        <location filename="../widgets/networkindicator.cpp" line="59"/>
-        <source>Network is very bad</source>
-        <translation type="unfinished"></translation>
+        <location filename="../misc/projectfile.cpp" line="82"/>
+        <source>Invalid legacy project metadata.</source>
+        <translation>旧形式のプロジェクトのメタデータが無効です。</translation>
     </message>
     <message>
-        <location filename="../widgets/networkindicator.cpp" line="63"/>
-        <source>Medium</source>
-        <translation type="unfinished"></translation>
+        <location filename="../misc/projectfile.cpp" line="85"/>
+        <source>Invalid canvas dimensions.</source>
+        <translation>キャンバスサイズが無効です。</translation>
     </message>
     <message>
-        <location filename="../widgets/networkindicator.cpp" line="64"/>
-        <source>Network is ok</source>
-        <translation type="unfinished"></translation>
+        <location filename="../misc/projectfile.cpp" line="90"/>
+        <source>Invalid legacy layer filename.</source>
+        <translation>旧形式のレイヤーのファイル名が無効です。</translation>
     </message>
     <message>
-        <location filename="../widgets/networkindicator.cpp" line="68"/>
-        <source>Good</source>
-        <translation type="unfinished"></translation>
+        <location filename="../misc/projectfile.cpp" line="96"/>
+        <source>Legacy project contains too many or too large layers.</source>
+        <translation>旧形式のプロジェクトのレイヤー数が多すぎるか、レイヤーのサイズが大きすぎます。</translation>
     </message>
     <message>
-        <location filename="../widgets/networkindicator.cpp" line="69"/>
-        <source>Excellent network</source>
-        <translation type="unfinished"></translation>
+        <location filename="../misc/projectfile.cpp" line="100"/>
+        <source>Could not read legacy layer image.</source>
+        <translation>旧形式のレイヤー画像を読み込めませんでした。</translation>
     </message>
     <message>
-        <location filename="../widgets/networkindicator.cpp" line="7"/>
-        <location filename="../widgets/networkindicator.cpp" line="74"/>
-        <source>Unknown</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>NewRoomWindow</name>
-    <message>
-        <location filename="../widgets/newroomwindow.ui" line="14"/>
-        <source>New Room</source>
-        <translation>新規ルーム</translation>
+        <location filename="../misc/projectfile.cpp" line="103"/>
+        <source>Layer %1</source>
+        <translation>レイヤー %1</translation>
     </message>
     <message>
-        <location filename="../widgets/newroomwindow.ui" line="25"/>
-        <source>Room Name*</source>
-        <translation>ルーム名*</translation>
+        <location filename="../misc/projectfile.cpp" line="107"/>
+        <source>Layer 1</source>
+        <translation>レイヤー 1</translation>
     </message>
     <message>
-        <location filename="../widgets/newroomwindow.ui" line="39"/>
-        <source>Width (px)*</source>
-        <translation>幅(pixel)*</translation>
+        <location filename="../misc/projectfile.cpp" line="144"/>
+        <source>Could not encode layer image.</source>
+        <translation>レイヤー画像をエンコードできませんでした。</translation>
     </message>
     <message>
-        <location filename="../widgets/newroomwindow.ui" line="53"/>
-        <source>Height (px)*</source>
-        <translation>高さ(pixel)*</translation>
+        <location filename="../misc/projectfile.cpp" line="147"/>
+        <source>Project exceeds the 512 MiB file size limit.</source>
+        <translation>プロジェクトが 512 MiB のファイルサイズ上限を超えています。</translation>
     </message>
     <message>
-        <location filename="../widgets/newroomwindow.ui" line="46"/>
-        <source>2880</source>
-        <translation>2880</translation>
+        <location filename="../misc/projectfile.cpp" line="161"/>
+        <source>This is not a supported Mr.Paint project file.</source>
+        <translation>この Mr.Paint プロジェクトファイルには対応していません。</translation>
     </message>
     <message>
-        <location filename="../widgets/newroomwindow.ui" line="60"/>
-        <source>1920</source>
-        <translation>1920</translation>
+        <location filename="../misc/projectfile.cpp" line="166"/>
+        <source>Truncated or invalid project metadata.</source>
+        <translation>プロジェクトのメタデータが欠けているか、無効です。</translation>
     </message>
     <message>
-        <location filename="../widgets/newroomwindow.ui" line="67"/>
-        <source>Max Member*</source>
-        <translation>最大人数*</translation>
+        <location filename="../misc/projectfile.cpp" line="171"/>
+        <source>Invalid or unsupported project version.</source>
+        <translation>プロジェクトのバージョンが無効か、対応していません。</translation>
     </message>
     <message>
-        <location filename="../widgets/newroomwindow.ui" line="87"/>
-        <source>Use Password</source>
-        <translation>パスワードを使う</translation>
+        <location filename="../misc/projectfile.cpp" line="178"/>
+        <source>Invalid canvas dimensions or layer count.</source>
+        <translation>キャンバスサイズまたはレイヤー数が無効です。</translation>
     </message>
     <message>
-        <location filename="../widgets/newroomwindow.ui" line="109"/>
-        <source>Welome Words</source>
-        <translation>歓迎の言葉</translation>
+        <location filename="../misc/projectfile.cpp" line="181"/>
+        <source>Invalid layer metadata.</source>
+        <translation>レイヤーのメタデータが無効です。</translation>
     </message>
     <message>
-        <location filename="../widgets/newroomwindow.ui" line="123"/>
-        <source>Auto close room when everyone leaves</source>
-        <translation>誰もいなかったらルームを自動的に閉じます</translation>
+        <location filename="../misc/projectfile.cpp" line="189"/>
+        <source>Truncated layer image.</source>
+        <translation>レイヤー画像のデータが欠けています。</translation>
     </message>
     <message>
-        <source>Succeed!</source>
-        <translation type="obsolete">成功！</translation>
+        <location filename="../misc/projectfile.cpp" line="192"/>
+        <source>Project images exceed the memory limit.</source>
+        <translation>プロジェクトの画像がメモリー上限を超えています。</translation>
     </message>
     <message>
-        <source>Go get your room!</source>
-        <translation type="obsolete">ルームに入室しましょう</translation>
-    </message>
-    <message>
-        <source>Error: %1, %2
-Do you want to retry?</source>
-        <translation type="obsolete">エラー：%，%2
-もう一度しますか。</translation>
-    </message>
-    <message>
-        <location filename="../widgets/newroomwindow.cpp" line="65"/>
-        <location filename="../widgets/newroomwindow.cpp" line="76"/>
-        <source>Error!</source>
-        <translation>エラー！</translation>
-    </message>
-    <message>
-        <location filename="../widgets/newroomwindow.cpp" line="63"/>
-        <source>Your room name is empty or too long!</source>
-        <translation>ルーム名がないか、長すぎたか。</translation>
-    </message>
-    <message>
-        <location filename="../widgets/newroomwindow.cpp" line="74"/>
-        <source>Your welcome message is too long!</source>
-        <translation>歓迎の言葉は長すぎた。</translation>
-    </message>
-    <message>
-        <location filename="../widgets/newroomwindow.cpp" line="88"/>
-        <source>Large Canvas!</source>
-        <translation>大きなキャンバス！</translation>
-    </message>
-    <message>
-        <location filename="../widgets/newroomwindow.cpp" line="89"/>
-        <source>You set a large canvas size, which may have high load on low-memory computers.</source>
-        <translation>キャンバスサイズが大きすぎたら、メモリが少ないコンピューターては実行するのが負担がかかります。</translation>
-    </message>
-    <message>
-        <location filename="../widgets/newroomwindow.cpp" line="126"/>
-        <source>Do you really want to cancel?</source>
-        <translation>本当にキャンセルてすか。</translation>
-    </message>
-    <message>
-        <location filename="../widgets/newroomwindow.cpp" line="127"/>
-        <source>Cancel?</source>
-        <translation>キャンセル？</translation>
+        <location filename="../misc/projectfile.cpp" line="197"/>
+        <source>Invalid project contents.</source>
+        <translation>プロジェクトの内容が無効です。</translation>
     </message>
 </context>
 <context>
     <name>QObject</name>
     <message>
-        <source>unknown error.</source>
-        <translation type="vanished">未知のエラー。</translation>
-    </message>
-    <message>
-        <source>server is busy.</source>
-        <translation type="vanished">サーバは忙しいです。</translation>
-    </message>
-    <message>
-        <source>name collision.</source>
-        <translation type="vanished">ルーム名が繰り返されました。</translation>
-    </message>
-    <message>
-        <source>invalid name.</source>
-        <translation type="vanished">無効なルーム名。</translation>
-    </message>
-    <message>
-        <source>invalid max member.</source>
-        <translation type="vanished">無効な最大人数。</translation>
-    </message>
-    <message>
-        <source>invalid welcome words.</source>
-        <translation type="vanished">無効な歓迎の言葉。</translation>
-    </message>
-    <message>
-        <source>invalid auto closing empty room.</source>
-        <translation type="vanished">空室が自動的に終了するのは無効化されました。</translation>
-    </message>
-    <message>
-        <source>invalid password.</source>
-        <translation type="vanished">無効なパスワード。</translation>
-    </message>
-    <message>
-        <source>auto closing empty room not supported.</source>
-        <translation type="vanished">空室が自動的に終了するのはサポートされていません。</translation>
-    </message>
-    <message>
-        <source>private room not supported.</source>
-        <translation type="vanished">非公開のルームはサポートされていません。</translation>
-    </message>
-    <message>
-        <source>too many rooms.</source>
-        <translation type="vanished">ルームは多過ぎました。</translation>
-    </message>
-    <message>
-        <source>invalid canvas size.</source>
-        <translation type="vanished">無効な画像サイズ。</translation>
-    </message>
-    <message>
-        <source>invalid password or lack of password.</source>
-        <translation type="vanished">無効なパスワードか、パスワードが欠けていますか。</translation>
-    </message>
-    <message>
-        <source>room is full.</source>
-        <translation type="vanished">ルームは満員されました。</translation>
-    </message>
-    <message>
-        <source>you&apos;re banned.</source>
-        <translation type="vanished">禁止された。</translation>
-    </message>
-    <message>
-        <source>closed by room or room manager.</source>
-        <translation type="vanished">管理者に閉じられました。</translation>
-    </message>
-    <message>
-        <source>closed by room owner.</source>
-        <translation type="vanished">家主さんに閉じられました。</translation>
-    </message>
-    <message>
-        <source>room is closed already.</source>
-        <translation type="vanished">ルームはもう閉じられました。</translation>
-    </message>
-    <message>
-        <source>Unnamed error: %1.</source>
-        <translation type="vanished">未知なエラー: %1。</translation>
-    </message>
-    <message>
-        <source>Brush</source>
-        <translation type="vanished">ブラシ</translation>
-    </message>
-    <message>
-        <source>Eraser</source>
-        <translation type="vanished">消しゴム</translation>
-    </message>
-    <message>
-        <source>Pencil</source>
-        <translation type="vanished">鉛筆</translation>
-    </message>
-    <message>
-        <source>Sketch</source>
-        <translation type="vanished">スケッチブラシ</translation>
-    </message>
-    <message>
-        <source>Wet Fingure</source>
-        <translation type="vanished">指先</translation>
-    </message>
-    <message>
-        <location filename="../main.cpp" line="126"/>
-        <source>We cannot find updater.
-You may need to check update yourself.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main.cpp" line="246"/>
-        <source>Password</source>
-        <translation type="unfinished">パスワード</translation>
-    </message>
-    <message>
-        <location filename="../main.cpp" line="247"/>
-        <source>This is a private room, please input password:</source>
-        <translation type="unfinished">これは非公開のルームなんで、入室用パスワードを入力してください：</translation>
-    </message>
-    <message>
         <location filename="../paintingTools/brush/basicbrush.cpp" line="32"/>
         <source>BasicBrush</source>
-        <translation type="unfinished"></translation>
+        <translation>ブラシ</translation>
     </message>
     <message>
         <location filename="../paintingTools/brush/basiceraser.cpp" line="19"/>
         <source>BasicEraser</source>
-        <translation type="unfinished"></translation>
+        <translation>消しゴム</translation>
     </message>
     <message>
         <location filename="../paintingTools/brush/binarybrush.cpp" line="20"/>
         <source>BinaryBrush</source>
-        <translation type="unfinished"></translation>
+        <translation>二値ブラシ</translation>
     </message>
     <message>
         <location filename="../paintingTools/brush/maskbased.cpp" line="20"/>
         <source>Crayon</source>
-        <translation type="unfinished"></translation>
+        <translation>クレヨン</translation>
     </message>
     <message>
         <location filename="../paintingTools/brush/sketchbrush.cpp" line="18"/>
         <source>SketchBrush</source>
-        <translation type="unfinished"></translation>
+        <translation>スケッチブラシ</translation>
     </message>
     <message>
-        <location filename="../common/network/known-error.cpp" line="8"/>
-        <location filename="../common/network/known-error.cpp" line="55"/>
-        <source>Unknown error</source>
-        <translation type="unfinished"></translation>
+        <location filename="../main.cpp" line="184"/>
+        <source>Mr.Paint — offline digital painting</source>
+        <translation>Mr.Paint — オフラインのデジタルペイント</translation>
     </message>
     <message>
-        <location filename="../common/network/known-error.cpp" line="9"/>
-        <location filename="../common/network/known-error.cpp" line="27"/>
-        <source>Server busy</source>
-        <translation type="unfinished"></translation>
+        <location filename="../main.cpp" line="187"/>
+        <source>Local .paintty file or legacy project folder to open.</source>
+        <translation>開くローカルの .paintty ファイルまたは旧形式のプロジェクトフォルダー。</translation>
     </message>
     <message>
-        <location filename="../common/network/known-error.cpp" line="10"/>
-        <source>Room name already exists</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../common/network/known-error.cpp" line="11"/>
-        <source>Invalid name</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../common/network/known-error.cpp" line="12"/>
-        <source>Invalid maximum member count</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../common/network/known-error.cpp" line="13"/>
-        <source>Invalid welcome message</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../common/network/known-error.cpp" line="14"/>
-        <source>Invalid empty room close setting</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../common/network/known-error.cpp" line="15"/>
-        <source>Invalid password</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../common/network/known-error.cpp" line="16"/>
-        <source>Auto-close empty rooms not supported</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../common/network/known-error.cpp" line="17"/>
-        <source>Private rooms not supported</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../common/network/known-error.cpp" line="18"/>
-        <source>Room limit reached</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../common/network/known-error.cpp" line="19"/>
-        <source>Invalid canvas size</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../common/network/known-error.cpp" line="22"/>
-        <source>Unknown error during login</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../common/network/known-error.cpp" line="23"/>
-        <source>Invalid username</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../common/network/known-error.cpp" line="24"/>
-        <source>Invalid password or password missing</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../common/network/known-error.cpp" line="25"/>
-        <source>Room is full</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../common/network/known-error.cpp" line="26"/>
-        <source>You have been banned</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../common/network/known-error.cpp" line="30"/>
-        <source>Unknown error during archive operation</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../common/network/known-error.cpp" line="33"/>
-        <source>Unknown error getting online list</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../common/network/known-error.cpp" line="34"/>
-        <source>Room is closed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../common/network/known-error.cpp" line="37"/>
-        <source>Unknown error during check-in</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../common/network/known-error.cpp" line="38"/>
-        <source>Invalid key provided during check-in</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../common/network/known-error.cpp" line="39"/>
-        <source>Check-in too late</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../common/network/known-error.cpp" line="41"/>
-        <source>Unknown error code: %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>RoomListDialog</name>
-    <message>
-        <location filename="../widgets/roomlistdialog.ui" line="14"/>
-        <source>Mr.Paint</source>
-        <translation>チャエ君</translation>
-    </message>
-    <message>
-        <source>Don&apos;t show it if room is full</source>
-        <translation type="obsolete">満員の部屋を表示しない</translation>
-    </message>
-    <message>
-        <location filename="../widgets/roomlistdialog.ui" line="42"/>
-        <source>TextLabel</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/roomlistdialog.ui" line="52"/>
-        <source>Filter</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/roomlistdialog.ui" line="58"/>
-        <source>Don&apos;t show full rooms</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/roomlistdialog.ui" line="67"/>
-        <source>Search</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/roomlistdialog.ui" line="74"/>
-        <source>Room Name Contains...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/roomlistdialog.ui" line="101"/>
-        <source>Nick Name:</source>
-        <translation>ニックネーム：</translation>
-    </message>
-    <message>
-        <location filename="../widgets/roomlistdialog.ui" line="111"/>
-        <source>Someone</source>
-        <translation>誰か</translation>
-    </message>
-    <message>
-        <location filename="../widgets/roomlistdialog.ui" line="161"/>
-        <source>New</source>
-        <translation>新規ルーム</translation>
-    </message>
-    <message>
-        <location filename="../widgets/roomlistdialog.ui" line="168"/>
-        <source>Join</source>
-        <translation>入室</translation>
-    </message>
-    <message>
-        <location filename="../widgets/roomlistdialog.ui" line="175"/>
-        <source>Join By Address</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/roomlistdialog.ui" line="182"/>
-        <source>Refresh</source>
-        <translation>リフレッシュ</translation>
-    </message>
-    <message>
-        <location filename="../widgets/roomlistdialog.ui" line="189"/>
-        <source>Configure</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/roomlistdialog.ui" line="196"/>
-        <source>Exit</source>
-        <translation>終了</translation>
-    </message>
-    <message>
-        <source>Note: We&apos;re still in alpha test, and only provide 50 rooms.</source>
-        <translation type="obsolete">通知：チャエ君はまだ試作の段階なんですから、チャットルームは50間しか新規できません。</translation>
-    </message>
-    <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="104"/>
-        <location filename="../widgets/roomlistdialog.cpp" line="404"/>
-        <source>Rooms: %1, Members: %2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="150"/>
-        <source>Room Name</source>
-        <translation>ルーム名</translation>
-    </message>
-    <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="151"/>
-        <source>Privacy</source>
-        <translation>公開制限</translation>
-    </message>
-    <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="152"/>
-        <source>Current Member</source>
-        <translation>只今の入室者数</translation>
-    </message>
-    <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="153"/>
-        <source>Max Member</source>
-        <translation>最大人数</translation>
-    </message>
-    <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="191"/>
-        <location filename="../widgets/roomlistdialog.cpp" line="239"/>
-        <source>Warning</source>
-        <translation>警告</translation>
-    </message>
-    <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="192"/>
-        <source>You must have a valid nick name.</source>
-        <translation>有効なニックネームを持たなければなりません。</translation>
-    </message>
-    <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="240"/>
-        <source>You didn&apos;t choose any room.</source>
-        <translation>ルームはご選択しておりません。</translation>
-    </message>
-    <message>
-        <source>Error!</source>
-        <translation type="obsolete">エラー！</translation>
-    </message>
-    <message>
-        <source>Succeed!</source>
-        <translation type="obsolete">成功！</translation>
-    </message>
-    <message>
-        <source>Go get your room!</source>
-        <translation type="obsolete">ルームに入室しましょう</translation>
-    </message>
-    <message>
-        <source>Error: %1, %2
-Do you want to retry?</source>
-        <translation type="obsolete">エラー：%，%2
-もう一度しますか。</translation>
-    </message>
-    <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="382"/>
-        <source>Private</source>
-        <translation>非公開</translation>
-    </message>
-    <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="382"/>
-        <source>Public</source>
-        <translation>公開</translation>
-    </message>
-    <message>
-        <source>Connection</source>
-        <translation type="vanished">接続</translation>
-    </message>
-    <message>
-        <source>Sorry, server has closed.</source>
-        <translation type="vanished">接続が切断されました、申し訳ありません。</translation>
-    </message>
-    <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="250"/>
-        <source>Full loaded</source>
-        <translation>満員</translation>
-    </message>
-    <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="53"/>
-        <source>Room Url</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="54"/>
-        <source>Input room url:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="251"/>
-        <source>Cannot join a full loaded room.</source>
-        <translation>ルームは満員のために、入室ができません。</translation>
-    </message>
-    <message>
-        <source>Password</source>
-        <translation type="vanished">パスワード</translation>
-    </message>
-    <message>
-        <source>This is a private room, please input password:</source>
-        <translation type="vanished">これは非公開のルームなんで、入室用パスワードを入力してください：</translation>
-    </message>
-    <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="319"/>
-        <location filename="../widgets/roomlistdialog.cpp" line="333"/>
-        <location filename="../widgets/roomlistdialog.cpp" line="342"/>
-        <source>Error</source>
-        <translation>エラー</translation>
-    </message>
-    <message>
-        <source>Sorry, an error occurred.
-Error: %1, %2</source>
-        <translation type="vanished">エラーが発生しました、申し訳ありません。
-エラー: %1，%2</translation>
-    </message>
-    <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="452"/>
-        <source>Notice</source>
-        <translation>通知</translation>
-    </message>
-    <message>
-        <location filename="../widgets/roomlistdialog.cpp" line="453"/>
-        <source>We&apos;re still in alpha test. This means the program may crash at any time in any condition.
-Use this software only when you accept it.</source>
-        <translation>チャエ君はまだテストの段階なんで、プログラムは時々崩れかねないから、
-貴方樣が不快なバグをお避けになるために、これを意識した上でお使いください。</translation>
-    </message>
-</context>
-<context>
-    <name>RoomShareBar</name>
-    <message>
-        <location filename="../widgets/roomsharebar.cpp" line="11"/>
-        <source>Share your room:</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>SSEClientSocket</name>
-    <message>
-        <location filename="../common/network/sse-clientsocket.cpp" line="938"/>
-        <source>Failed to process login response</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../common/network/sse-clientsocket.cpp" line="1066"/>
-        <location filename="../common/network/sse-clientsocket.cpp" line="1088"/>
-        <location filename="../common/network/sse-clientsocket.cpp" line="1117"/>
-        <location filename="../common/network/sse-clientsocket.cpp" line="1146"/>
-        <location filename="../common/network/sse-clientsocket.cpp" line="1188"/>
-        <location filename="../common/network/sse-clientsocket.cpp" line="1217"/>
-        <location filename="../common/network/sse-clientsocket.cpp" line="1246"/>
-        <location filename="../common/network/sse-clientsocket.cpp" line="1275"/>
-        <source>Invalid JSON response</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../common/network/sse-clientsocket.cpp" line="1566"/>
-        <source>Invalid manager address: %1. 
-Use default manager address in settings please.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../common/network/sse-clientsocket.cpp" line="1574"/>
-        <source>Empty host in manager address: %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../common/network/sse-clientsocket.cpp" line="1583"/>
-        <source>DNS lookup failed for host: %1. Error: %2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../common/network/sse-clientsocket.cpp" line="1598"/>
-        <source>No IPv4 address found for host: %1</source>
-        <translation type="unfinished"></translation>
+        <location filename="../paintingTools/brush/basicbrushv3.cpp" line="8"/>
+        <source>Pressure Brush</source>
+        <translation>筆圧ブラシ</translation>
     </message>
 </context>
 <context>
     <name>ShortcutDelegate</name>
     <message>
-        <location filename="../widgets/configuredialog.cpp" line="376"/>
-        <location filename="../widgets/configuredialog.cpp" line="395"/>
+        <location filename="../widgets/configuredialog.cpp" line="230"/>
+        <location filename="../widgets/configuredialog.cpp" line="249"/>
         <source>Immediately</source>
-        <translation type="unfinished"></translation>
+        <translation>すぐに実行</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.cpp" line="378"/>
-        <location filename="../widgets/configuredialog.cpp" line="397"/>
+        <location filename="../widgets/configuredialog.cpp" line="232"/>
+        <location filename="../widgets/configuredialog.cpp" line="251"/>
         <source>When Release</source>
-        <translation type="unfinished"></translation>
+        <translation>キーを離したときに実行</translation>
     </message>
 </context>
 <context>
     <name>ShortcutManager</name>
     <message>
-        <source>Pencil</source>
-        <translation type="obsolete">鉛筆</translation>
-    </message>
-    <message>
         <location filename="../misc/shortcutmanager.cpp" line="15"/>
         <source>Brush</source>
-        <translation type="unfinished">ブラシ</translation>
+        <translation>ブラシ</translation>
     </message>
     <message>
         <location filename="../misc/shortcutmanager.cpp" line="39"/>
         <source>Sketch</source>
-        <translation type="unfinished">スケッチブラシ</translation>
+        <translation>スケッチブラシ</translation>
     </message>
     <message>
         <location filename="../misc/shortcutmanager.cpp" line="21"/>
         <source>Eraser</source>
-        <translation type="unfinished">消しゴム</translation>
+        <translation>消しゴム</translation>
     </message>
     <message>
         <location filename="../misc/shortcutmanager.cpp" line="27"/>
         <source>BinaryBrush</source>
-        <translation type="unfinished"></translation>
+        <translation>二値ブラシ</translation>
     </message>
     <message>
         <location filename="../misc/shortcutmanager.cpp" line="33"/>
         <source>Crayon</source>
-        <translation type="unfinished"></translation>
+        <translation>クレヨン</translation>
     </message>
     <message>
         <location filename="../misc/shortcutmanager.cpp" line="52"/>
         <source>ColorPicker</source>
-        <translation type="unfinished"></translation>
+        <translation>スポイト</translation>
     </message>
     <message>
         <location filename="../misc/shortcutmanager.cpp" line="58"/>
         <source>MoveTool</source>
-        <translation type="unfinished"></translation>
+        <translation>移動ツール</translation>
     </message>
     <message>
         <location filename="../misc/shortcutmanager.cpp" line="64"/>
         <source>Increase brush width</source>
-        <translation type="unfinished"></translation>
+        <translation>ブラシのサイズを大きくする</translation>
     </message>
     <message>
         <location filename="../misc/shortcutmanager.cpp" line="70"/>
         <source>Decrease brush width</source>
-        <translation type="unfinished"></translation>
+        <translation>ブラシのサイズを小さくする</translation>
     </message>
     <message>
         <location filename="../misc/shortcutmanager.cpp" line="76"/>
         <source>Increase brush hardness</source>
-        <translation type="unfinished"></translation>
+        <translation>ブラシの硬さを上げる</translation>
     </message>
     <message>
         <location filename="../misc/shortcutmanager.cpp" line="82"/>
         <source>Decrease brush hardness</source>
-        <translation type="unfinished"></translation>
+        <translation>ブラシの硬さを下げる</translation>
     </message>
     <message>
         <location filename="../misc/shortcutmanager.cpp" line="88"/>
         <source>Increase brush thickness</source>
-        <translation type="unfinished"></translation>
+        <translation>ブラシの濃度を上げる</translation>
     </message>
     <message>
         <location filename="../misc/shortcutmanager.cpp" line="94"/>
         <source>Decrease brush thickness</source>
-        <translation type="unfinished"></translation>
+        <translation>ブラシの濃度を下げる</translation>
     </message>
     <message>
         <location filename="../misc/shortcutmanager.cpp" line="106"/>
         <source>Zoom in canvas</source>
-        <translation type="unfinished"></translation>
+        <translation>キャンバスを拡大</translation>
     </message>
     <message>
         <location filename="../misc/shortcutmanager.cpp" line="112"/>
         <source>Zoom out canvas</source>
-        <translation type="unfinished"></translation>
+        <translation>キャンバスを縮小</translation>
     </message>
     <message>
         <location filename="../misc/shortcutmanager.cpp" line="118"/>
         <source>Rotate canvas clockwise</source>
-        <translation type="unfinished"></translation>
+        <translation>キャンバスを時計回りに回転</translation>
     </message>
     <message>
         <location filename="../misc/shortcutmanager.cpp" line="124"/>
         <source>Rotate canvas anticlockwise</source>
-        <translation type="unfinished"></translation>
+        <translation>キャンバスを反時計回りに回転</translation>
     </message>
     <message>
         <location filename="../misc/shortcutmanager.cpp" line="130"/>
         <source>Reset canvas transformations</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>WaitUpdaterDialog</name>
-    <message>
-        <location filename="../widgets/waitupdaterdialog.ui" line="14"/>
-        <source>Update checking</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../widgets/waitupdaterdialog.ui" line="20"/>
-        <source>Checking updates...</source>
-        <translation type="unfinished"></translation>
+        <translation>キャンバスの変形をリセット</translation>
     </message>
 </context>
 </TS>
