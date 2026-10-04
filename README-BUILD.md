@@ -118,7 +118,7 @@ Qt DLL、插件、MinGW 运行库、许可文本和记录版本与源提交的 `
 用户解压整个 ZIP 后运行 `MrPaint.exe`，无需安装 Qt。
 
 打包脚本使用 `windeployqt` 部署依赖，并解压生成的 ZIP，在清除 SDK 路径后执行
-`MrPaint.exe --version`，检查包能独立启动。本地 Windows 11 验证中，12 项回归测试全部通过。
+`MrPaint.exe --version`，检查包能独立启动且版本与源码一致。Windows CI 的 16 项回归测试全部通过。
 
 ## GitHub Actions Windows 发行
 
@@ -133,14 +133,17 @@ Pull Request 上构建、测试并打包 Windows x64 版本，也支持手动运
 
 推送版本标签后，Linux、macOS、Windows CI 全部成功才自动发布 GitHub Release：
 
+应用版本统一维护在根目录 `VERSION`，用于命令行、“关于”窗口和 Windows EXE 版本信息。
+发行标签须与该文件一致（例如 `VERSION` 为 `1.0.0` 时使用 `v1.0.0`）。
+
 ```bash
 # 在需要发行的提交上创建版本标签，例如：
-git tag v0.6.0
-git push origin v0.6.0
+git tag v1.0.0
+git push origin v1.0.0
 ```
 
-发行附件为 `MrPaint-v0.6.0-windows-x64.zip` 和 `.zip.sha256`。含连字符的版本标签
-（例如 `v0.6.0-beta.1`）会标记为预发行。工作流核对校验值、创建草稿并上传附件，
+发行附件为 `MrPaint-v1.0.0-windows-x64.zip` 和 `.zip.sha256`。含连字符的版本标签
+（例如 `v1.0.0-beta.1`）会标记为预发行。工作流核对校验值、创建草稿并上传附件，
 完成后才公开；重跑同一标签的工作流会更新附件。只有标签发布任务拥有仓库写入权限。
 若使用手动触发，需要此工作流先存在于仓库默认分支。
 

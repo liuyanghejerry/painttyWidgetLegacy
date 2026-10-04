@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     a.setOrganizationName("Paintty");
     a.setApplicationName("MrPaint");
-    a.setApplicationVersion("0.6-local");
+    a.setApplicationVersion(QStringLiteral(PAINTTY_VERSION));
     mainOnly::adjustLog();
 
 #ifdef Q_OS_MACOS

@@ -9,6 +9,10 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $projectDirectory = Split-Path $PSScriptRoot -Parent
+$applicationVersion = (Get-Content (Join-Path $projectDirectory 'VERSION') -Raw).Trim()
+if ($Version.StartsWith('v') -and $Version.Substring(1) -ne $applicationVersion) {
+    throw "Release tag $Version does not match application version $applicationVersion."
+}
 if (-not $BuildDirectory) { $BuildDirectory = Join-Path $projectDirectory 'build/windows' }
 if (-not $OutputDirectory) { $OutputDirectory = Join-Path $projectDirectory 'dist' }
 $BuildDirectory = [IO.Path]::GetFullPath($BuildDirectory)
@@ -57,6 +61,7 @@ Copy-Item (Join-Path $QtDirectory '../../Tools/mingw1120_64/licenses') (Join-Pat
 Copy-Item (Join-Path $projectDirectory 'packaging/windows/README.txt') (Join-Path $stagingDirectory 'README.txt')
 $metadata = [ordered]@{
     version = $Version
+    applicationVersion = $applicationVersion
     commit = $Commit
     qt = '6.6.3'
     compiler = 'MinGW 11.2.0'
@@ -114,7 +119,7 @@ try {
     if ($process.ExitCode -ne 0) {
         throw "Packaged application failed ($($process.ExitCode)): $errorOutput"
     }
-    if ($versionOutput -notmatch 'MrPaint\s+\S+') { throw "Unexpected --version output: $versionOutput" }
+    if ($versionOutput.Trim() -ne "MrPaint $applicationVersion") { throw "Unexpected --version output: $versionOutput" }
 } finally {
     if ($process) { $process.Dispose() }
     foreach ($name in $variables) { [Environment]::SetEnvironmentVariable($name, $previousEnvironment[$name], 'Process') }

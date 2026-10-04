@@ -6,10 +6,15 @@
 
 QT       += core gui widgets
 
+VERSION = $$cat($$PWD/../../VERSION, lines)
+DEFINES += PAINTTY_VERSION=\\\"$$VERSION\\\"
 DEFINES += PAINTTY_DESKTOP
 
 win32 {
-    RC_FILE = app.rc
+    RC_ICONS = iconset/painttyWidget.ico
+    QMAKE_TARGET_COMPANY = Project Paintty
+    QMAKE_TARGET_PRODUCT = Mr.Paint
+    QMAKE_TARGET_DESCRIPTION = Offline digital painting
     LIBS += -limm32
     SOURCES +=
     HEADERS +=

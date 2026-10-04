@@ -10,8 +10,6 @@
 namespace GlobalDef
 {
 
-const static int CLIENT_VER = 60;
-
 inline QString settingsPath()
 {
     const auto directory = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
