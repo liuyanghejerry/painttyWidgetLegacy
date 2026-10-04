@@ -59,7 +59,7 @@ QTDIR="$HOME/develop/Qt/6.6.3/gcc_64" ./scripts/build-linux.sh --debug --jobs 8
 
 QtTest 回归测试覆盖图层往返保存、覆盖失败保护、损坏文件、旧格式层序、撤销重做、
 未保存关闭提示、取消另存为、鼠标和 Pressure Brush 笔画、图层锁定与本地偏好。
-测试使用临时项目及配置目录，不写入用户偏好。
+测试使用临时项目和独立的配置命名空间，不写入 Mr.Paint 的用户偏好。
 
 ```bash
 JOBS=8 ./scripts/test-linux.sh
@@ -72,7 +72,56 @@ QT_QPA_PLATFORM=offscreen ./build/build/canvas-renderer \
 项目尺寸上限为 10000×10000 且不超过 64 百万像素，最多 256 个图层。
 原生项目文件上限为 512 MiB，读取图层的总像素存储上限为 1 GiB。
 
-## macOS / Windows
+## Windows 构建与便携包
+
+Windows x64 使用 Qt 6.6.3 的 `win64_mingw` 和 MinGW 11.2.0，与 Windows 11
+虚拟机中的工具链一致。可通过 aqt 安装：
+
+```powershell
+python -m pip install aqtinstall==3.3.0
+python -m aqt install-qt windows desktop 6.6.3 win64_mingw -O C:\Qt --archives qtbase qttools qttranslations qtsvg MinGW d3dcompiler_47 opengl32sw
+python -m aqt install-tool windows desktop tools_mingw90 qt.tools.win64_mingw900 -O C:\Qt
+
+./scripts/build-windows.ps1 -QtDirectory C:\Qt\6.6.3\mingw_64
+./scripts/package-windows.ps1 -QtDirectory C:\Qt\6.6.3\mingw_64 -Version dev-local
+```
+
+Qt 的工具包标识 `qt.tools.win64_mingw900` 对应 MinGW **11.2.0**，目录为
+`C:\Qt\Tools\mingw1120_64`。脚本会检查 Qt 和编译器版本，并在任何构建或测试失败时退出。
+
+三个程序在 `build/windows/build/` 中，回归测试结果在 `build/windows/test-results.txt`
+和 `test-results.xml` 中。发行 ZIP 和 SHA-256 文件位于 `dist/`，ZIP 包含 `MrPaint.exe`、
+Qt DLL、插件、MinGW 运行库、许可文本和记录版本与源提交的 `build-info.json`。
+用户解压整个 ZIP 后运行 `MrPaint.exe`，无需安装 Qt。
+
+打包脚本使用 `windeployqt` 部署依赖，并解压生成的 ZIP，在清除 SDK 路径后执行
+`MrPaint.exe --version`，检查包能独立启动。本地 Windows 11 验证中，12 项回归测试全部通过。
+
+## GitHub Actions Windows 发行
+
+`.github/workflows/ci.yml` 在主开发分支、`feature/**` 分支的提交和针对主开发分支的
+Pull Request 上构建、测试并打包 Windows x64 版本，也支持手动运行。
+在 Actions 运行页的 **Artifacts** 中下载：
+
+- `windows-portable`：`MrPaint-dev-<提交短哈希>-windows-x64.zip` 及 `.zip.sha256` 校验文件。
+- `windows-test-results`：文本和 JUnit 测试结果，以及便携包启动检查日志。
+
+构建产物保留 30 天。普通分支构建不创建 Release。
+
+推送版本标签后，Linux、macOS、Windows CI 全部成功才自动发布 GitHub Release：
+
+```bash
+# 在需要发行的提交上创建版本标签，例如：
+git tag v0.6.0
+git push origin v0.6.0
+```
+
+发行附件为 `MrPaint-v0.6.0-windows-x64.zip` 和 `.zip.sha256`。含连字符的版本标签
+（例如 `v0.6.0-beta.1`）会标记为预发行。工作流核对校验值、创建草稿并上传附件，
+完成后才公开；重跑同一标签的工作流会更新附件。只有标签发布任务拥有仓库写入权限。
+若使用手动触发，需要此工作流先存在于仓库默认分支。
+
+## macOS
 
 使用对应 Qt 6.6.3 的 qmake 进行目录外构建：
 
@@ -83,5 +132,4 @@ cd build
 make -j8
 ```
 
-Windows 在配置了 MSVC 和 Qt 的开发者命令行中使用 `nmake` 替代 `make`。
-本次验证平台为 Linux，其他平台需要在对应系统验证。
+macOS 构建需要在对应系统验证。

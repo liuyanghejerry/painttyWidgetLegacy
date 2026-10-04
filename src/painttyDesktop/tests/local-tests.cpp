@@ -15,6 +15,10 @@
 #include <QGraphicsScene>
 #include <QGraphicsProxyWidget>
 
+#ifdef Q_OS_UNIX
+#include <unistd.h>
+#endif
+
 #include "common/common.h"
 #include "misc/projectfile.h"
 #include "widgets/canvas.h"
@@ -106,15 +110,19 @@ private slots:
         QVERIFY(file.open(QIODevice::ReadOnly));
         QCOMPARE(file.readAll(), before);
         file.close();
-        // Without directory write permission an atomic save cannot create its temporary file.
-        const auto permissions = QFile::permissions(directory.path());
-        QVERIFY(QFile::setPermissions(directory.path(), QFile::ReadOwner | QFile::ExeOwner));
-        const bool saved = ProjectFile::save(path, sample(), &error);
-        QVERIFY(QFile::setPermissions(directory.path(), permissions));
-        QVERIFY(!saved);
-        QVERIFY(file.open(QIODevice::ReadOnly));
-        QCOMPARE(file.readAll(), before);
-        file.close();
+#ifdef Q_OS_UNIX
+        // Windows directory ACLs and privileged Unix users do not follow these mode bits.
+        if (geteuid() != 0) {
+            const auto permissions = QFile::permissions(directory.path());
+            QVERIFY(QFile::setPermissions(directory.path(), QFile::ReadOwner | QFile::ExeOwner));
+            const bool saved = ProjectFile::save(path, sample(), &error);
+            QVERIFY(QFile::setPermissions(directory.path(), permissions));
+            QVERIFY(!saved);
+            QVERIFY(file.open(QIODevice::ReadOnly));
+            QCOMPARE(file.readAll(), before);
+            file.close();
+        }
+#endif
         QVERIFY(!ProjectFile::save(directory.path(), sample(), &error));
         QVERIFY(QFileInfo(directory.path()).isDir());
         QVERIFY(ProjectFile::save(path, sample(), &error));

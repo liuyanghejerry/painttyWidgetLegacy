@@ -3,8 +3,17 @@ name: CI Build
 on:
   push:
     branches: [ "main", "master", "develop", "feature/**" ]
+    tags: [ "v[0-9]*" ]
   pull_request:
     branches: [ "main", "master", "develop" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref_type != 'tag' }}
 
 jobs:
   build-linux:
@@ -67,24 +76,100 @@ jobs:
 
   build-windows:
     runs-on: windows-2022
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: pwsh
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Qt6
-        uses: jurplel/install-qt-action@v3
+      - name: Set up Python for aqt
+        uses: actions/setup-python@v6
         with:
-          version: '6.6.0'
+          python-version: '3.12'
 
-      - name: Set up MSVC environment
-        uses: ilammy/msvc-dev-cmd@v1
+      - name: Install Qt 6.6.3 and MinGW 11.2.0
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.6.3'
+          arch: win64_mingw
+          archives: qtbase qttools qttranslations qtsvg MinGW d3dcompiler_47 opengl32sw
+          tools: tools_mingw90,qt.tools.win64_mingw900
+          aqtversion: '==3.3.0'
+          setup-python: false
+          cache: true
 
-      - name: Build
+      - name: Build and test
+        run: ./scripts/build-windows.ps1
+
+      - name: Package and verify portable ZIP
+        id: package
+        env:
+          BUILD_REF_TYPE: ${{ github.ref_type }}
+          BUILD_REF_NAME: ${{ github.ref_name }}
+          BUILD_SHA: ${{ github.sha }}
         run: |
-          mkdir build
-          cd build
-          qmake ../painttyWidget.pro
-          nmake
+          $version = if ($env:BUILD_REF_TYPE -eq 'tag') { $env:BUILD_REF_NAME } else { "dev-$($env:BUILD_SHA.Substring(0, 7))" }
+          ./scripts/package-windows.ps1 -Version $version -Commit $env:BUILD_SHA
 
-      - name: Verify build
-        shell: pwsh
-        run: Get-ChildItem build/ -Recurse -Name | Select-Object -First 30
+      - name: Upload portable ZIP and SHA-256
+        id: portable
+        uses: actions/upload-artifact@v7
+        with:
+          name: windows-portable
+          path: |
+            ${{ steps.package.outputs.archive }}
+            ${{ steps.package.outputs.checksum }}
+          compression-level: 0
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload test and package logs
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: windows-test-results
+          path: |
+            build/windows/test-results.*
+            build/windows/package-smoke-*.txt
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Add download link to job summary
+        env:
+          ARTIFACT_URL: ${{ steps.portable.outputs.artifact-url }}
+        run: |
+          "Windows x64 portable ZIP: [download artifact]($env:ARTIFACT_URL)" >> $env:GITHUB_STEP_SUMMARY
+
+  release-windows:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    needs: [build-linux, build-macos, build-windows]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download verified Windows package
+        uses: actions/download-artifact@v8
+        with:
+          name: windows-portable
+          path: release-assets
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          cd release-assets
+          sha256sum --check *.zip.sha256
+          assets=(*.zip *.zip.sha256)
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" "${assets[@]}" --clobber
+          else
+            options=(--draft --verify-tag --generate-notes --title "Mr.Paint $RELEASE_TAG")
+            if [[ "$RELEASE_TAG" == *-* ]]; then
+              options+=(--prerelease)
+            fi
+            gh release create "$RELEASE_TAG" "${assets[@]}" "${options[@]}"
+          fi
+          gh release edit "$RELEASE_TAG" --draft=false
