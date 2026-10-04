@@ -29,6 +29,7 @@ public:
     void removeLayer(const QString &name);
     void clearLayer(const QString &name);
     void clearAllLayer();
+    void reset();
     void moveUp(const QString &name);
     void moveDown(const QString &name);
     void moveTo(const QString &, int);

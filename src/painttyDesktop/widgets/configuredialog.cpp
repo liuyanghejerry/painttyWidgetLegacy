@@ -4,7 +4,6 @@
 #include <QRegularExpression>
 #include <QLocale>
 #include <QMessageBox>
-#include <QProcess>
 #include <QTreeWidgetItem>
 #include <QMapIterator>
 #include <QComboBox>
@@ -19,16 +18,13 @@ ConfigureDialog::ConfigureDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::ConfigureDialog),
     auto_disable_ime(false),
-    skip_replay(false),
-    use_droid_font(false),
-    use_default_server(true)
+    use_droid_font(false)
 {
     ui->setupUi(this);
     resize(width() * logicalDpiX() / 96, height() * logicalDpiY() / 96);
     readSettings();
     initLanguageList();
     initShortcutList();
-    initServerSettings();
     initUi();
 
     connect(this, &ConfigureDialog::accepted,
@@ -42,14 +38,11 @@ ConfigureDialog::~ConfigureDialog()
 
 void ConfigureDialog::readSettings()
 {
-    QSettings settings(GlobalDef::SETTINGS_NAME,
+    QSettings settings(GlobalDef::settingsPath(),
                        QSettings::defaultFormat());
     selectedLanguage = settings.value("global/language").toString();
     auto_disable_ime = settings.value("canvas/auto_disable_ime", true).toBool();
-    enable_tablet = settings.value("canvas/enable_tablet", false).toBool();
-    use_default_server = settings.value("global/server/use_default", true).toBool();
-    addr = settings.value("global/server/addr").toString();
-    skip_replay = settings.value("canvas/skip_replay", true).toBool();
+    enable_tablet = settings.value("canvas/enable_tablet", true).toBool();
     use_droid_font = settings.value("global/use_droid_font", false).toBool();
 
 }
@@ -106,44 +99,20 @@ void ConfigureDialog::initShortcutList()
     ui->shortcutList->resizeColumnToContents(0);
 }
 
-void ConfigureDialog::initServerSettings()
-{
-    connect(ui->use_default_server_checkbox, &QCheckBox::stateChanged,
-            [this](int n_state){
-        if(n_state == Qt::Checked){
-            ui->ipv4_lineedit->setDisabled(true);
-            ui->server_notice_label->setVisible(false);
-        }else{
-            ui->ipv4_lineedit->setDisabled(false);
-            ui->server_notice_label->setVisible(true);
-        }
-    });
-    ui->use_default_server_checkbox->setChecked(use_default_server);
-
-    ui->ipv4_lineedit->setText(addr);
-}
-
 void ConfigureDialog::initUi()
 {
     ui->auto_disable_ime_checkbox->setChecked(auto_disable_ime);
     ui->enable_tablet->setChecked(enable_tablet);
-    ui->skip_replay->setChecked(skip_replay);
     ui->droid_font_checkbox->setChecked(use_droid_font);
 
-    connect(ui->clearCache, &QPushButton::clicked,
-            [](){
-        QDir cacheDir("cache");
-        cacheDir.removeRecursively();
-    });
 
-    ui->enable_tablet->setDisabled(true);
 }
 
 
 
 void ConfigureDialog::acceptConfigure()
 {
-    QSettings settings(GlobalDef::SETTINGS_NAME,
+    QSettings settings(GlobalDef::settingsPath(),
                        QSettings::defaultFormat(),
                        qApp);
     bool needRestart = false;
@@ -212,32 +181,6 @@ void ConfigureDialog::acceptConfigure()
         needRestart = true;
     }
 
-    // save server settings
-    {
-        if (ui->use_default_server_checkbox->isChecked() != use_default_server)
-        {
-            settings.setValue("global/server/use_default",
-                              ui->use_default_server_checkbox->isChecked());
-            needRestart = true;
-        }
-        QString ip_t(ui->ipv4_lineedit->text().trimmed());
-        if (ip_t != addr)
-        {
-            settings.setValue("global/server/addr",
-                              ip_t);
-            needRestart = true;
-        }
-    }
-
-    // save canvas replay-skip settings
-    if (ui->skip_replay->isChecked() != skip_replay)
-    {
-        settings.setValue("canvas/skip_replay",
-                          ui->skip_replay->isChecked());
-        needRestart = true;
-    }
-
-
     settings.sync();
 
     //see if we need to restart
@@ -245,19 +188,8 @@ void ConfigureDialog::acceptConfigure()
         return;
     }
 
-    int result = QMessageBox::warning(this, tr("Restart"),
-                                      tr("Application must restart to "
-                                         "enable some of the settings.\n"
-                                         "Do you want to restart right now?"),
-                                      QMessageBox::Yes | QMessageBox::No);
-    if (result == QMessageBox::Yes) {
-        qApp->closeAllWindows();
-        qApp->exit(1);
-        QProcess::startDetached(qApp->applicationFilePath(), QStringList());
-    } else if (result == QMessageBox::No) {
-        QMessageBox::warning(this , tr("Restart"),
-                             tr("New settings will be applied on next start."));
-    }
+    QMessageBox::information(this, tr("Preferences"),
+                             tr("Language, font and shortcut changes will apply the next time you start Mr.Paint."));
 }
 
 ShortcutDelegate::ShortcutDelegate(QObject *parent) :

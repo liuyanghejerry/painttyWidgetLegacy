@@ -1,34 +1,35 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include <QCheckBox>
 #include <QClipboard>
 #include <QCloseEvent>
-#include <QCryptographicHash>
-#include <QDateTime>
 #include <QDir>
-#include <QEventLoop>
 #include <QFile>
 #include <QFileDialog>
 #include <QFileInfo>
-#include <QJsonDocument>
-#include <QJsonObject>
 #include <QMessageBox>
-#include <QProgressDialog>
 #include <QActionGroup>
 #include <QSettings>
 #include <QShortcut>
-#include <QTimer>
 #include <QToolBar>
 #include <QToolButton>
-#include <QtConcurrent>
-#include <QThread>
 #include <QApplication>
 #include <QTextStream>
-#include <QPushButton>
+#include <QStatusBar>
+#include <QInputDialog>
+#include <QImageReader>
+#include <QImageWriter>
+#include <QSaveFile>
+#include <QScopedValueRollback>
+#include <QMenu>
+#include <QVBoxLayout>
+#include <QDockWidget>
+#include <algorithm>
+#include <QUndoStack>
+#include <QUndoCommand>
 
 #include "../common/common.h"
-#include "../misc/archivefile.h"
+#include "../misc/projectfile.h"
 #include "../misc/psdexport.h"
 #include "../misc/shortcutmanager.h"
 #include "../misc/singleshortcut.h"
@@ -45,6 +46,25 @@
 #include "layeritem.h"
 #include "layerwidget.h"
 #include "colorbox.h"
+
+namespace {
+class DocumentChange : public QUndoCommand
+{
+public:
+    DocumentChange(const PaintingProject &before, const PaintingProject &after,
+                   std::function<void(const PaintingProject &)> apply)
+        : before_(before), after_(after), apply_(std::move(apply)) {}
+    void undo() override { apply_(before_); }
+    void redo() override {
+        if (firstRedo_) firstRedo_ = false;
+        else apply_(after_);
+    }
+private:
+    PaintingProject before_, after_;
+    std::function<void(const PaintingProject &)> apply_;
+    bool firstRedo_ = true;
+};
+}
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -80,6 +100,9 @@ void MainWindow::stylize()
 
 void MainWindow::init()
 {
+    undoStack_ = new QUndoStack(this);
+    undoStack_->setUndoLimit(30);
+    connect(undoStack_, &QUndoStack::cleanChanged, this, [this](bool clean) { setWindowModified(!clean); });
     // 设置初始窗口标题
     setWindowTitle(tr("Mr.Paint"));
 
@@ -138,7 +161,6 @@ void MainWindow::init()
             static_cast<void (CanvasContainer::*)(const QPointF&)>
             (&CanvasContainer::centerOn));
 
-    layerWidgetInit();
     colorGridInit();
     statusBarInit();
     toolbarInit();
@@ -148,19 +170,18 @@ void MainWindow::init()
     // 将 Canvas 注册到 CanvasContainer 的 scene 中，启用滚动条和视图管理
     ui->centralWidget->setCanvas(ui->canvas);
     ui->centralWidget->resetView();
-}
-
-void MainWindow::layerWidgetInit()
-{
-    for(int i=0;i<10;++i){
-        addLayer();
-    }
-    ui->layerWidget->itemAt(0)->setSelect(true);
+    connect(ui->canvas, &Canvas::documentChanged, this, [this]() {
+        if (!resettingDocument_) {
+            setWindowModified(true);
+            if (!ui->canvas->isDrawing()) recordDocumentChange();
+        }
+    });
+    newProject(1280, 720);
 }
 
 void MainWindow::colorGridInit()
 {
-    QSettings settings(GlobalDef::SETTINGS_NAME,
+    QSettings settings(GlobalDef::settingsPath(),
                        QSettings::defaultFormat(),
                        qApp);
     QByteArray data = settings.value("colorgrid/pal")
@@ -174,9 +195,9 @@ void MainWindow::colorGridInit()
 
 void MainWindow::viewInit()
 {
-    QSettings settings(GlobalDef::SETTINGS_NAME,
-                       QSettings::defaultFormat(),
-                       qApp);
+    QSettings settings(GlobalDef::settingsPath(), QSettings::IniFormat);
+    defaultView = saveState();
+    restoreGeometry(settings.value("mainwindow/geometry").toByteArray());
     QByteArray data = settings.value("mainwindow/view")
             .toByteArray();
     if(data.isEmpty()){
@@ -202,6 +223,7 @@ void MainWindow::toolbarInit()
 
     auto brushes = Singleton<BrushManager>::instance().allBrushes();
     auto brushesV3 = Singleton<BrushManager>::instance().allBrushesV3();
+    std::sort(brushes.begin(), brushes.end(), [](const auto &a, const auto &b) { return a->name() < b->name(); });
 
     // 添加v1笔刷
     for(auto &item: brushes){
@@ -321,20 +343,6 @@ void MainWindow::toolbarInit()
                 .arg(moveTool->text())
                 .arg(movetool_key));
 
-    // // TODO: v3笔刷成熟后可以放开
-    // 从 settings 读取 tablet 默认状态，与 configuredialog.cpp 保持一致
-    // QSettings settings(GlobalDef::SETTINGS_NAME, QSettings::defaultFormat(), qApp);
-    // bool enable_tablet = settings.value("canvas/enable_tablet", false).toBool();
-
-    // QToolBar *tabletEnableToolbar = new QToolBar(tr("Tablet"), this);
-    // tabletEnableToolbar->setObjectName("TabletEnableToolbar");
-    // QAction *tabletAction = tabletEnableToolbar->addAction(QIcon(":/iconset/ui/tablet.png"), tr("Draw with Tablet"));
-    // tabletAction->setCheckable(true);
-    // tabletAction->setChecked(enable_tablet);
-    // ui->canvas->setTabletEnabled(enable_tablet);
-    // connect(tabletAction, &QAction::toggled, ui->canvas, &Canvas::setTabletEnabled);
-    // addToolBar(Qt::TopToolBarArea, tabletEnableToolbar);
-
     // for brush width
     QToolBar *brushSettingToolbar = new QToolBar(tr("Brush Settings"), this);
     brushSettingToolbar->setObjectName("BrushSettingToolbar");
@@ -380,10 +388,67 @@ void MainWindow::toolbarInit()
 
 void MainWindow::statusBarInit()
 {
+    ui->statusBar->setSizeGripEnabled(true);
 }
 
 void MainWindow::shortcutInit()
 {
+    auto *undo = undoStack_->createUndoAction(this, tr("Undo"));
+    undo->setObjectName("actionUndo");
+    undo->setShortcut(QKeySequence::Undo);
+    auto *redo = undoStack_->createRedoAction(this, tr("Redo"));
+    redo->setObjectName("actionRedo");
+    redo->setShortcuts(QKeySequence::Redo);
+    ui->menu_Edit->insertAction(ui->actionClear_All_Layers, undo);
+    ui->menu_Edit->insertAction(ui->actionClear_All_Layers, redo);
+    ui->actionNew->setShortcut(QKeySequence::New);
+    ui->actionOpen->setShortcut(QKeySequence::Open);
+    ui->actionSave->setShortcut(QKeySequence::Save);
+    ui->actionSave_As->setShortcut(QKeySequence::SaveAs);
+    ui->action_Quit->setShortcut(QKeySequence::Quit);
+    recentProjectsMenu_ = new QMenu(tr("Open Recent"), this);
+    ui->menu_File->insertMenu(ui->actionSave, recentProjectsMenu_);
+    refreshRecentProjects();
+    auto *import = new QAction(tr("Import Image as Layer…"), this);
+    import->setObjectName("actionImportImage");
+    ui->menu_File->insertAction(ui->action_Quit, import);
+    connect(import, &QAction::triggered, this, &MainWindow::importImage);
+    auto *legacy = new QAction(tr("Open Legacy Project Folder…"), this);
+    ui->menu_File->insertAction(ui->action_Quit, legacy);
+    connect(legacy, &QAction::triggered, this, [this]() {
+        const QString path = QFileDialog::getExistingDirectory(this, tr("Open Legacy Project"), lastProjectDirectory());
+        if (!path.isEmpty()) openProject(path);
+    });
+    auto *fileToolbar = addToolBar(tr("File"));
+    fileToolbar->setObjectName("FileToolbar");
+    fileToolbar->addActions({ui->actionNew, ui->actionOpen, ui->actionSave});
+
+    auto *layerMenu = new QMenu(tr("&Layer"), this);
+    ui->menuBar->insertMenu(ui->menu_View->menuAction(), layerMenu);
+    auto *layerToolbar = new QToolBar(tr("Layers"), ui->layerWidget->parentWidget());
+    ui->layerWidget->parentWidget()->layout()->addWidget(layerToolbar);
+    auto addLayerAction = [this, layerMenu, layerToolbar](const QString &text, const QString &name, auto callback) {
+        auto *action = layerMenu->addAction(text);
+        action->setObjectName(name);
+        layerToolbar->addAction(action);
+        connect(action, &QAction::triggered, this, callback);
+        return action;
+    };
+    addLayerAction(tr("Add"), "actionAddLayer", [this]() { addLayer(); })->setShortcut(QKeySequence("Ctrl+Shift+N"));
+    addLayerAction(tr("Delete"), "actionDeleteLayer", [this]() { deleteLayer(); });
+    addLayerAction(tr("Up"), "actionRaiseLayer", [this]() {
+        ui->canvas->moveLayerUp(ui->canvas->currentLayer()); rebuildLayerList();
+    });
+    addLayerAction(tr("Down"), "actionLowerLayer", [this]() {
+        ui->canvas->moveLayerDown(ui->canvas->currentLayer()); rebuildLayerList();
+    });
+    layerMenu->addAction(tr("Clear Selected Layer"), this, [this]() { clearLayer(ui->canvas->currentLayer()); });
+    connect(ui->layerWidget, &LayerWidget::renameRequested, this, [this](const QString &oldName, const QString &newName) {
+        if (ui->canvas->renameLayer(oldName, newName)) rebuildLayerList();
+        else QMessageBox::warning(this, tr("Rename Layer"), tr("Choose a unique layer name of 1–256 characters."));
+    });
+    ui->menu_View->addSeparator();
+    for (auto *dock : findChildren<QDockWidget *>()) ui->menu_View->addAction(dock->toggleViewAction());
     connect(ui->action_Quit, &QAction::triggered,
             this, &MainWindow::close);
     connect(ui->actionNew, &QAction::triggered,
@@ -413,9 +478,12 @@ void MainWindow::shortcutInit()
     connect(ui->actionClear_All_Layers, &QAction::triggered,
             this, &MainWindow::clearAllLayer);
     connect(ui->actionConfiguration, &QAction::triggered,
-            [](){
-        ConfigureDialog conf_dialog;
-        conf_dialog.exec();
+            [this](){
+        ConfigureDialog conf_dialog(this);
+        if (conf_dialog.exec() == QDialog::Accepted) {
+            QSettings settings(GlobalDef::settingsPath(), QSettings::IniFormat);
+            ui->canvas->setTabletEnabled(settings.value("canvas/enable_tablet", true).toBool());
+        }
     });
 
     regShortcut<>("zoomin", [this](){
@@ -462,9 +530,8 @@ void MainWindow::onBrushSettingsChanged(const QVariantMap &m)
     int extend = m["extend"].toInt();
     int mixin = m["mixin"].toInt();
     QVariantMap colorMap = m["color"].toMap();
-    QColor c(colorMap["red"].toInt(),
-            colorMap["green"].toInt(),
-            colorMap["blue"].toInt());
+    QColor c = m["color"].canConvert<QColor>() ? m["color"].value<QColor>()
+        : QColor(colorMap["red"].toInt(), colorMap["green"].toInt(), colorMap["blue"].toInt());
 
     // INFO: to prevent scaled to 1px, should always
     // change width first
@@ -532,6 +599,9 @@ void MainWindow::onCanvasToolComplete()
 
 void MainWindow::changeToBrush(const QString &brushName)
 {
+    for (auto *action : brushActionGroup_->actions()) {
+        if (action->objectName().compare(brushName, Qt::CaseInsensitive) == 0) action->setChecked(true);
+    }
     // 检查是否为v3笔刷
     if (Singleton<BrushManager>::instance().isV3Brush(brushName)) {
         ui->canvas->changeBrushV3(brushName);
@@ -556,121 +626,94 @@ void MainWindow::changeToBrush(const QString &brushName)
         this->brushSettingControl_->setMixinEnabled(f.support(BrushFeature::MIXIN));
     }
 
-    // onBrushSettingsChanged(ui->canvas->brushSettings());
+    onBrushSettingsChanged(ui->canvas->brushSettings());
+}
+
+void MainWindow::rebuildLayerList()
+{
+    ui->layerWidget->clear();
+    const auto project = ui->canvas->projectState();
+    for (const auto &layer : project.layers) {
+        auto *item = new LayerItem;
+        QIcon visibility(":/iconset/ui/visibility-on.png");
+        visibility.addFile(":/iconset/ui/visibility-off.png", QSize(), QIcon::Selected, QIcon::On);
+        item->setVisibleIcon(visibility);
+        QIcon lock(":/iconset/ui/lock.png");
+        lock.addFile(":/iconset/ui/unlock.png", QSize(), QIcon::Selected, QIcon::On);
+        item->setLockIcon(lock);
+        item->setLabel(layer.name);
+        item->setHidden(!layer.visible);
+        item->setLocked(layer.locked);
+        ui->layerWidget->addItem(item);
+        if (layer.name == project.layers.at(project.selectedLayer).name) item->setSelect(true);
+    }
 }
 
 void MainWindow::addLayer(const QString &layerName)
 {
+    const auto project = ui->canvas->projectState();
+    if (project.layers.size() >= ProjectFile::MaxLayers) {
+        QMessageBox::warning(this, tr("Layers"), tr("The maximum number of layers is 256."));
+        return;
+    }
     QString name = layerName;
-    if(name.isNull() || name.isEmpty())
-        name = QString::number(ui->canvas->layerNum());
-
-    LayerItem *item = new LayerItem;
-    QIcon visibility(":/iconset/ui/visibility-on.png");
-    visibility.addFile(":/iconset/ui/visibility-off.png",
-                       QSize(),
-                       QIcon::Selected,
-                       QIcon::On);
-    item->setVisibleIcon(visibility);
-    QIcon lock(":/iconset/ui/lock.png");
-    lock.addFile(":/iconset/ui/unlock.png",
-                 QSize(),
-                 QIcon::Selected,
-                 QIcon::On);
-    item->setLockIcon(lock);
-    item->setLabel(name);
-    ui->layerWidget->addItem(item);
+    int number = ui->canvas->layerNum() + 1;
+    auto exists = [&project](const QString &candidate) {
+        for (const auto &layer : project.layers) if (layer.name == candidate) return true;
+        return false;
+    };
+    if (name.isEmpty()) {
+        do { name = tr("Layer %1").arg(number++); } while (exists(name));
+    } else if (exists(name)) return;
     ui->canvas->addLayer(name);
-
-    // NOTICE: disable single layer clear due to lack of
-    // a way to store this action in server history
-    //    QAction *clearOne = new QAction(this);
-    //    ui->menuClear_Canvas->insertAction(ui->actionAll_Layers,
-    //                                       clearOne);
-    //    clearOne->setText(tr("Layer ")+name);
-    //    connect(clearOne, &QAction::triggered,
-    //            [this, name, clearOne](){
-    //        this->clearLayer(name);
-    //    });
+    ui->canvas->layerSelected(name);
+    rebuildLayerList();
 }
 
 void MainWindow::deleteLayer()
 {
-    LayerItem * item = ui->layerWidget->selected();
-    QString text = item->label();
-    bool sucess = ui->canvas->deleteLayer(text);
-    if(sucess) ui->layerWidget->removeItem(item);
-}
-
-void MainWindow::clearLayer(const QString &name)
-{
-    auto result = QMessageBox::question(this,
-                                        tr("OMG"),
-                                        tr("You're going to clear layer %1. "
-                                           "All the work of that layer"
-                                           "will be deleted and CANNOT be undone.\n"
-                                           "Do you really want to do so?").arg(name),
-                                        QMessageBox::Yes|QMessageBox::No);
-    if(result == QMessageBox::Yes){
-        ui->canvas->clearLayer(name);
-    }
-}
-
-void MainWindow::clearAllLayer()
-{
-    auto result = QMessageBox::question(this,
-                                        tr("OMG"),
-                                        tr("You're going to clear ALL LAYERS"
-                                           ". All of work on the canvas"
-                                           "will be deleted and CANNOT be undone.\n"
-                                           "Do you really want to do so?"),
-                                        QMessageBox::Yes|QMessageBox::No);
-    if(result == QMessageBox::Yes){
-        ui->canvas->clearAllLayer();
-    }
+    deleteLayer(ui->canvas->currentLayer());
 }
 
 void MainWindow::deleteLayer(const QString &name)
 {
-    bool sucess = ui->canvas->deleteLayer(name);
-    if(sucess) ui->layerWidget->removeItem(name);
+    if (ui->canvas->count() <= 1) {
+        ui->statusBar->showMessage(tr("Keep at least one layer in the project."), 4000);
+        return;
+    }
+    for (const auto &layer : ui->canvas->projectState().layers) {
+        if (layer.name == name && layer.locked) {
+            ui->statusBar->showMessage(tr("Unlock the layer before deleting it."), 4000);
+            return;
+        }
+    }
+    if (QMessageBox::question(this, tr("Delete Layer"), tr("Delete layer “%1”?").arg(name),
+                              QMessageBox::Yes | QMessageBox::No, QMessageBox::No) != QMessageBox::Yes) return;
+    if (ui->canvas->deleteLayer(name)) rebuildLayerList();
 }
 
-void MainWindow::closeEvent( QCloseEvent * event )
+void MainWindow::clearLayer(const QString &name)
 {
-    ui->canvas->pause();
+    if (QMessageBox::question(this, tr("Clear Layer"), tr("Clear layer “%1”?").arg(name),
+                              QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::Yes)
+        ui->canvas->clearLayer(name);
+}
 
-    // 在关闭前保存画布快照
-    if (ui->canvas) {
-        qDebug() << "[MainWindow] 关闭窗口前保存画布快照";
-        ui->canvas->exportCanvasSnapshot();
+void MainWindow::clearAllLayer()
+{
+    if (QMessageBox::question(this, tr("Clear Canvas"), tr("Clear all unlocked layers?"),
+                              QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::Yes)
+        ui->canvas->clearAllLayer();
+}
 
-        // 等待一小段时间确保快照保存完成
-        QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-        QThread::msleep(100);
-    }
-
-    QProgressDialog dialog(tr("Saving, please wait..."),
-                           QString(),
-                           0, 0, this);
-    dialog.setWindowModality(Qt::ApplicationModal);
-    dialog.show();
-
-    // This is a workaround to make msgBox text shown
-    QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-
-    QSettings settings(GlobalDef::SETTINGS_NAME,
-                       QSettings::defaultFormat(),
-                       qApp);
-    settings.setValue("colorgrid/pal",
-                      ui->colorGrid->dataExport());
-    settings.setValue("mainwindow/view",
-                      saveState());
-
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    if (!promptSaveIfDirty()) { event->ignore(); return; }
+    QSettings settings(GlobalDef::settingsPath(), QSettings::IniFormat);
+    settings.setValue("colorgrid/pal", ui->colorGrid->dataExport());
+    settings.setValue("mainwindow/view", saveState());
+    settings.setValue("mainwindow/geometry", saveGeometry());
     settings.sync();
-
-    dialog.close();
-
     event->accept();
 }
 
@@ -679,7 +722,7 @@ void MainWindow::exportAllToFile()
     QString fileName =
             QFileDialog::getSaveFileName(this,
                                          tr("Export all to file"),
-                                         this->windowTitle(),
+                                         defaultExportPath("png"),
                                          tr("Images (*.png)"));
     fileName = fileName.trimmed();
     if(fileName.isEmpty()){
@@ -689,7 +732,10 @@ void MainWindow::exportAllToFile()
         fileName = fileName + ".png";
     }
     QImage image = ui->canvas->allCanvas();
-    image.save(fileName, "PNG");
+    QSaveFile file(fileName);
+    QImageWriter writer(&file, "PNG");
+    if (!file.open(QIODevice::WriteOnly) || !writer.write(image) || !file.commit())
+        QMessageBox::critical(this, tr("Export Failed"), tr("Could not write the image:\n%1").arg(file.errorString()));
 }
 
 void MainWindow::exportVisibleToFile()
@@ -697,7 +743,7 @@ void MainWindow::exportVisibleToFile()
     QString fileName =
             QFileDialog::getSaveFileName(this,
                                          tr("Export visible part to file"),
-                                         this->windowTitle(),
+                                         defaultExportPath("png"),
                                          tr("Images (*.png)"));
     fileName = fileName.trimmed();
     if(fileName.isEmpty()){
@@ -707,7 +753,10 @@ void MainWindow::exportVisibleToFile()
         fileName = fileName + ".png";
     }
     QImage image = ui->canvas->currentCanvas();
-    image.save(fileName, "PNG");
+    QSaveFile file(fileName);
+    QImageWriter writer(&file, "PNG");
+    if (!file.open(QIODevice::WriteOnly) || !writer.write(image) || !file.commit())
+        QMessageBox::critical(this, tr("Export Failed"), tr("Could not write the image:\n%1").arg(file.errorString()));
 }
 
 void MainWindow::exportToPSD()
@@ -715,7 +764,7 @@ void MainWindow::exportToPSD()
     QString fileName =
             QFileDialog::getSaveFileName(this,
                                          tr("Export contents to psd file"),
-                                         this->windowTitle(),
+                                         defaultExportPath("psd"),
                                          tr("Photoshop Images (*.psd)"));
     fileName = fileName.trimmed();
     if(fileName.isEmpty()){
@@ -727,27 +776,10 @@ void MainWindow::exportToPSD()
 
     // save all layers into psd
 
-    QProgressDialog *dialog = new QProgressDialog(tr("Exporting..."), QString(), 0, 0, this);
-    dialog->setWindowModality(Qt::WindowModal);
-    dialog->show();
-    QFutureWatcher<QByteArray> *watcher = new QFutureWatcher<QByteArray>;
-    QFuture<QByteArray> *future = new QFuture<QByteArray>(QtConcurrent::run(imagesToPSD,
-                                                                            ui->canvas->layerImages(),
-                                                                            ui->canvas->allCanvas()));
-    watcher->setFuture(*future);
-    connect(watcher, &QFutureWatcher<QByteArray>::finished, [watcher, dialog, future, fileName](){
-        QByteArray data = future->result();
-        QFile file(fileName);
-        if(!file.open(QIODevice::Truncate|QIODevice::WriteOnly)) {
-            return;
-        }
-        qDebug()<<data.length();
-        file.write(data);
-        file.close();
-        dialog->close();
-        dialog->deleteLater();
-        watcher->deleteLater();
-    });
+    const QByteArray data = imagesToPSD(ui->canvas->layerImages(), ui->canvas->allCanvas());
+    QSaveFile file(fileName);
+    if (data.isEmpty() || !file.open(QIODevice::WriteOnly) || file.write(data) != data.size() || !file.commit())
+        QMessageBox::critical(this, tr("Export Failed"), tr("Could not write the PSD file:\n%1").arg(file.errorString()));
 }
 
 void MainWindow::exportAllToClipboard()
@@ -777,223 +809,220 @@ void MainWindow::about()
 
 void MainWindow::onNewProject()
 {
-    if (!promptSaveIfDirty())
-        return;
-
     NewProjectDialog dialog(this);
-    if (dialog.exec() == QDialog::Accepted) {
-        newProject(dialog.canvasWidth(), dialog.canvasHeight());
-    }
+    if (dialog.exec() == QDialog::Accepted) newProject(dialog.canvasWidth(), dialog.canvasHeight());
 }
 
 void MainWindow::newProject(int width, int height)
 {
+    if (!ProjectFile::validSize(QSize(width, height)) || !promptSaveIfDirty()) return;
+    QScopedValueRollback<bool> resetting(resettingDocument_, true);
+    PaintingProject project;
+    project.size = QSize(width, height);
+    project.layers.append({tr("Layer 1"), QImage(), true, false});
+    ui->canvas->setProjectState(project);
+    rebuildLayerList();
+    undoStack_->clear();
+    historyBytes_ = 0;
+    lastProjectState_ = ui->canvas->projectState();
     currentProjectPath_.clear();
-    ui->canvas->setCanvasSize(QSize(width, height));
-    ui->canvas->clearAllLayer();
-    setWindowTitle(tr("Mr.Paint - Untitled"));
+    setWindowModified(false);
+    updateProjectTitle();
     ui->centralWidget->resetView();
     onPanoramaRefresh();
 }
 
 void MainWindow::onOpenProject()
 {
-    if (!promptSaveIfDirty())
-        return;
-
-    QString filePath = QFileDialog::getExistingDirectory(
-        this,
-        tr("Open Project"),
-        QString(),
-        QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks
-    );
-
-    if (filePath.isEmpty())
-        return;
-
-    QFileInfo fi(filePath);
-    QString metadataPath = filePath + "/metadata.json";
-    if (fi.suffix() == "paintty" || QFile::exists(metadataPath)) {
-        openProject(filePath);
-    } else {
-        QMessageBox::warning(this, tr("Invalid Project"),
-                             tr("The selected directory is not a valid Mr.Paint project."));
-    }
+    const QString path = QFileDialog::getOpenFileName(this, tr("Open Project"), lastProjectDirectory(),
+                                                     tr("Mr.Paint Projects (*.paintty)"));
+    if (!path.isEmpty()) openProject(path);
 }
 
 bool MainWindow::openProject(const QString &filePath)
 {
-    if (loadFromFile(filePath)) {
-        currentProjectPath_ = filePath;
-        setWindowTitle(tr("Mr.Paint - %1").arg(QFileInfo(filePath).fileName()));
-        ui->centralWidget->resetView();
-        onPanoramaRefresh();
-        return true;
+    PaintingProject project;
+    QString error;
+    if (!ProjectFile::load(filePath, &project, &error)) {
+        QMessageBox::critical(this, tr("Open Failed"), tr("Could not open the project:\n%1").arg(error));
+        return false;
     }
-    return false;
+    if (!promptSaveIfDirty()) return false;
+    QScopedValueRollback<bool> resetting(resettingDocument_, true);
+    ui->canvas->setProjectState(project);
+    rebuildLayerList();
+    undoStack_->clear();
+    historyBytes_ = 0;
+    lastProjectState_ = ui->canvas->projectState();
+    currentProjectPath_ = QFileInfo(filePath).absoluteFilePath();
+    setWindowModified(false);
+    updateProjectTitle();
+    rememberProject(currentProjectPath_);
+    ui->centralWidget->resetView();
+    onPanoramaRefresh();
+    ui->statusBar->showMessage(tr("Project opened"), 3000);
+    return true;
 }
 
-void MainWindow::onSaveProject()
-{
-    if (currentProjectPath_.isEmpty()) {
-        onSaveProjectAs();
-    } else {
-        saveToFile(currentProjectPath_);
-    }
-}
+void MainWindow::onSaveProject() { saveProject(); }
+void MainWindow::onSaveProjectAs() { saveProjectAs(); }
 
 bool MainWindow::saveProject()
 {
-    if (currentProjectPath_.isEmpty())
-        return false;
-    return saveToFile(currentProjectPath_);
-}
-
-void MainWindow::onSaveProjectAs()
-{
-    QString filePath = QFileDialog::getSaveFileName(
-        this,
-        tr("Save Project As"),
-        QString(),
-        tr("Mr.Paint Projects (*.paintty)")
-    );
-
-    if (filePath.isEmpty())
-        return;
-
-    if (filePath.endsWith(".paintty", Qt::CaseInsensitive))
-        filePath.chop(8);
-    filePath += ".paintty";
-
-    if (saveToFile(filePath)) {
-        currentProjectPath_ = filePath;
-        setWindowTitle(tr("Mr.Paint - %1").arg(QFileInfo(filePath).fileName()));
-    }
+    if (currentProjectPath_.isEmpty() || QFileInfo(currentProjectPath_).isDir()) return saveProjectAs();
+    return saveProjectTo(currentProjectPath_);
 }
 
 bool MainWindow::saveProjectAs()
 {
-    if (currentProjectPath_.isEmpty())
-        return false;
-    onSaveProjectAs();
-    return !currentProjectPath_.isEmpty();
+    QString initialPath = currentProjectPath_;
+    if (initialPath.isEmpty()) initialPath = QDir(lastProjectDirectory()).filePath(tr("Untitled.paintty"));
+    if (QFileInfo(initialPath).isDir()) initialPath += ".paintty";
+    QFileDialog dialog(this, tr("Save Project As"), initialPath, tr("Mr.Paint Projects (*.paintty)"));
+    dialog.setAcceptMode(QFileDialog::AcceptSave);
+    dialog.setDefaultSuffix("paintty");
+    if (dialog.exec() != QDialog::Accepted || dialog.selectedFiles().isEmpty()) return false;
+    return saveProjectTo(dialog.selectedFiles().first());
 }
 
-bool MainWindow::saveToFile(const QString &filePath)
+bool MainWindow::saveProjectTo(const QString &path)
 {
-    QDir projectDir(filePath);
-
-    if (projectDir.exists()) {
-        if (!projectDir.removeRecursively()) {
-            QMessageBox::critical(this, tr("Save Failed"),
-                                  tr("Could not overwrite existing project directory."));
-            return false;
-        }
-    }
-    if (!projectDir.mkpath(".")) {
-        QMessageBox::critical(this, tr("Save Failed"),
-                              tr("Could not create project directory:\n%1").arg(filePath));
+    QString error;
+    if (!ProjectFile::save(path, ui->canvas->projectState(), &error)) {
+        QMessageBox::critical(this, tr("Save Failed"), tr("Could not save the project:\n%1").arg(error));
         return false;
     }
-
-    QSize size = ui->canvas->canvasSize();
-    QJsonObject metadata;
-    metadata["version"] = 1;
-    metadata["canvasWidth"] = size.width();
-    metadata["canvasHeight"] = size.height();
-    metadata["created"] = QDateTime::currentDateTime().toString(Qt::ISODate);
-
-    QFile metadataFile(filePath + "/metadata.json");
-    if (!metadataFile.open(QIODevice::WriteOnly)) {
-        QMessageBox::critical(this, tr("Save Failed"),
-                              tr("Could not write project metadata."));
-        return false;
-    }
-    metadataFile.write(QJsonDocument(metadata).toJson());
-    metadataFile.close();
-
-    QDir imagesDir(filePath + "/images");
-    imagesDir.mkpath(".");
-
-    QList<QImage> images = ui->canvas->layerImages();
-    for (int i = 0; i < images.size(); ++i) {
-        QString imagePath = QString("%1/images/layer_%2.png").arg(filePath).arg(i);
-        if (!images[i].save(imagePath, "PNG")) {
-            qWarning() << "[MainWindow] Failed to save layer image:" << imagePath;
-        }
-    }
-
-    qDebug() << "[MainWindow] Project saved to:" << filePath
-             << "canvas:" << size << "layers:" << images.size();
-    return true;
-}
-
-bool MainWindow::loadFromFile(const QString &filePath)
-{
-    QFile metadataFile(filePath + "/metadata.json");
-    if (!metadataFile.open(QIODevice::ReadOnly)) {
-        QMessageBox::critical(this, tr("Load Failed"),
-                              tr("Could not read project metadata:\n%1").arg(filePath));
-        return false;
-    }
-
-    QJsonParseError parseError;
-    QJsonDocument doc = QJsonDocument::fromJson(metadataFile.readAll(), &parseError);
-    metadataFile.close();
-
-    if (parseError.error != QJsonParseError::NoError || !doc.isObject()) {
-        QMessageBox::critical(this, tr("Load Failed"),
-                              tr("Invalid project metadata: %1").arg(parseError.errorString()));
-        return false;
-    }
-
-    QJsonObject metadata = doc.object();
-    int width = metadata.value("canvasWidth").toInt(720);
-    int height = metadata.value("canvasHeight").toInt(480);
-
-    if (width < 1 || height < 1 || width > 10000 || height > 10000) {
-        QMessageBox::critical(this, tr("Load Failed"),
-                              tr("Invalid canvas dimensions in project file."));
-        return false;
-    }
-
-    ui->canvas->setCanvasSize(QSize(width, height));
-    ui->canvas->clearAllLayer();
-
-    QString imagesPath = filePath + "/images";
-    QDir imagesDir(imagesPath);
-
-    if (imagesDir.exists()) {
-        QStringList filters;
-        filters << "layer_*.png";
-        QStringList imageFiles = imagesDir.entryList(filters, QDir::Files, QDir::Name);
-
-        int canvasCount = ui->canvas->count();
-
-        for (int i = 0; i < imageFiles.size(); ++i) {
-            QString imagePath = imagesDir.filePath(imageFiles[i]);
-            QImage img(imagePath);
-            if (img.isNull()) {
-                qWarning() << "[MainWindow] Failed to load layer image:" << imagePath;
-                continue;
-            }
-
-            if (i >= canvasCount) {
-                addLayer();
-            }
-
-            ui->canvas->setLayerContent(i, img);
-        }
-    }
-
-    qDebug() << "[MainWindow] Project loaded from:" << filePath
-             << "canvas:" << width << "x" << height;
+    currentProjectPath_ = QFileInfo(path).absoluteFilePath();
+    undoStack_->setClean();
+    setWindowModified(false);
+    updateProjectTitle();
+    rememberProject(currentProjectPath_);
+    ui->statusBar->showMessage(tr("Project saved"), 3000);
     return true;
 }
 
 bool MainWindow::promptSaveIfDirty()
 {
-    return true;
+    if (!isWindowModified()) return true;
+    const auto choice = QMessageBox::warning(this, tr("Unsaved Changes"),
+        tr("Save changes to %1 before continuing?").arg(currentProjectPath_.isEmpty() ? tr("Untitled")
+                                                        : QFileInfo(currentProjectPath_).fileName()),
+        QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel, QMessageBox::Save);
+    if (choice == QMessageBox::Save) return saveProject();
+    return choice == QMessageBox::Discard;
+}
+
+void MainWindow::updateProjectTitle()
+{
+    setWindowTitle(tr("%1[*] — Mr.Paint").arg(currentProjectPath_.isEmpty() ? tr("Untitled")
+                                                                         : QFileInfo(currentProjectPath_).fileName()));
+    setWindowFilePath(QFileInfo(currentProjectPath_).isFile() ? currentProjectPath_ : QString());
+    const QSize size = ui->canvas->canvasSize();
+    ui->statusBar->showMessage(tr("%1 × %2 px · %3 layers").arg(size.width()).arg(size.height()).arg(ui->canvas->count()));
+}
+
+QString MainWindow::lastProjectDirectory() const
+{
+    QSettings settings(GlobalDef::settingsPath(), QSettings::IniFormat);
+    return settings.value("projects/lastDirectory", QDir::homePath()).toString();
+}
+
+QString MainWindow::defaultExportPath(const QString &extension) const
+{
+    const QString name = currentProjectPath_.isEmpty() ? tr("Untitled") : QFileInfo(currentProjectPath_).completeBaseName();
+    return QDir(lastProjectDirectory()).filePath(name + "." + extension);
+}
+
+void MainWindow::rememberProject(const QString &path)
+{
+    QSettings settings(GlobalDef::settingsPath(), QSettings::IniFormat);
+    auto recent = settings.value("projects/recent").toStringList();
+    recent.removeAll(path);
+    recent.prepend(path);
+    while (recent.size() > 10) recent.removeLast();
+    settings.setValue("projects/recent", recent);
+    settings.setValue("projects/lastDirectory", QFileInfo(path).absolutePath());
+    refreshRecentProjects();
+}
+
+void MainWindow::refreshRecentProjects()
+{
+    recentProjectsMenu_->clear();
+    QSettings settings(GlobalDef::settingsPath(), QSettings::IniFormat);
+    for (const auto &path : settings.value("projects/recent").toStringList()) {
+        if (!QFileInfo::exists(path)) continue;
+        auto *action = recentProjectsMenu_->addAction(QFileInfo(path).fileName());
+        action->setToolTip(path);
+        connect(action, &QAction::triggered, this, [this, path]() { openProject(path); });
+    }
+    recentProjectsMenu_->setEnabled(!recentProjectsMenu_->isEmpty());
+}
+
+void MainWindow::importImage()
+{
+    const QString path = QFileDialog::getOpenFileName(this, tr("Import Image as Layer"), lastProjectDirectory(),
+                                                     tr("Images (*.png *.jpg *.jpeg *.bmp *.webp)"));
+    if (path.isEmpty()) return;
+    if (ui->canvas->count() >= ProjectFile::MaxLayers) return;
+    QImageReader::setAllocationLimit(256);
+    QImageReader reader(path);
+    reader.setAutoTransform(true);
+    if (!ProjectFile::validSize(reader.size())) {
+        QMessageBox::warning(this, tr("Import Failed"), tr("The image dimensions are unsupported."));
+        return;
+    }
+    const QImage image = reader.read();
+    if (image.isNull()) { QMessageBox::warning(this, tr("Import Failed"), reader.errorString()); return; }
+    addLayer();
+    ui->canvas->setLayerContent(ui->canvas->count() - 1, image);
+    onPanoramaRefresh();
+}
+
+void MainWindow::recordDocumentChange()
+{
+    const auto after = ui->canvas->projectState();
+    bool equal = after.size == lastProjectState_.size && after.layers.size() == lastProjectState_.layers.size();
+    if (equal) {
+        for (int i = 0; i < after.layers.size(); ++i) {
+            const auto &a = after.layers[i];
+            const auto &b = lastProjectState_.layers[i];
+            if (a.name != b.name || a.visible != b.visible || a.locked != b.locked || a.image != b.image) {
+                equal = false;
+                break;
+            }
+        }
+    }
+    if (equal) {
+        lastProjectState_ = after;
+        setWindowModified(!undoStack_->isClean());
+        return;
+    }
+    qint64 bytes = 0;
+    for (const auto &layer : lastProjectState_.layers) bytes += layer.image.sizeInBytes();
+    for (const auto &layer : after.layers) bytes += layer.image.sizeInBytes();
+    // Images share storage until edited. Bound retained history conservatively.
+    constexpr qint64 budget = 256LL * 1024 * 1024;
+    if (historyBytes_ + bytes > budget) {
+        undoStack_->clear();
+        undoStack_->resetClean();
+        historyBytes_ = 0;
+    }
+    if (bytes <= budget) {
+        undoStack_->push(new DocumentChange(lastProjectState_, after,
+            [this](const PaintingProject &project) { restoreDocument(project); }));
+        historyBytes_ += bytes;
+    }
+    lastProjectState_ = after;
+    setWindowModified(!undoStack_->isClean());
+}
+
+void MainWindow::restoreDocument(const PaintingProject &project)
+{
+    QScopedValueRollback<bool> resetting(resettingDocument_, true);
+    ui->canvas->setProjectState(project);
+    rebuildLayerList();
+    lastProjectState_ = project;
+    onPanoramaRefresh();
 }
 
 template<typename T, typename U>

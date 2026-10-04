@@ -5,7 +5,8 @@
 BasicBrushV3::BasicBrushV3()
     : AbstractBrushV3()
 {
-    displayName_ = "基础笔刷 V3";
+    displayName_ = QObject::tr("Pressure Brush");
+    icon_ = QIcon(":/iconset/ui/brush/pressurebrushv2.png");
     initializeSubsystems();
 }
 
@@ -44,8 +45,27 @@ void BasicBrushV3::drawPathToPainter(const QList<PressurePoint>& points, QPainte
         processedPoints = trail_->processTrail(points);
     }
 
+    // Stamp coverage should depend on distance and brush size, not input event frequency.
+    QList<PressurePoint> continuous;
+    if (!processedPoints.isEmpty()) continuous.append(processedPoints.first());
+    const qreal gap = qMax(1.0, width_ * 0.25);
+    for (int i = 1; i < processedPoints.size(); ++i) {
+        const auto &start = processedPoints[i - 1];
+        const auto &end = processedPoints[i];
+        const int steps = qBound(1, qCeil(QLineF(start.pos, end.pos).length() / gap), 32768);
+        for (int step = 1; step <= steps; ++step) {
+            const qreal ratio = qreal(step) / steps;
+            PressurePoint point = end;
+            point.pos = start.pos + (end.pos - start.pos) * ratio;
+            point.pressure = start.pressure + (end.pressure - start.pressure) * ratio;
+            point.tiltX = start.tiltX + (end.tiltX - start.tiltX) * ratio;
+            point.tiltY = start.tiltY + (end.tiltY - start.tiltY) * ratio;
+            continuous.append(point);
+        }
+    }
+
     // 沿着路径绘制印
-    drawStampsAlongPath(processedPoints, painter);
+    drawStampsAlongPath(continuous, painter);
 }
 
 Stamp* BasicBrushV3::createStamp()

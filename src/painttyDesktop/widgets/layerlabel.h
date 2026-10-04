@@ -17,7 +17,7 @@ public:
     QSize minimumSizeHint () const;
     
 signals:
-    
+    void renameRequested(QString name);
 public slots:
 protected:
     void paintEvent ( QPaintEvent * e );

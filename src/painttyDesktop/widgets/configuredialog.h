@@ -27,16 +27,12 @@ private:
     QString selectedLanguage;
     bool auto_disable_ime;
     bool enable_tablet;
-    bool skip_replay;
     bool use_droid_font;
 
-    bool use_default_server;
-    QString addr;
 
     void readSettings();
     void initLanguageList();
     void initShortcutList();
-    void initServerSettings();
     void initUi();
 
 private slots:

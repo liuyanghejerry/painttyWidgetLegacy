@@ -7,11 +7,10 @@
 #include <QThread>
 #include <QDebug>
 #include <QDateTime>
-#include <QFileDialog>
+#include <QFile>
+#include <QCommandLineParser>
 #include "common/common.h"
 #include "widgets/mainwindow.h"
-#include "widgets/welcomedialog.h"
-#include "widgets/newprojectdialog.h"
 
 namespace mainOnly
 {
@@ -44,19 +43,23 @@ void initSettings()
 {
     QSettings::setDefaultFormat(QSettings::IniFormat);
 
-    QSettings settings(GlobalDef::SETTINGS_NAME,
+    QSettings settings(GlobalDef::settingsPath(),
                        QSettings::defaultFormat(),
                        qApp);
-    QString clientVersion = settings.value("global/version/client",
-                                           GlobalDef::CLIENT_VER)
-            .toString();
-    settings.setValue("global/version/client", clientVersion);
+    // Import existing local preferences once, without restoring server settings.
+    if (settings.allKeys().isEmpty() && QFile::exists("mrpaint.ini")) {
+        QSettings legacy("mrpaint.ini", QSettings::IniFormat);
+        for (const auto &key : legacy.allKeys()) {
+            if (!key.startsWith("global/server") && !key.contains("replay"))
+                settings.setValue(key, legacy.value(key));
+        }
+    }
     settings.sync();
 }
 
 void initTranslation()
 {
-    QSettings settings(GlobalDef::SETTINGS_NAME,
+    QSettings settings(GlobalDef::settingsPath(),
                        QSettings::defaultFormat(),
                        qApp);
 
@@ -68,14 +71,14 @@ void initTranslation()
     if(locale.isEmpty())
         locale = QLocale(QLocale::system().uiLanguages().at(0)).name();
 
-    qtTranslator->load(QString("qt_%1").arg(locale), ":/translation", "_", ".qm");
-    myappTranslator->load(QString("paintty_%1").arg(locale), ":/translation", "_", ".qm");
-    QCoreApplication::installTranslator(qtTranslator);
-    QCoreApplication::installTranslator(myappTranslator);
+    if (qtTranslator->load(QString("qt_%1").arg(locale), ":/translation", "_", ".qm"))
+        QCoreApplication::installTranslator(qtTranslator);
+    if (myappTranslator->load(QString("paintty_%1").arg(locale), ":/translation", "_", ".qm"))
+        QCoreApplication::installTranslator(myappTranslator);
 }
 void initFonts()
 {
-    QSettings settings(GlobalDef::SETTINGS_NAME,
+    QSettings settings(GlobalDef::settingsPath(),
                        QSettings::defaultFormat(),
                        qApp);
     bool use_droid_font = settings.value("global/use_droid_font", false)
@@ -164,6 +167,9 @@ void adjustLog()
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    a.setOrganizationName("Paintty");
+    a.setApplicationName("MrPaint");
+    a.setApplicationVersion("0.6-local");
     mainOnly::adjustLog();
 
 #ifdef Q_OS_MACOS
@@ -174,34 +180,14 @@ int main(int argc, char *argv[])
     mainOnly::initTranslation();
     mainOnly::initFonts();
 
-    // Show welcome dialog
-    WelcomeDialog welcome;
-    if (welcome.exec() != QDialog::Accepted)
-        return 0;
-
+    QCommandLineParser parser;
+    parser.setApplicationDescription(QObject::tr("Mr.Paint — offline digital painting"));
+    parser.addHelpOption();
+    parser.addVersionOption();
+    parser.addPositionalArgument("project", QObject::tr("Local .paintty file or legacy project folder to open."), "[project]");
+    parser.process(a);
     MainWindow w;
-
-    if (welcome.userChoice() == WelcomeDialog::NewProject) {
-        // Show new project dialog
-        NewProjectDialog newDlg;
-        if (newDlg.exec() != QDialog::Accepted)
-            return 0;
-        w.newProject(newDlg.canvasWidth(), newDlg.canvasHeight());
-    } else {
-        // Open existing project
-        QString filePath = welcome.selectedRecentFile();
-        if (filePath.isEmpty()) {
-            filePath = QFileDialog::getExistingDirectory(
-                nullptr,
-                QObject::tr("Open Project"),
-                QString(),
-                QFileDialog::ShowDirsOnly
-            );
-        }
-        if (filePath.isEmpty())
-            return 0;
-        w.openProject(filePath);
-    }
+    if (!parser.positionalArguments().isEmpty()) w.openProject(parser.positionalArguments().first());
 
     w.showMaximized();
     return a.exec();

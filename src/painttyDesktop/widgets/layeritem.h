@@ -16,6 +16,8 @@ public:
     void setLockIcon(const QIcon &icon);
     void setLabel(const QString &string);
     void setSelect(bool b);
+    void setHidden(bool hidden);
+    void setLocked(bool locked);
     bool isHide();
     bool isLock();
     
@@ -24,6 +26,7 @@ signals:
     void deSelected();
     void lock(bool);
     void hide(bool);
+    void renameRequested(QString oldName, QString newName);
     
 public slots:
 protected:

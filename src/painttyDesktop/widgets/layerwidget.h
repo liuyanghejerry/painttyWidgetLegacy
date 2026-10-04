@@ -17,6 +17,7 @@ public:
     int itemCount();
     LayerItem* itemAt(int index);
     void addItem(LayerItem *item);
+    void clear();
     void removeItem(LayerItem *item);
     void removeItem(const QString &name);
     LayerItem* selected();
@@ -28,6 +29,7 @@ signals:
     void itemShow(QString);
     void itemLock(QString);
     void itemUnlock(QString);
+    void renameRequested(QString oldName, QString newName);
     
 private slots:
     void onItemSelected();

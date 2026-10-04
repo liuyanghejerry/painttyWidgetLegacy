@@ -33,6 +33,9 @@ LayerItem::LayerItem(QWidget *parent) :
             this, &LayerItem::lock);
     connect(visible_,&IconCheckBox::toggled,
             this, &LayerItem::hide);
+    connect(label_, &LayerLabel::renameRequested, this, [this](const QString &name) {
+        emit renameRequested(label(), name);
+    });
 }
 
 void LayerItem::setVisibleIcon(const QIcon &icon)
@@ -75,6 +78,16 @@ bool LayerItem::isHide()
 bool LayerItem::isLock()
 {
     return lock_->isChecked();
+}
+
+void LayerItem::setHidden(bool hidden)
+{
+    visible_->setChecked(!hidden);
+}
+
+void LayerItem::setLocked(bool locked)
+{
+    lock_->setChecked(locked);
 }
 
 void LayerItem::paintEvent(QPaintEvent *)

@@ -4,8 +4,7 @@
 #
 #-------------------------------------------------
 
-DEFINES += PAINTTY_DEV
-QT       += core gui widgets concurrent
+QT       += core gui widgets
 
 DEFINES += PAINTTY_DESKTOP
 
@@ -47,7 +46,6 @@ TEMPLATE = app
 SOURCES += main.cpp\
     widgets/mainwindow.cpp \
     widgets/newprojectdialog.cpp \
-    widgets/welcomedialog.cpp \
     widgets/canvas.cpp \
     misc/layermanager.cpp \
     widgets/colorwheel.cpp \
@@ -76,11 +74,9 @@ SOURCES += main.cpp\
     misc/platformextend.cpp \
     misc/shortcutmanager.cpp \
     widgets/configuredialog.cpp\
-    misc/archivefile.cpp \
     widgets/clearlineedit.cpp \
     widgets/easycopylineedit.cpp \
     widgets/gradualbox.cpp \
-    widgets/canvasbackend.cpp \
     paintingTools/brush/abstractbrush.cpp \
     paintingTools/brush/abstractbrushv3.cpp \
     paintingTools/brush/basic-stamp.cpp \
@@ -96,12 +92,12 @@ SOURCES += main.cpp\
     paintingTools/brush/basicbrushv3-simd.cpp \
     paintingTools/brush/basic-stamp-simd.cpp \
     widgets/panoramarotator.cpp \
+    misc/projectfile.cpp \
     misc/psdexport.cpp
 
 
 HEADERS  += widgets/mainwindow.h \
     widgets/newprojectdialog.h \
-    widgets/welcomedialog.h \
     widgets/canvas.h \
     misc/layermanager.h \
     widgets/colorwheel.h \
@@ -120,7 +116,6 @@ HEADERS  += widgets/mainwindow.h \
     common/common.h \
     misc/singleshortcut.h \
     widgets/canvascontainer.h \
-    misc/router.h \
     widgets/brushsettingswidget.h \
     widgets/helpdialog.h \
     widgets/panoramaview.h \
@@ -131,11 +126,9 @@ HEADERS  += widgets/mainwindow.h \
     misc/call_once.h \
     misc/shortcutmanager.h \
     widgets/configuredialog.h\
-    misc/archivefile.h \
     widgets/clearlineedit.h \
     widgets/easycopylineedit.h \
     widgets/gradualbox.h \
-    widgets/canvasbackend.h \
     paintingTools/brush/brushmanager.h \
     paintingTools/brush/abstractbrush.h \
     paintingTools/brush/abstractbrushv3.h \
@@ -153,6 +146,7 @@ HEADERS  += widgets/mainwindow.h \
     paintingTools/brush/basicbrushv3-simd.h \
     paintingTools/brush/basic-stamp-simd.h \
     widgets/panoramarotator.h \
+    misc/projectfile.h \
     misc/psdexport.h
 
 FORMS    += widgets/mainwindow.ui \

@@ -1,17 +1,12 @@
 #include <QPainter>
 #include <QHash>
 #include <QSharedPointer>
-#include <QJsonDocument>
-#include <QJsonObject>
 #include <QStyleOption>
 #include <QMouseEvent>
 #include <QTabletEvent>
 #include <QSettings>
 #include <QApplication>
 #include <QTimer>
-#include <QDir>
-#include <QStaticText>
-#include <QDateTime>
 #include <QtCore/qmath.h>
 
 #include "../common/common.h"
@@ -25,7 +20,6 @@
 #include "../paintingTools/brush/basicbrushv3-simd.h"
 #include "../misc/platformextend.h"
 #include "../misc/singleton.h"
-#include "../misc/archivefile.h"
 
 #include "canvas.h"
 
@@ -43,9 +37,7 @@ Canvas::Canvas(QWidget *parent) :
     shareColor_(true),
     jitterCorrection_(true),
     jitterCorrectionLevel_(10),
-    backend_(new CanvasBackend()),
-    worker_(new QThread(this)),
-    archive_loading_(false)
+    jitterCorrectionLevel_internal_(0)
 {
     brush_ = BrushPointer(new BasicBrush);
     brush_->setSettings(brush_->defaultSettings());
@@ -71,46 +63,16 @@ Canvas::Canvas(QWidget *parent) :
     brush_manager.addBrush(p3);
     brush_manager.addBrush(p4);
     brush_manager.addBrush(p5);
+    BrushPointerV3 pressureBrush(new BasicBrushV3);
+    pressureBrush->setSettings(pressureBrush->defaultSettings());
+    brush_manager.addBrushV3(pressureBrush);
 
     setJitterCorrectionLevel(5);
-
-    worker_->setObjectName("CanvasWorkerThread");
-    worker_->start();
-    backend_->moveToThread(worker_);
-
-    connect(backend_, &CanvasBackend::remoteDrawLine,
-            this, &Canvas::remoteDrawLine);
-    connect(backend_, &CanvasBackend::remoteDrawPoint,
-            this, &Canvas::remoteDrawPoint);
-    connect(backend_, &CanvasBackend::remoteDrawBlock,
-            this, &Canvas::remoteDrawBlock);
-    connect(backend_, &CanvasBackend::repaintHint,
-            this, static_cast<void (Canvas::*)()>(&Canvas::update));
-    connect(worker_, &QThread::finished,
-            backend_, &CanvasBackend::deleteLater);
-    connect(this, &Canvas::newPaintAction,
-            backend_, &CanvasBackend::onDataBlock);
-    connect(this, &Canvas::parsePaused,
-            backend_, &CanvasBackend::pauseParse);
-
-    connect(backend_, &CanvasBackend::archiveLoadingStarted,
-            this, &Canvas::onArchiveLoadingStarted, Qt::QueuedConnection);
-    connect(backend_, &CanvasBackend::archiveRenderFinished,
-            this, &Canvas::onArchiveRenderFinished, Qt::QueuedConnection);
-
-    connect(backend_, &CanvasBackend::canvasSnapshotRestored,
-            this, &Canvas::restoreCanvasFromSnapshot, Qt::QueuedConnection);
+    QSettings settings(GlobalDef::settingsPath(), QSettings::IniFormat);
+    m_tabletEnabled = settings.value("canvas/enable_tablet", true).toBool();
 }
 
-Canvas::~Canvas()
-{
-    pause();
-    if(worker_){
-        worker_->quit();
-        worker_->wait();
-    }
-    this->disconnect();
-}
+Canvas::~Canvas() = default;
 
 QImage Canvas::currentCanvas()
 {
@@ -127,6 +89,7 @@ QImage Canvas::allCanvas()
     int count = layers.count();
     for(int i=0;i<count;++i){
         LayerPointer l = layers.layerFrom(i);
+        if (!l->isTouched()) continue;
         QImage * im = l->imagePtr();
         painter.drawImage(0, 0, *im);
     }
@@ -208,8 +171,8 @@ void Canvas::tryJitterCorrection()
 
 QVariantMap Canvas::brushSettings() const
 {
-    auto m = brush_->settings();
-    m.insert("name", brush_->name().toLower());
+    auto m = isCurrentBrushV3() ? brushV3_->settings() : brush_->settings();
+    m.insert("name", isCurrentBrushV3() ? brushV3_->name().toLower() : brush_->name().toLower());
     return m;
 }
 
@@ -225,8 +188,8 @@ void Canvas::setShareColor(bool b)
 
 void Canvas::setBrushColor(const QColor &newColor)
 {
-    if(brush_->color() == newColor) return;
-    brush_->setColor(newColor);
+    if (isCurrentBrushV3()) brushV3_->setColor(newColor);
+    else brush_->setColor(newColor);
 }
 
 void Canvas::setBrushWidth(int newWidth)
@@ -262,7 +225,8 @@ void Canvas::setBrushMixin(int e)
 
 void Canvas::setBrushSettings(const QVariantMap &settings)
 {
-    brush_->setSettings(settings);
+    if (isCurrentBrushV3()) brushV3_->setSettings(settings);
+    else brush_->setSettings(settings);
 }
 
 BrushPointer Canvas::brushFactory(const QString &name)
@@ -281,145 +245,69 @@ QList<QImage> Canvas::layerImages() const
 {
     QList<QImage> lists;
     for(int i=0;i<layers.count();++i){
-        if(!layers.layerFrom(i)->isTouched()){
-            continue;
-        }
         lists.append(*(layers.layerFrom(i)->imageConstPtr()));
     }
     return lists;
 }
 
-void Canvas::pause()
+PaintingProject Canvas::projectState() const
 {
-    emit parsePaused();
-}
-
-void Canvas::initCanvasWithArchive(const QString &roomName)
-{
-    qDebug() << "[Canvas] 初始化画布，房间:" << roomName;
-
-    if (backend_) {
-        QMetaObject::invokeMethod(backend_, "initializeArchiveFile",
-                                  Qt::QueuedConnection,
-                                  Q_ARG(QString, roomName));
+    PaintingProject project;
+    project.size = canvasSize_;
+    for (int i = 0; i < layers.count(); ++i) {
+        const auto layer = layers.layerFrom(i);
+        project.layers.append({layer->name(), layer->isTouched() ? *layer->imageConstPtr() : QImage(),
+                               !layer->isHided(), layer->isLocked()});
+        if (layer == layers.selectedLayer()) project.selectedLayer = i;
     }
+    return project;
 }
 
-void Canvas::saveCanvasToCache()
+void Canvas::setProjectState(const PaintingProject &project)
 {
-    if(backend_) {
-        QList<QImage> images = layerImages();
-        QMetaObject::invokeMethod(backend_, "saveCurrentCanvas",
-                                  Qt::QueuedConnection,
-                                  Q_ARG(QList<QImage>, images));
+    control_mode_ = NONE;
+    stackPoints.clear();
+    if (brushV3_) brushV3_->clearAllPaths();
+    v3StrokeBase_ = QImage();
+    for (auto &brush : localBrush) brush->setSurface(LayerPointer());
+    brush_->setSurface(LayerPointer());
+    layers.reset();
+    setCanvasSize(project.size);
+    layerNameCounter = 0;
+    for (const auto &entry : project.layers) {
+        auto layer = layers.appendLayer(entry.name);
+        if (!entry.image.isNull()) *layer->imagePtr() = entry.image;
+        if (entry.locked) layer->lock();
+        if (!entry.visible) layer->hide();
+        ++layerNameCounter;
     }
-}
-
-void Canvas::loadCanvasFromCache()
-{
-    if(backend_) {
-        QMetaObject::invokeMethod(backend_, "loadCachedCanvas",
-                                  Qt::QueuedConnection);
-    }
-}
-
-void Canvas::setArchiveLoading(bool loading)
-{
-    if(archive_loading_ != loading) {
-        archive_loading_ = loading;
-        if(loading) {
-            setEnabled(false);
-            qDebug() << "[Canvas] 手动设置loading状态为true";
-        } else {
-            setEnabled(true);
-            qDebug() << "[Canvas] 手动设置loading状态为false";
-        }
-        update();
-    }
-}
-
-void Canvas::onArchiveLoadingStarted()
-{
-    archive_loading_ = true;
-    setEnabled(false);
+    layers.select(project.layers.at(project.selectedLayer).name);
+    updateCursor();
     update();
-    qDebug() << "[Canvas] 开始加载archive数据，设置loading状态";
 }
 
-void Canvas::onArchiveRenderFinished()
+bool Canvas::renameLayer(const QString &oldName, const QString &newName)
 {
-    archive_loading_ = false;
-    setEnabled(true);
-    update();
-    qDebug() << "[Canvas] archive数据加载完成，移除loading状态";
+    if (newName.trimmed().isEmpty() || newName.size() > 256 || !layers.exists(oldName)
+            || layers.exists(newName)) return false;
+    layers.rename(oldName, newName);
+    emit documentChanged();
+    return true;
 }
 
-void Canvas::exportCanvasSnapshot()
+bool Canvas::canDraw() const
 {
-    qDebug() << "[Canvas] 开始导出画布快照";
-
-    if (backend_) {
-        QList<QImage> layerImages;
-        for(int i = 0; i < layers.count(); ++i) {
-            LayerPointer layer = layers.layerFrom(i);
-            if(!layer.isNull()) {
-                layerImages.append(*(layer->imageConstPtr()));
-            }
-        }
-
-        if (!layerImages.isEmpty()) {
-            QMetaObject::invokeMethod(backend_, "saveCanvasSnapshot",
-                                      Qt::QueuedConnection,
-                                      Q_ARG(QList<QImage>, layerImages));
-            qDebug() << "[Canvas] 画布快照导出完成，共" << layerImages.size() << "个图层";
-        } else {
-            qDebug() << "[Canvas] 没有图层内容，跳过快照导出";
-        }
-    }
-}
-
-void Canvas::restoreCanvasFromSnapshot()
-{
-    qDebug() << "[Canvas] 开始从快照恢复画布";
-
-    if (backend_) {
-        bool hasSnapshot = false;
-        QMetaObject::invokeMethod(backend_, "hasCanvasSnapshot",
-                                  Qt::BlockingQueuedConnection,
-                                  Q_RETURN_ARG(bool, hasSnapshot));
-
-        if (hasSnapshot) {
-            QList<QImage> layerImages;
-            QMetaObject::invokeMethod(backend_, "loadCanvasSnapshot",
-                                      Qt::BlockingQueuedConnection,
-                                      Q_RETURN_ARG(QList<QImage>, layerImages));
-
-            if (!layerImages.isEmpty()) {
-                for(int i = 0; i < qMin(layerImages.size(), layers.count()); ++i) {
-                    LayerPointer layer = layers.layerFrom(i);
-                    if(!layer.isNull()) {
-                        QPainter painter(layer->imagePtr());
-                        painter.drawImage(0, 0, layerImages[i]);
-                    }
-                }
-
-                setEnabled(true);
-                update();
-                qDebug() << "[Canvas] 成功从快照恢复" << layerImages.size() << "个图层";
-            }
-        } else {
-            qDebug() << "[Canvas] 没有可用的画布快照";
-        }
-    }
+    const auto selected = layers.selectedLayer();
+    return selected && !selected->isLocked() && !selected->isHided();
 }
 
 void Canvas::changeBrush(const QString &name)
 {
+    const auto color = isCurrentBrushV3() ? brushV3_->settings().value("color").value<QColor>() : brush_->color();
     useV3Brush_ = false;
     QVariantMap currentSettings;
     LayerPointer sur = brush_->surface();
-    QVariantMap colorMap = brush_->settings()
-            .value("color").toMap();
+    QVariantMap colorMap{{"red", color.red()}, {"green", color.green()}, {"blue", color.blue()}};
 
     QString brushName = name;
     if(localBrush.contains(brushName)){
@@ -435,6 +323,7 @@ void Canvas::changeBrush(const QString &name)
         currentSettings["color"] = colorMap;
     }
 
+    brush_->setSettings(currentSettings);
     brush_->setSurface(sur);
     updateCursor();
 
@@ -443,23 +332,19 @@ void Canvas::changeBrush(const QString &name)
 
 void Canvas::changeBrushV3(const QString &name)
 {
-    useV3Brush_ = true;
-
     QVariantMap currentSettings;
-    QVariantMap colorMap;
 
-    if (brushV3_) {
-        colorMap = brushV3_->settings().value("color").toMap();
-    }
+    const auto legacyColor = brush_->settings().value("color").toMap();
+    const QColor color = isCurrentBrushV3() ? brushV3_->settings().value("color").value<QColor>()
+        : QColor(legacyColor.value("red").toInt(), legacyColor.value("green").toInt(), legacyColor.value("blue").toInt());
+    useV3Brush_ = true;
 
     QString brushName = name;
     brushV3_ = brushV3Factory(brushName);
 
     if (brushV3_) {
-        currentSettings = brushV3_->settings();
-        if(shareColor_ && !colorMap.isEmpty()){
-            currentSettings["color"] = colorMap;
-        }
+        currentSettings = brushV3_->defaultSettings();
+        if (shareColor_) currentSettings["color"] = color;
         brushV3_->setSettings(currentSettings);
     }
 
@@ -516,12 +401,7 @@ void Canvas::drawLineTo(const QPoint &endPoint, qreal pressure)
 
     update();
 
-    QVariantMap point;
-    point.insert("x", endPoint.x());
-    point.insert("y", endPoint.y());
-    point.insert("pressure", double(pressure));
-
-    storeAction(point);
+    emit documentChanged();
 }
 
 void Canvas::drawPoint(const QPoint &point, qreal pressure)
@@ -539,38 +419,15 @@ void Canvas::drawPoint(const QPoint &point, qreal pressure)
     update(QRect(lastPoint, point).normalized()
            .adjusted(-rad, -rad, +rad, +rad));
 
-    QVariantMap point_j;
-    point_j.insert("x", point.x());
-    point_j.insert("y", point.y());
-    point_j.insert("pressure", double(pressure));
-
-    storeAction(point_j);
-}
-
-void Canvas::storeAction(const QVariantMap &map)
-{
-    action_buffer_.push_back(map);
-}
-
-void Canvas::sendAction()
-{
-    QVariantMap store;
-    store.insert("layer", currentLayer());
-    store.insert("clientid", backend_->localClientId());
-    store.insert("type", "data");
-    store.insert("brush", brushSettings());
-    store.insert("action", "block");
-    store.insert("block", action_buffer_);
-
-    qDebug() << "[Canvas] sendAction:" << store;
-    emit newPaintAction(store);
-    action_buffer_.clear();
+    emit documentChanged();
 }
 
 void Canvas::pickColor(const QPoint &point)
 {
-    brush_->setColor(image.pixel(point));
-    newBrushSettings(brush_->settings());
+    if (!rect().contains(point)) return;
+    const QColor color = currentCanvas().pixelColor(point);
+    setBrushColor(color);
+    emit newBrushSettings(brushSettings());
 }
 
 void Canvas::updateCursor()
@@ -582,166 +439,44 @@ void Canvas::updateCursor()
     }
 }
 
-void Canvas::remoteDrawPoint(const QPoint &point,
-                             const QVariantMap &brushInfo,
-                             const QString &layer,
-                             const QString clientid,
-                             const qreal pressure)
-{
-    if(!layers.exists(layer)) return;
-    LayerPointer l = layers.layerFrom(layer);
-
-    QVariantMap cpd_brushInfo = brushInfo;
-    QString brushName = cpd_brushInfo["name"].toString().toLower();
-
-    cpd_brushInfo.remove("name");
-
-    if(remoteBrush.contains(clientid)){
-        BrushPointer t = remoteBrush[clientid];
-        if(brushName != t->name().toLower()){
-            BrushPointer newOne = brushFactory(brushName);
-            newOne->setSurface(l);
-            newOne->setSettings(cpd_brushInfo);
-            newOne->drawPoint(point, pressure);
-            remoteBrush[clientid] = newOne;
-        }else{
-            BrushPointer original = remoteBrush[clientid];
-            original->setSurface(l);
-            original->setSettings(cpd_brushInfo);
-            original->drawPoint(point, pressure);
-        }
-    }else{
-        BrushPointer newOne = brushFactory(brushName);
-        newOne->setSurface(l);
-        newOne->setSettings(cpd_brushInfo);
-        newOne->drawPoint(point, pressure);
-        remoteBrush[clientid] = newOne;
-    }
-
-    update();
-}
-
-void Canvas::remoteDrawLine(const QPoint &, const QPoint &end,
-                            const QVariantMap &brushInfo,
-                            const QString &layer,
-                            const QString clientid,
-                            const qreal pressure)
-{
-    if(!layers.exists(layer)){
-        return;
-    }
-    LayerPointer l = layers.layerFrom(layer);
-
-    QVariantMap cpd_brushInfo = brushInfo;
-    QString brushName = cpd_brushInfo["name"].toString().toLower();
-
-    if(remoteBrush.contains(clientid)){
-        BrushPointer t = remoteBrush[clientid];
-        if(brushName != t->name().toLower()){
-            BrushPointer newOne = brushFactory(brushName);
-            newOne->setSurface(l);
-            newOne->setSettings(cpd_brushInfo);
-            newOne->drawLineTo(end, pressure);
-            remoteBrush[clientid] = newOne;
-        }else{
-            BrushPointer original = remoteBrush[clientid];
-            original->setSurface(l);
-            original->setSettings(cpd_brushInfo);
-            original->drawLineTo(end, pressure);
-        }
-    }else{
-        BrushPointer newOne = brushFactory(brushName);
-        newOne->setSurface(l);
-        newOne->setSettings(cpd_brushInfo);
-        qDebug()<<"warning, remote drawing starts with line drawing";
-        newOne->drawLineTo(end, pressure);
-        remoteBrush[clientid] = newOne;
-    }
-    update();
-}
-
-void Canvas::remoteDrawBlock(const QVariantList &block,
-                            const QVariantMap &brushInfo,
-                            const QString &layer,
-                            const QString clientid)
-{
-    if(!layers.exists(layer)){
-        return;
-    }
-    LayerPointer l = layers.layerFrom(layer);
-
-    QVariantMap cpd_brushInfo = brushInfo;
-    QString brushName = cpd_brushInfo["name"].toString().toLower();
-    cpd_brushInfo.remove("name");
-
-    BrushPointer remoteBrushPtr;
-    if(remoteBrush.contains(clientid)){
-        remoteBrushPtr = remoteBrush[clientid];
-        if(brushName != remoteBrushPtr->name().toLower()){
-            remoteBrushPtr = brushFactory(brushName);
-            remoteBrush[clientid] = remoteBrushPtr;
-        }
-    }else{
-        remoteBrushPtr = brushFactory(brushName);
-        remoteBrush[clientid] = remoteBrushPtr;
-    }
-
-    remoteBrushPtr->setSurface(l);
-    remoteBrushPtr->setSettings(cpd_brushInfo);
-
-    if(block.length() >= 1) {
-        QVariantMap firstPoint = block.first().toMap();
-        QPoint point(firstPoint.value("x", 0).toInt(), firstPoint.value("y", 0).toInt());
-        qreal pressure = firstPoint.contains("pressure") ? firstPoint.value("pressure").toDouble() : 1.0;
-
-        remoteBrushPtr->drawPoint(point, pressure);
-
-        QPoint startPoint = point;
-        for(int i = 1; i < block.length(); ++i) {
-            QVariantMap pointData = block[i].toMap();
-            QPoint endPoint(pointData.value("x", 0).toInt(), pointData.value("y", 0).toInt());
-            qreal pressure = pointData.contains("pressure") ? pointData.value("pressure").toDouble() : 1.0;
-
-            remoteBrushPtr->drawLineTo(endPoint, pressure);
-            startPoint = endPoint;
-        }
-    }
-
-    update();
-}
-
-/* Layer */
-
 QString Canvas::currentLayer()
 {
-    return layers.selectedLayer()->name();
+    const auto selected = layers.selectedLayer();
+    return selected ? selected->name() : QString();
 }
 
 void Canvas::addLayer(const QString &name)
 {
-    layers.appendLayer(name);
-    layerNameCounter++;
+    if (layers.appendLayer(name)) {
+        layerNameCounter++;
+        layers.select(name);
+        emit documentChanged();
+    }
 }
 
 bool Canvas::deleteLayer(const QString &name)
 {
-    if(layers.layerFrom(name)->isLocked())
+    if (!layers.exists(name) || layers.count() <= 1 || layers.layerFrom(name)->isLocked())
         return false;
 
     layers.removeLayer(name);
+    emit documentChanged();
     update();
     return true;
 }
 
 void Canvas::clearLayer(const QString &name)
 {
+    if (!layers.exists(name) || layers.layerFrom(name)->isLocked()) return;
     layers.clearLayer(name);
+    emit documentChanged();
     update();
 }
 
 void Canvas::clearAllLayer()
 {
     layers.clearAllLayer();
+    emit documentChanged();
     update();
 }
 
@@ -751,42 +486,55 @@ void Canvas::setLayerContent(int index, const QImage &image)
     if (layer.isNull() || image.isNull())
         return;
     layer->clear();
-    QPainter painter(layer->imagePtr());
-    painter.drawImage(0, 0, image);
+    {
+        QPainter painter(layer->imagePtr());
+        painter.drawImage(0, 0, image);
+    }
+    emit documentChanged();
     update();
 }
 
 void Canvas::lockLayer(const QString &name)
 {
+    if (!layers.exists(name)) return;
     layers.layerFrom(name)->lock();
+    emit documentChanged();
 }
 
 void Canvas::unlockLayer(const QString &name)
 {
+    if (!layers.exists(name)) return;
     layers.layerFrom(name)->unlock();
+    emit documentChanged();
 }
 
 void Canvas::hideLayer(const QString &name)
 {
+    if (!layers.exists(name)) return;
     layers.layerFrom(name)->hide();
+    emit documentChanged();
     update();
 }
 
 void Canvas::showLayer(const QString &name)
 {
+    if (!layers.exists(name)) return;
     layers.layerFrom(name)->show();
+    emit documentChanged();
     update();
 }
 
 void Canvas::moveLayerUp(const QString &name)
 {
     layers.moveUp(name);
+    emit documentChanged();
     update();
 }
 
 void Canvas::moveLayerDown(const QString &name)
 {
     layers.moveDown(name);
+    emit documentChanged();
     update();
 }
 
@@ -800,6 +548,9 @@ void Canvas::tabletEvent(QTabletEvent *event)
 {
     if (!m_tabletEnabled)
         return;
+
+    if (event->type() == QEvent::TabletPress && control_mode_ != PICKING && control_mode_ != MOVING
+            && !canDraw()) { event->accept(); return; }
 
     if (isCurrentBrushV3()) {
         switch(event->type()){
@@ -816,6 +567,8 @@ void Canvas::tabletEvent(QTabletEvent *event)
             default:
             case NONE:
                 control_mode_ = DRAWING;
+                brushV3_->clearAllPaths();
+                v3StrokeBase_ = *layers.selectedLayer()->imageConstPtr();
             case DRAWING:
                 PressurePoint pt(
                     event->position(),
@@ -824,6 +577,7 @@ void Canvas::tabletEvent(QTabletEvent *event)
                     event->yTilt() / 60.0
                 );
                 brushV3_->addPointToCurrentPath(pt);
+                updateBrushV3StrokesOnGoing();
                 update();
             }
             break;
@@ -866,11 +620,14 @@ void Canvas::tabletEvent(QTabletEvent *event)
             case MOVING:
                 break;
             default:
+                break;
             case DRAWING:
+                updateBrushV3StrokesOnGoing();
                 brushV3_->endStroke();
                 updateBrushV3StrokesOnDone();
                 update();
                 control_mode_ = NONE;
+                emit documentChanged();
             }
             break;
         default:
@@ -942,12 +699,14 @@ void Canvas::tabletEvent(QTabletEvent *event)
         case MOVING:
             break;
         default:
+            break;
         case DRAWING:
+            for (const auto &point : stackPoints) drawLineTo(point, event->pressure());
             stackPoints.clear();
             updateCursor();
-            sendAction();
             control_mode_ = NONE;
             if (brush_) brush_->endStroke();
+            emit documentChanged();
         }
         break;
     default:
@@ -958,7 +717,7 @@ void Canvas::tabletEvent(QTabletEvent *event)
 
 void Canvas::focusInEvent(QFocusEvent *)
 {
-    QSettings settings(GlobalDef::SETTINGS_NAME,
+    QSettings settings(GlobalDef::settingsPath(),
                        QSettings::defaultFormat(),
                        qApp);
     bool disable_ime = settings.value("canvas/auto_disable_ime", true).toBool();
@@ -968,7 +727,7 @@ void Canvas::focusInEvent(QFocusEvent *)
 
 void Canvas::focusOutEvent(QFocusEvent *)
 {
-    QSettings settings(GlobalDef::SETTINGS_NAME,
+    QSettings settings(GlobalDef::settingsPath(),
                        QSettings::defaultFormat(),
                        qApp);
     bool disable_ime = settings.value("canvas/auto_disable_ime", true).toBool();
@@ -978,8 +737,8 @@ void Canvas::focusOutEvent(QFocusEvent *)
 
 void Canvas::mousePressEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton && !m_tabletEnabled) {
-        qDebug() << "Drawing with v3?" << useV3Brush_;
+    if (event->button() == Qt::LeftButton && (!m_tabletEnabled || event->source() == Qt::MouseEventNotSynthesized)) {
+        if (control_mode_ != PICKING && control_mode_ != MOVING && !canDraw()) return;
         lastPoint = event->position().toPoint();
         switch(control_mode_) {
         case PICKING:
@@ -990,12 +749,17 @@ void Canvas::mousePressEvent(QMouseEvent *event)
         default:
         case NONE:
             control_mode_ = DRAWING;
+            if (isCurrentBrushV3()) {
+                brushV3_->clearAllPaths();
+                v3StrokeBase_ = *layers.selectedLayer()->imageConstPtr();
+            }
         case DRAWING:
             if(isCurrentBrushV3()) {
                 PressurePoint pt(
                     event->position()
                 );
                 brushV3_->addPointToCurrentPath(pt);
+                updateBrushV3StrokesOnGoing();
             } else {
                 stackPoints.push_back(lastPoint);
                 drawPoint(lastPoint);
@@ -1006,7 +770,7 @@ void Canvas::mousePressEvent(QMouseEvent *event)
 
 void Canvas::mouseMoveEvent(QMouseEvent *event)
 {
-    if ((event->buttons() & Qt::LeftButton && !m_tabletEnabled)){
+    if ((event->buttons() & Qt::LeftButton && (!m_tabletEnabled || event->source() == Qt::MouseEventNotSynthesized))){
         switch(control_mode_) {
         case PICKING:
             pickColor(event->position().toPoint());
@@ -1053,24 +817,30 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
 
 void Canvas::mouseReleaseEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton && !m_tabletEnabled) {
+    if (event->button() == Qt::LeftButton && (!m_tabletEnabled || event->source() == Qt::MouseEventNotSynthesized)) {
         switch(control_mode_) {
         case PICKING:
             break;
         case MOVING:
             break;
         default:
+            break;
         case DRAWING:
             if (isCurrentBrushV3() && brushV3_) {
+                updateBrushV3StrokesOnGoing();
                 brushV3_->endStroke();
                 updateBrushV3StrokesOnDone();
                 updateCursor();
                 control_mode_ = NONE;
+                emit documentChanged();
             } else {
+                for (const auto &point : stackPoints) drawLineTo(point);
+                drawLineTo(event->position().toPoint());
                 stackPoints.clear();
+                if (brush_) brush_->endStroke();
                 updateCursor();
-                sendAction();
                 control_mode_ = NONE;
+                emit documentChanged();
             }
         }
     }
@@ -1083,6 +853,7 @@ void Canvas::updateBrushV3StrokesOnDone()
         return;
     }
     brushV3_->clearAllPaths();
+    v3StrokeBase_ = QImage();
 }
 
 void Canvas::updateBrushV3StrokesOnGoing()
@@ -1092,10 +863,15 @@ void Canvas::updateBrushV3StrokesOnGoing()
     }
 
     LayerPointer currentLayer = layers.selectedLayer();
-    QPainter imagePainter(currentLayer->imagePtr());
-
-    brushV3_->drawCurrentPath(&imagePainter);
-    brushV3_->clearCurrentPath();
+    if (!canDraw()) { brushV3_->clearAllPaths(); return; }
+    QImage preview = v3StrokeBase_;
+    if (preview.isNull()) return;
+    {
+        QPainter imagePainter(&preview);
+        brushV3_->drawCurrentPath(&imagePainter);
+    }
+    *currentLayer->imagePtr() = preview;
+    emit documentChanged();
 }
 
 void Canvas::paintEvent(QPaintEvent *event)
@@ -1107,16 +883,6 @@ void Canvas::paintEvent(QPaintEvent *event)
     layers.combineLayers(&image, dirtyRect);
     painter.drawImage(dirtyRect, image, dirtyRect);
 
-    if(archive_loading_){
-        QBrush brush;
-        brush.setStyle(Qt::BDiagPattern);
-        brush.setColor(Qt::lightGray);
-        painter.setBrush(brush);
-        QRect rect = this->rect();
-        rect.setWidth(rect.width());
-        rect.setHeight(rect.height());
-        painter.drawRect(rect);
-    }
 
     QStyleOption opt;
     opt.initFrom(this);
@@ -1148,6 +914,7 @@ void Canvas::setCanvasSize(const QSize &size)
 
     canvasSize_ = size;
     layers.resizeLayers(size);
+    emit documentChanged();
 
     QImage newImage(size, QImage::Format_ARGB32_Premultiplied);
     newImage.fill(Qt::transparent);

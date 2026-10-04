@@ -21,7 +21,8 @@ CanvasContainer::CanvasContainer(QWidget *parent) :
     smoothScaleFlag(true)
 {
     setCacheMode(QGraphicsView::CacheBackground);
-    setAlignment(Qt::AlignTop | Qt::AlignLeft);
+    setBackgroundBrush(QColor(82, 82, 82));
+    setAlignment(Qt::AlignCenter);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     setDragMode(QGraphicsView::ScrollHandDrag);
@@ -51,9 +52,11 @@ void CanvasContainer::setCanvas(QWidget *canvas)
     if (canvas->parent())
     {
         canvas->setParent(0);
-        canvas->setWindowFlags(canvas->windowFlags() | Qt::Window);
+        canvas->setWindowFlags(Qt::Widget);
     }
     proxy = scene->addWidget(canvas);
+    proxy->setMinimumSize(1, 1);
+    proxy->setMaximumSize(10000, 10000);
     
     if (proxy && proxy->widget()) {
         canvas->installEventFilter(this);
@@ -263,15 +266,11 @@ void CanvasContainer::wheelEvent(QWheelEvent *event)
         delete(event2);
         return;
     }
-    if (proxy && proxy->widget() && qobject_cast<Canvas*>(proxy->widget())->tabletEnabled()) //it seems that tablet pen scrolling is conflict with drawing, we disable it
-        return;
     QGraphicsView::wheelEvent(event);
 }
 
 void CanvasContainer::mousePressEvent(QMouseEvent *event)
 {
-    if (proxy && proxy->widget() && qobject_cast<Canvas*>(proxy->widget())->tabletEnabled()) //it seems that tablet pen right click is conflict with drawing, we disable it
-        return;
     if (event->button() == Qt::RightButton)
     {
         moveStartPoint = event->pos();
@@ -281,8 +280,6 @@ void CanvasContainer::mousePressEvent(QMouseEvent *event)
 
 void CanvasContainer::mouseMoveEvent(QMouseEvent *event)
 {
-    if (proxy && proxy->widget() && qobject_cast<Canvas*>(proxy->widget())->tabletEnabled())
-        return;
     if (event->buttons() & Qt::RightButton)
     {
         moveBy(moveStartPoint - event->pos());

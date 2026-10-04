@@ -58,7 +58,7 @@ BrushPointer BrushManager::makeBrush(const QString &name)
 {
     auto brush = getBrush(name);
     if (brush) {
-        return brush;
+        return BrushPointer(brush->createBrush());
     }
 
     return BrushPointer(new BasicBrush);

@@ -49,12 +49,12 @@ QSize LayerWidget::minimumSizeHint () const
 
 int LayerWidget::itemCount()
 {
-    return layout_->count();
+    return layout_->count() - 1; // Exclude the stretch.
 }
 
 LayerItem* LayerWidget::itemAt(int index)
 {
-    if(itemCount()){
+    if (index >= 0 && index < itemCount()) {
         return qobject_cast<LayerItem*>(layout_->itemAt(index)->widget());
     }else{
         return 0;
@@ -70,12 +70,24 @@ void LayerWidget::addItem(LayerItem *item)
             this,&LayerWidget::onItemHidden);
     connect(item,&LayerItem::lock,
             this,&LayerWidget::onItemLocked);
+    connect(item, &LayerItem::renameRequested, this, &LayerWidget::renameRequested);
+}
+
+void LayerWidget::clear()
+{
+    lastSelected_ = nullptr;
+    while (itemCount() > 0) {
+        auto *item = layout_->takeAt(0);
+        delete item->widget();
+        delete item;
+    }
 }
 
 void LayerWidget::removeItem(LayerItem *item)
 {
     layout_->removeWidget(item);
-    //    disconnect(item,SIGNAL(selected()),this,SLOT(itemSelected()));
+    if (lastSelected_ == item) lastSelected_ = nullptr;
+    delete item;
 }
 
 void LayerWidget::removeItem(const QString &name)
@@ -83,9 +95,8 @@ void LayerWidget::removeItem(const QString &name)
     for(int i=0;i<layout_->count();++i){
         LayerItem *item = qobject_cast<LayerItem *>(layout_->itemAt(i)->widget());
         if(item && item->label() == name){
-            layout_->removeWidget(item);
-            disconnect(item,&LayerItem::selected,
-                       this,&LayerWidget::onItemSelected);
+            removeItem(item);
+            return;
         }
     }
 }

@@ -138,7 +138,7 @@ ShortcutManager::ShortcutManager(QObject *parent) :
 
 bool ShortcutManager::loadFromConfigure()
 {
-    QSettings settings(GlobalDef::SETTINGS_NAME,
+    QSettings settings(GlobalDef::settingsPath(),
                        QSettings::defaultFormat(),
                        qApp);
     settings.sync();
@@ -165,7 +165,7 @@ bool ShortcutManager::loadFromConfigure()
 
 bool ShortcutManager::saveToConfigure()
 {
-    QSettings settings(GlobalDef::SETTINGS_NAME,
+    QSettings settings(GlobalDef::settingsPath(),
                        QSettings::defaultFormat(),
                        qApp);
     settings.setValue("shortcuts/user", shortcut_conf);

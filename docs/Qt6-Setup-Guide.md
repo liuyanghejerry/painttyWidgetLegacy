@@ -1,6 +1,44 @@
 # Qt 6 开发环境配置指南
 
-本文档记录了在 macOS 上使用 aqt (Another Qt installer) 安装 Qt 6.6.3 并编译 painttyWidget 项目的过程。
+本文档介绍使用 aqt (Another Qt installer) 安装 Qt 6.6.3 并编译 painttyWidget 本地绘画版的过程。
+
+## Linux（Ubuntu / Debian）
+
+Linux 同样使用 Qt 6.6.3，架构为 `gcc_64`。在项目根目录执行：
+
+```bash
+sudo apt update
+sudo apt install -y build-essential python3-venv libgl-dev libxkbcommon-dev \
+    libxcb-cursor0 libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 \
+    libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0
+
+python3 -m venv "$HOME/.local/share/paintty-aqt"
+"$HOME/.local/share/paintty-aqt/bin/python" -m pip install aqtinstall==3.3.0
+"$HOME/.local/share/paintty-aqt/bin/aqt" install-qt linux desktop 6.6.3 gcc_64 \
+    -O "$HOME/develop/Qt" --archives qtbase qttools qttranslations qtwayland icu
+
+./scripts/build-linux.sh --jobs 8
+./build/build/mrpaint
+```
+
+`icu` 是 Qt 官方二进制所需的 ICU 56 配套库，不能直接用系统的新版 ICU 替代。
+当前单人版编译使用 Core、Gui 和 Widgets，均包含在 `qtbase` 中。
+aqt 的命令选项参考其[官方文档](https://aqtinstall.readthedocs.io/en/latest/cli.html)。
+
+构建脚本默认从 `$HOME/develop/Qt/6.6.3/gcc_64` 查找 Qt，可通过 `QTDIR` 覆盖。
+产物为 `build/build/mrpaint`、`build/build/canvas-renderer` 和
+`build/build/renderer-widget`；`--debug` 可切换到调试构建。
+
+无显示环境下可验证绘图工具：
+
+```bash
+QT_QPA_PLATFORM=offscreen ./build/build/canvas-renderer \
+    -i src/renderer/events.json -o build/render-smoke.png
+```
+
+若系统 Python 尚未安装 `venv` 且无法使用 sudo，可用 `uv venv --python 3.12`
+创建上述独立环境，再用 `uv pip install --python <环境路径>/bin/python aqtinstall==3.3.0`
+安装 aqt。本次初始化使用此方法；编译器及 OpenGL 开发库仍需系统安装。
 
 ## 环境信息
 
@@ -41,8 +79,6 @@
 - `QtCore` - 核心模块
 - `QtGui` - GUI 模块
 - `QtWidgets` - 控件模块
-- `QtNetwork` - 网络模块
-- `QtConcurrent` - 并发模块
 
 ## 已知问题及解决方案
 

@@ -13,3 +13,4 @@ ui_*.h
 *.user
 *Makefile*
 moc_predefs.h
+/mrpaint.ini

@@ -6,6 +6,8 @@
 #include <QLabel>
 #include <QSize>
 #include <QSpinBox>
+#include <QMessageBox>
+#include "../misc/projectfile.h"
 
 NewProjectDialog::NewProjectDialog(QWidget *parent)
     : QDialog(parent)
@@ -15,12 +17,13 @@ NewProjectDialog::NewProjectDialog(QWidget *parent)
     setWindowTitle(tr("New Project"));
 
     widthSpin_->setRange(1, 10000);
-    widthSpin_->setValue(720);
+    widthSpin_->setValue(1280);
     heightSpin_->setRange(1, 10000);
-    heightSpin_->setValue(480);
+    heightSpin_->setValue(720);
 
     auto *presetLabel = new QLabel(tr("Preset:"), this);
     auto *presetCombo = new QComboBox(this);
+    presetCombo->addItem(tr("1280 × 720"), QSize(1280, 720));
     presetCombo->addItem(tr("720 × 480"),     QSize(720, 480));
     presetCombo->addItem(tr("1024 × 768"),    QSize(1024, 768));
     presetCombo->addItem(tr("1920 × 1080"),   QSize(1920, 1080));
@@ -38,7 +41,13 @@ NewProjectDialog::NewProjectDialog(QWidget *parent)
     auto *heightLabel = new QLabel(tr("Height:"), this);
 
     auto *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
-    connect(buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
+    connect(buttonBox, &QDialogButtonBox::accepted, this, [this]() {
+        if (!ProjectFile::validSize(QSize(canvasWidth(), canvasHeight()))) {
+            QMessageBox::warning(this, tr("Canvas Size"), tr("Choose a canvas up to 64 megapixels."));
+            return;
+        }
+        accept();
+    });
     connect(buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
 
     auto *layout = new QGridLayout(this);

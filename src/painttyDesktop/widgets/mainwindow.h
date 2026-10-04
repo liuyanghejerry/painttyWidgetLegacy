@@ -4,10 +4,13 @@
 #include <QMainWindow>
 
 #include "../misc/shortcutmanager.h"
+#include "../misc/projectfile.h"
 
 class QToolButton;
 class BrushSettingsWidget;
 class QActionGroup;
+class QMenu;
+class QUndoStack;
 
 typedef ShortcutManager::ShortcutType ShT;
 
@@ -48,6 +51,7 @@ public slots:
     bool openProject(const QString &filePath);
     bool saveProject();
     bool saveProjectAs();
+    bool saveProjectTo(const QString &path);
 
     /* layer operations */
     void addLayer(const QString &name = QString());
@@ -56,7 +60,6 @@ public slots:
     void clearLayer(const QString &name);
     void clearAllLayer();
 
-    /* script - removed QtScript functionality */
 signals:
     void brushColorChange(const QColor &color);
 protected:
@@ -64,7 +67,15 @@ protected:
 private:
     void init();
     void stylize();
-    void layerWidgetInit();
+    void rebuildLayerList();
+    void updateProjectTitle();
+    QString lastProjectDirectory() const;
+    QString defaultExportPath(const QString &extension) const;
+    void rememberProject(const QString &path);
+    void refreshRecentProjects();
+    void importImage();
+    void recordDocumentChange();
+    void restoreDocument(const PaintingProject &project);
     void colorGridInit();
     void viewInit();
     void statusBarInit();
@@ -86,8 +97,11 @@ private:
     QHash<QString, bool> keyMap_;
     QString currentProjectPath_;
 
-    bool saveToFile(const QString &filePath);
-    bool loadFromFile(const QString &filePath);
+    bool resettingDocument_ = false;
+    QMenu *recentProjectsMenu_ = nullptr;
+    QUndoStack *undoStack_ = nullptr;
+    PaintingProject lastProjectState_;
+    qint64 historyBytes_ = 0;
     bool promptSaveIfDirty();
 
 private slots:

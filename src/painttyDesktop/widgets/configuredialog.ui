@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <ui version="4.0">
  <class>ConfigureDialog</class>
  <widget class="QDialog" name="ConfigureDialog">
@@ -35,7 +35,7 @@
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QComboBox" name="languageComboBox"/>
+        <widget class="QComboBox" name="languageComboBox" />
        </item>
        <item row="1" column="0">
         <widget class="QLabel" name="droidFontLabel">
@@ -58,14 +58,6 @@
          </property>
         </widget>
        </item>
-       <item row="5" column="0">
-        <widget class="QPushButton" name="clearCache">
-         <property name="text">
-          <string>Clear Cache</string>
-         </property>
-        </widget>
-       </item>
-
       </layout>
      </widget>
      <widget class="QWidget" name="shortcutTab">
@@ -113,66 +105,9 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="serverTab">
-      <attribute name="title">
-       <string>Server</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_3">
-       <item>
-        <widget class="QCheckBox" name="use_default_server_checkbox">
-         <property name="text">
-          <string>Use default server</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <layout class="QGridLayout" name="gridLayout">
-         <item row="0" column="0">
-          <widget class="QLabel" name="ipv4_label">
-           <property name="text">
-            <string>address</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLineEdit" name="ipv4_lineedit"/>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="QLabel" name="server_notice_label">
-         <property name="styleSheet">
-          <string notr="true">#server_notice_label {
-font-weight: bold;
-}</string>
-         </property>
-         <property name="text">
-          <string>Warning, non-default server may lead to software crush.
-Use at your own risk.</string>
-         </property>
-         <property name="wordWrap">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer_2">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </widget>
      <widget class="QWidget" name="experimentalTab">
       <attribute name="title">
-       <string>Experimental Fetures</string>
+       <string>Drawing</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
@@ -182,14 +117,6 @@ Use at your own risk.</string>
          </property>
         </widget>
        </item>
-       <item>
-        <widget class="QCheckBox" name="skip_replay">
-         <property name="text">
-          <string>Always skip replay if possible</string>
-         </property>
-        </widget>
-       </item>
-
        <item>
         <spacer name="verticalSpacer">
          <property name="orientation">
@@ -219,7 +146,7 @@ Use at your own risk.</string>
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources />
  <connections>
   <connection>
    <sender>okCancelBox</sender>

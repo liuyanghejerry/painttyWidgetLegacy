@@ -12,7 +12,7 @@ LayerManager::LayerManager(const QSize &initSize)
 
 LayerPointer LayerManager::layerFrom(int pos) const
 {
-    if( pos >= layers.count() ){
+    if (pos < 0 || pos >= layerLinks.count()) {
         return LayerPointer();
     }
     return layers[layerLinks[pos]];
@@ -29,12 +29,12 @@ LayerPointer LayerManager::layerFrom(const QString &name) const
 
 LayerPointer LayerManager::topLayer() const
 {
-    return layers[layerLinks.last()];
+    return layerLinks.isEmpty() ? LayerPointer() : layers[layerLinks.last()];
 }
 
 LayerPointer LayerManager::bottomLayer() const
 {
-    return layers[layerLinks.first()];
+    return layerLinks.isEmpty() ? LayerPointer() : layers[layerLinks.first()];
 }
 
 void LayerManager::updateSelected()
@@ -42,7 +42,7 @@ void LayerManager::updateSelected()
     for(int i=0;i<layerLinks.count();++i){
         LayerPointer l = layers[layerLinks[i]];
         if(l->isSelected() && l!=lastSelected){
-            lastSelected->deselect();
+            if (lastSelected) lastSelected->deselect();
             lastSelected = l;
         }
     }
@@ -55,7 +55,7 @@ LayerPointer LayerManager::selectedLayer() const
 
 LayerPointer LayerManager::topShownLayer() const
 {
-    for(int i=layerLinks.count()-1;i>0;--i){
+    for(int i=layerLinks.count()-1;i>=0;--i){
         if(layers[layerLinks[i]]->isHided()){
             continue;
         }else{
@@ -70,8 +70,8 @@ void LayerManager::select(const QString &name)
 {
     if(exists(name)){
         LayerPointer l = layers[name];
-        l->select();
         if(lastSelected) lastSelected->deselect();
+        l->select();
         lastSelected = l;
     }else{
         qDebug()<<"Selected an non-exists layer";
@@ -115,8 +115,13 @@ void LayerManager::removeLayer(const QString &name)
         qDebug()<<"Warning: try to remove locked layer";
         return;
     }
+    const bool wasSelected = lastSelected == layers[name];
     layers.remove(name);
     layerLinks.removeAll(name);
+    if (wasSelected) {
+        lastSelected.clear();
+        if (!layerLinks.isEmpty()) select(layerLinks.last());
+    }
     qDebug()<<"remove"<<name;
 }
 
@@ -130,29 +135,39 @@ void LayerManager::clearLayer(const QString &name)
 void LayerManager::clearAllLayer()
 {
     for(auto &item: layers.values()){
-        item->clear();
+        if (!item->isLocked()) item->clear();
     }
     qDebug()<<"all layers cleared";
 }
 
-void LayerManager::moveUp(const QString &)
+void LayerManager::reset()
 {
-    //TODO
+    lastSelected.clear();
+    layerLinks.clear();
+    layers.clear();
 }
 
-void LayerManager::moveDown(const QString &)
+void LayerManager::moveUp(const QString &name)
 {
-    //TODO
+    const int index = layerLinks.indexOf(name);
+    if (index >= 0 && index + 1 < layerLinks.size()) moveTo(index, index + 1);
 }
 
-void LayerManager::moveTo(int ,int )
+void LayerManager::moveDown(const QString &name)
 {
-    //TODO
+    const int index = layerLinks.indexOf(name);
+    if (index > 0) moveTo(index, index - 1);
 }
 
-void LayerManager::moveTo(const QString &, int )
+void LayerManager::moveTo(int from, int to)
 {
-    //TODO
+    if (from >= 0 && from < layerLinks.size() && to >= 0 && to < layerLinks.size())
+        layerLinks.move(from, to);
+}
+
+void LayerManager::moveTo(const QString &name, int to)
+{
+    moveTo(layerLinks.indexOf(name), to);
 }
 
 bool LayerManager::exists(const QString &name) const
@@ -162,14 +177,14 @@ bool LayerManager::exists(const QString &name) const
 
 bool LayerManager::exists(int pos) const
 {
-    return layerLinks.count()-1 >pos;
+    return pos >= 0 && pos < layerLinks.count();
 }
 
 void LayerManager::rename(const QString &oname,const QString &nname)
 {
-    if(layers.contains(oname)){
-        layers[nname] = layers[oname];
-        layers[oname] = LayerPointer();
+    if (layers.contains(oname) && !layers.contains(nname)) {
+        layers[nname] = layers.take(oname);
+        layers[nname]->rename(nname);
         int i = layerLinks.indexOf(oname);
         layerLinks[i] = nname;
     }
@@ -186,9 +201,13 @@ void LayerManager::resizeLayers(const QSize &newsize)
 
 void LayerManager::combineLayers(QImage *p, const QRect &rect)
 {
-    *p = p->scaled(layerSize_);
-    p->fill(Qt::white);
+    if (p->size() != layerSize_) {
+        *p = QImage(layerSize_, QImage::Format_ARGB32_Premultiplied);
+        p->fill(Qt::white);
+    }
     QPainter painter(p);
+    if (!rect.isNull()) painter.setClipRect(rect);
+    painter.fillRect(rect.isNull() ? p->rect() : rect, Qt::white);
     int lc = this->count();
     QImage * im = 0;
     for(int i=0;i<lc;++i){

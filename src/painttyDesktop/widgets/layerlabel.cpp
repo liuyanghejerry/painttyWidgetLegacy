@@ -7,7 +7,7 @@
 
 LayerLabel::LayerLabel(QWidget *parent) :
     QWidget(parent),
-    prefix_(tr("layer ")),
+    prefix_(),
     isSelected_(false),
     isEdited_(false)
 {
@@ -103,6 +103,8 @@ void LayerLabel::paintEvent (QPaintEvent *)
 
 void LayerLabel::mouseDoubleClickEvent(QMouseEvent *)
 {
-    setShownName(QInputDialog::getText(this, tr("Layer Name"),
-                                       tr("Input your desire layer name here")));
+    bool accepted = false;
+    const auto name = QInputDialog::getText(this, tr("Rename Layer"), tr("Layer name:"),
+                                          QLineEdit::Normal, text_, &accepted).trimmed();
+    if (accepted && !name.isEmpty() && name != text_) emit renameRequested(name);
 }
