@@ -69,7 +69,7 @@ for path in app.rglob('*'):
     with path.open('rb') as f:
         if f.read(4) not in magic:
             continue
-    subprocess.run(['lipo', '-verify_arch', 'x86_64', 'arm64', str(path)], check=True)
+    subprocess.run(['lipo', str(path), '-verify_arch', 'x86_64', 'arm64'], check=True)
     loads = subprocess.check_output(['otool', '-l', str(path)], text=True)
     for rpath in set(re.findall(r'cmd LC_RPATH\s+cmdsize \d+\s+path (.*?) \(offset', loads)):
         if rpath.startswith('/') and not rpath.startswith(('/usr/lib/', '/System/Library/')):

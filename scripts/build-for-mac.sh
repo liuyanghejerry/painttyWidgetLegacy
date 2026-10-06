@@ -22,7 +22,7 @@ cd "$BUILD_DIR/src/painttyDesktop"
 "$QTDIR/bin/qmake" "$PROJECT_DIR/src/painttyDesktop/painttyDesktop.pro" \
     CONFIG-=debug CONFIG+=release 'QMAKE_APPLE_DEVICE_ARCHS=x86_64 arm64'
 make -j"$JOBS"
-lipo -verify_arch x86_64 arm64 "$BUILD_DIR/build/MrPaint.app/Contents/MacOS/MrPaint"
+lipo "$BUILD_DIR/build/MrPaint.app/Contents/MacOS/MrPaint" -verify_arch x86_64 arm64
 
 cd "$BUILD_DIR/tests"
 "$QTDIR/bin/qmake" "$PROJECT_DIR/src/painttyDesktop/local-tests.pro" \
