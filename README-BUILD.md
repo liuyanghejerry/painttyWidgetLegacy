@@ -157,15 +157,36 @@ git push origin v1.0.0
 完成后才公开；重跑同一标签的工作流会更新附件。只有标签发布任务拥有仓库写入权限。
 若使用手动触发，需要此工作流先存在于仓库默认分支。
 
-## macOS
+## macOS 构建与发行包
 
-使用对应 Qt 6.6.3 的 qmake 进行目录外构建：
+Release 中的 `MrPaint-v1.0.1-macos-universal.zip` 支持 macOS 11 及以上，
+包含 Apple Silicon（arm64）和 Intel（x86_64）代码、Qt 运行库及许可文本。
+解压后将 `MrPaint.app` 拖到“应用程序”即可，无需安装 Qt；另附 SHA-256 校验文件。
+此包使用临时签名校验完整性，尚未使用 Apple Developer ID 签名和公证。
+首次打开若被拦截，在确认来自本仓库 Release 后，按
+[Apple 说明](https://support.apple.com/en-us/102445)通过“系统设置 → 隐私与安全性 → 仍要打开”运行。
+
+在 Mac 上安装 Xcode 命令行工具和 Qt 6.6.3，然后构建并打包：
 
 ```bash
-mkdir -p build
-cd build
-/path/to/Qt/bin/qmake -r ../painttyWidget.pro CONFIG+=release
-make -j8
+python3 -m venv /tmp/qt-venv
+/tmp/qt-venv/bin/pip install aqtinstall==3.3.0
+/tmp/qt-venv/bin/aqt install-qt mac desktop 6.6.3 clang_64 -O /tmp/Qt --archives qtbase qttools qtsvg
+export QTDIR=/tmp/Qt/6.6.3/macos
+# Apple Silicon 上启用 Intel 版启动验证所需的 Rosetta：
+sudo softwareupdate --install-rosetta --agree-to-license
+./scripts/build-for-mac.sh
+./scripts/package-macos.sh dev-local
 ```
 
-macOS 构建需要在对应系统验证。
+构建脚本生成通用应用并运行 QtTest 回归测试。产物和测试日志位于 `build/macos/`。
+打包脚本用 `macdeployqt` 部署依赖，验证所有二进制包含两种架构、移除 SDK 搜索路径，
+并校验签名。随后解压实际 ZIP，在清除 Qt SDK 环境的条件下分别用 arm64、x86_64
+和 Cocoa、offscreen 插件检查启动及版本，最后输出 `dist/` 下的 ZIP 和校验文件。
+Intel Mac 需要使用 Apple Silicon Mac 或 CI 执行包含 arm64 启动验证的打包步骤。
+
+`.github/workflows/release-macos.yml` 在标签的 CI Build 成功后补充 macOS 发行附件。
+也可在 Actions 的 **macOS Release → Run workflow** 中输入已有标签（如 `v1.0.1`）
+补打包：工具来自工作流版本，应用源码严格来自发行标签，不会修改标签。
+只有打包、回归测试及两种架构的启动检查全部成功，发布任务才上传到已有 Release。
+Actions 同时保留 `macos-universal` 和 `macos-test-results` 产物 30 天。

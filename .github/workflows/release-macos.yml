@@ -1,0 +1,100 @@
+name: macOS Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing release tag to build and attach the macOS package to
+        required: true
+        default: v1.0.1
+        type: string
+  workflow_run:
+    workflows: [CI Build]
+    types: [completed]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: macos-release-${{ inputs.release_tag || github.event.workflow_run.head_branch }}
+  cancel-in-progress: false
+
+jobs:
+  package:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       startsWith(github.event.workflow_run.head_branch, 'v'))
+    runs-on: macos-14
+    timeout-minutes: 30
+    env:
+      RELEASE_TAG: ${{ inputs.release_tag || github.event.workflow_run.head_branch }}
+      QTDIR: /tmp/Qt/6.6.3/macos
+      PROJECT_DIR: ${{ github.workspace }}/release-source
+      BUILD_DIR: ${{ github.workspace }}/build/macos
+    steps:
+      # Packaging tools come from this workflow's revision; application code comes from the tag.
+      - uses: actions/checkout@v4
+      - name: Validate release tag
+        run: |
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([.-][A-Za-z0-9.-]+)?$ ]]
+          git ls-remote --exit-code --tags origin "refs/tags/$RELEASE_TAG"
+      - name: Check out released application source
+        uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ env.RELEASE_TAG }}
+          path: release-source
+      - name: Install Qt 6.6.3
+        run: |
+          python3 -m venv /tmp/qt-venv
+          /tmp/qt-venv/bin/pip install aqtinstall==3.3.0
+          /tmp/qt-venv/bin/aqt install-qt mac desktop 6.6.3 clang_64 -O /tmp/Qt --archives qtbase qttools qtsvg
+      - name: Enable Intel runtime smoke checks on Apple Silicon
+        run: sudo softwareupdate --install-rosetta --agree-to-license
+      - name: Build universal application and run regression tests
+        run: ./scripts/build-for-mac.sh
+      - name: Package and verify both architectures without SDK paths
+        id: package
+        run: ./scripts/package-macos.sh "$RELEASE_TAG"
+      - name: Upload verified universal ZIP and SHA-256
+        uses: actions/upload-artifact@v7
+        with:
+          name: macos-universal
+          path: |
+            ${{ steps.package.outputs.archive }}
+            ${{ steps.package.outputs.checksum }}
+          compression-level: 0
+          if-no-files-found: error
+          retention-days: 30
+      - name: Upload test and startup logs
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: macos-test-results
+          path: |
+            build/macos/test-results.*
+            build/macos/package-smoke-*.txt
+          if-no-files-found: ignore
+          retention-days: 30
+
+  publish:
+    needs: package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      RELEASE_TAG: ${{ inputs.release_tag || github.event.workflow_run.head_branch }}
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: macos-universal
+          path: release-assets
+      - name: Attach macOS package to existing release
+        run: |
+          cd release-assets
+          sha256sum --check *.zip.sha256
+          gh release view "$RELEASE_TAG"
+          gh release upload "$RELEASE_TAG" *.zip *.zip.sha256 --clobber
