@@ -26,7 +26,6 @@ private:
     Ui::ConfigureDialog *ui;
     QString selectedLanguage;
     bool auto_disable_ime;
-    bool enable_tablet;
     bool use_droid_font;
 
 

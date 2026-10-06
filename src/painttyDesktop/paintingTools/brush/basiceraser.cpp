@@ -22,7 +22,7 @@ BasicEraser::BasicEraser()
     icon_ = QIcon(":/iconset/ui/brush/basiceraser.png");
 }
 
-void BasicEraser::drawPoint(const QPoint &p, qreal )
+void BasicEraser::drawPoint(const QPoint &p)
 {
     pen_.setWidth(width_);
     painter_.begin(surface_->imagePtr());
@@ -35,7 +35,7 @@ void BasicEraser::drawPoint(const QPoint &p, qreal )
     last_point_ = p;
 }
 
-void BasicEraser::drawLineTo(const QPoint &end, qreal )
+void BasicEraser::drawLineTo(const QPoint &end)
 {
     pen_.setWidth(width_);
     painter_.begin(surface_->imagePtr());

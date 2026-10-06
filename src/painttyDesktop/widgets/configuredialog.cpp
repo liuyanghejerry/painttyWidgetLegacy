@@ -42,7 +42,6 @@ void ConfigureDialog::readSettings()
                        QSettings::defaultFormat());
     selectedLanguage = settings.value("global/language").toString();
     auto_disable_ime = settings.value("canvas/auto_disable_ime", true).toBool();
-    enable_tablet = settings.value("canvas/enable_tablet", true).toBool();
     use_droid_font = settings.value("global/use_droid_font", false).toBool();
 
 }
@@ -88,10 +87,14 @@ void ConfigureDialog::initShortcutList()
                 ShortcutManager::ShortcutType(singleEntry.value("type").toInt());
         shortcutItem->setText(0, singleEntry.value("description").toString());
         shortcutItem->setText(1,sequence.toString(QKeySequence::NativeText));
-        if (type == ShortcutManager::Single)
-            shortcutItem->setText(2, tr("Immediately"));
-        else if (type == ShortcutManager::Multiple)
-            shortcutItem->setText(2, tr("When Release"));
+        const QString name = iterator.key();
+        if (name == "colorpicker" || name == "movetool")
+            shortcutItem->setText(2, tr("Hold to use"));
+        else if (name == "basicbrush" || name == "basiceraser" || name == "binarybrush"
+                 || name == "crayon" || name == "sketchbrush")
+            shortcutItem->setText(2, tr("Select tool"));
+        else
+            shortcutItem->setText(2, tr("Repeat"));
         shortcutItem->setData(0, Qt::UserRole, iterator.key());
         shortcutItem->setData(1, Qt::UserRole, sequence);
         shortcutItem->setData(2, Qt::UserRole, type);
@@ -105,13 +108,9 @@ void ConfigureDialog::initShortcutList()
 void ConfigureDialog::initUi()
 {
     ui->auto_disable_ime_checkbox->setChecked(auto_disable_ime);
-    ui->enable_tablet->setChecked(enable_tablet);
     ui->droid_font_checkbox->setChecked(use_droid_font);
 
-
 }
-
-
 
 void ConfigureDialog::acceptConfigure()
 {
@@ -176,14 +175,6 @@ void ConfigureDialog::acceptConfigure()
         needRestart = true;
     }
 
-    //save tablet settings
-    if (ui->enable_tablet->isChecked() != enable_tablet)
-    {
-        settings.setValue("canvas/enable_tablet",
-                          ui->enable_tablet->isChecked());
-        needRestart = true;
-    }
-
     settings.sync();
 
     //see if we need to restart
@@ -223,14 +214,7 @@ void ShortcutDelegate::setEditorData(QWidget *editor, const QModelIndex &index) 
         QKeySequenceEdit *shortcutEditor = qobject_cast<QKeySequenceEdit*>(editor);
         shortcutEditor->setKeySequence(index.data(Qt::UserRole).value<QKeySequence>());
     }
-    else if (index.column() == 2)
-    {
-        QComboBox *comboBox = qobject_cast<QComboBox*>(editor);
-        if (index.data(Qt::UserRole).toInt() == ShortcutManager::Single)
-            comboBox->setCurrentText(tr("Immediately"));
-        else if (index.data(Qt::UserRole).toInt() == ShortcutManager::Multiple)
-            comboBox->setCurrentText(tr("When Release"));
-    }
+
 }
 
 void ShortcutDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
@@ -243,15 +227,7 @@ void ShortcutDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, 
         model->setData(index, shortcutEditor->keySequence(), Qt::UserRole);
         model->setData(index, shortcutEditor->keySequence().toString(), Qt::DisplayRole);
     }
-    else if (index.column() == 2)
-    {
-        QComboBox *comboBox = qobject_cast<QComboBox*>(editor);
-        if (comboBox->currentText() == tr("Immediately"))
-            model->setData(index, ShortcutManager::Single, Qt::UserRole);
-        else if (comboBox->currentText() == tr("When Release"))
-            model->setData(index, ShortcutManager::Multiple, Qt::UserRole);
-        model->setData(index, comboBox->currentText(), Qt::DisplayRole);
-    }
+
 }
 
 void ShortcutDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const

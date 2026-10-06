@@ -1,22 +1,33 @@
 #include "singleshortcut.h"
-#include <QPainter>
+#include <QApplication>
 #include <QKeyEvent>
+#include <QShortcut>
+#include <QWidget>
 
-SingleShortcut::SingleShortcut(QObject *parent) :
+SingleShortcut::SingleShortcut(QWidget *parent) :
     QObject(parent),
-    enabled_(false)
+    shortcut_(new QShortcut(parent)),
+    window_(parent->window())
 {
-    parent->installEventFilter(this);
+    shortcut_->setAutoRepeat(false);
+    qApp->installEventFilter(this);
+    connect(shortcut_, &QShortcut::activated, this, [this]() {
+        if (active_) return;
+        active_ = true;
+        emit activated();
+    });
 }
 
 void SingleShortcut::setKey(int k)
 {
-    key_ = QKeySequence(k);
+    setKey(QKeySequence(k));
 }
 
 void SingleShortcut::setKey(QKeySequence ks)
 {
+    release();
     key_ = ks;
+    shortcut_->setKey(key_);
 }
 
 QKeySequence SingleShortcut::key()
@@ -24,34 +35,33 @@ QKeySequence SingleShortcut::key()
     return key_;
 }
 
-void SingleShortcut::setEnabled(bool e)
+void SingleShortcut::setEnabled(bool enabled)
 {
-    enabled_ = e;
+    if (!enabled) release();
+    shortcut_->setEnabled(enabled);
+}
+
+void SingleShortcut::release()
+{
+    if (!active_) return;
+    active_ = false;
+    emit inactivated();
 }
 
 bool SingleShortcut::eventFilter(QObject *obj, QEvent *event)
 {
-    if(event->type() == QEvent::KeyPress){
-        QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
-        if( QKeySequence(keyEvent->key()).matches(key_)
-                == QKeySequence::ExactMatch
-                && !keyEvent->isAutoRepeat()
-                && keyEvent->modifiers() == Qt::NoModifier ){
-            emit activated();
+    if (!active_) return false;
+    if (event->type() == QEvent::KeyRelease) {
+        const auto *keyEvent = static_cast<QKeyEvent *>(event);
+        // Match the key that activated us, even if modifiers or focus changed.
+        if (!keyEvent->isAutoRepeat() && !key_.isEmpty()
+                && keyEvent->key() == key_[key_.count() - 1].key()) {
+            release();
             return true;
         }
-        return false;
-    }else if(event->type() == QEvent::KeyRelease){
-        QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
-        if( QKeySequence(keyEvent->key()).matches(key_)
-                == QKeySequence::ExactMatch
-                && !keyEvent->isAutoRepeat()
-                && keyEvent->modifiers() == Qt::NoModifier ){
-            emit inactivated();
-            return true;
-        }
-        return false;
-    }else{
-        return QObject::eventFilter(obj, event);
+    } else if ((event->type() == QEvent::WindowDeactivate && obj == window_)
+               || event->type() == QEvent::ApplicationDeactivate) {
+        release();
     }
+    return false;
 }

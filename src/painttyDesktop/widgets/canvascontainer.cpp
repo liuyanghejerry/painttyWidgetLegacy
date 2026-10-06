@@ -181,46 +181,6 @@ void CanvasContainer::moveBy(const QPoint &p)
     verticalScrollBar()->setValue(v);
 }
 
-qreal CanvasContainer::calculateFactor(qreal current, bool zoomIn)
-{
-    if (current <= MIN_SCALE_FACTOR && !zoomIn)
-        return MIN_SCALE_FACTOR;
-    if (current >= MAX_SCALE_FACTOR && zoomIn)
-        return MAX_SCALE_FACTOR;
-    if (current < 1)
-    {
-        qreal power = qLn(current) / qLn(0.5);
-        int newPower = qFloor(power);
-        if (zoomIn)
-        {
-            if (qFuzzyCompare(qreal(newPower), power))
-                newPower--;
-            return qBound(MIN_SCALE_FACTOR, qPow(0.5, newPower), MAX_SCALE_FACTOR);
-        }
-        else
-        {
-            return qBound(MIN_SCALE_FACTOR, qPow(0.5, newPower + 1), MAX_SCALE_FACTOR);
-        }
-    }
-    else
-    {
-        qreal newScale = qFloor(current);
-        if (zoomIn)
-        {
-            return qBound(MIN_SCALE_FACTOR, newScale + 1, MAX_SCALE_FACTOR);
-        }
-        else
-        {
-            if (qFuzzyCompare(newScale, current))
-                newScale--;
-            if (qFuzzyCompare(newScale, 0.0))
-                newScale = 0.5;
-            return qBound(MIN_SCALE_FACTOR, newScale, MAX_SCALE_FACTOR);
-        }
-
-    }
-}
-
 void CanvasContainer::setScaleFactorInternal(qreal factor, const QPoint scaleCenter)
 {
     factor = qBound(MIN_SCALE_FACTOR, factor, MAX_SCALE_FACTOR);
@@ -252,18 +212,12 @@ void CanvasContainer::setScaleFactorInternal(qreal factor, const QPoint scaleCen
 
 void CanvasContainer::wheelEvent(QWheelEvent *event)
 {
-    if (event->modifiers() & Qt::ControlModifier && proxy) //tablet pinch is ctrl+scrolling
+    if (event->modifiers() & Qt::ControlModifier && proxy)
     {
-        setScaleFactorInternal(calculateFactor(proxy->scale(), event->angleDelta().y() > 0), event->position().toPoint());
-        return;
-    }
-    if (event->modifiers() & Qt::AltModifier && proxy) //tablet pinch is alt+scrolling
-    {
-        QWheelEvent *event2 = new QWheelEvent(event->position(), event->globalPosition(), event->pixelDelta(),
-                        event->angleDelta(), event->buttons(),
-                        event->modifiers(), event->phase(), event->inverted());
-        QGraphicsView::wheelEvent(event);
-        delete(event2);
+        const int delta = event->angleDelta().y() != 0 ? event->angleDelta().y() : event->pixelDelta().y();
+        if (delta != 0)
+            setScaleFactorInternal(proxy->scale() * (delta > 0 ? 1.2 : 1.0 / 1.2), event->position().toPoint());
+        event->accept();
         return;
     }
     QGraphicsView::wheelEvent(event);
@@ -271,15 +225,27 @@ void CanvasContainer::wheelEvent(QWheelEvent *event)
 
 void CanvasContainer::mousePressEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::RightButton)
-    {
-        moveStartPoint = event->pos();
+    if (panning_ && event->button() == Qt::LeftButton) {
+        moveStartPoint = event->position().toPoint();
+        panPressed_ = true;
+        viewport()->setCursor(Qt::ClosedHandCursor);
+        event->accept();
+        return;
     }
+    if (event->button() == Qt::RightButton) moveStartPoint = event->position().toPoint();
     QGraphicsView::mousePressEvent(event);
 }
 
 void CanvasContainer::mouseMoveEvent(QMouseEvent *event)
 {
+    if (panning_ && (event->buttons() & Qt::LeftButton)) {
+        const QPoint position = event->position().toPoint();
+        if (panPressed_) moveBy(moveStartPoint - position);
+        moveStartPoint = position;
+        panPressed_ = true;
+        event->accept();
+        return;
+    }
     if (event->buttons() & Qt::RightButton)
     {
         moveBy(moveStartPoint - event->pos());
@@ -302,28 +268,24 @@ bool CanvasContainer::eventFilter(QObject *object, QEvent *event)
             && event->type() == QEvent::Resize) {
         setSceneRect(scene->itemsBoundingRect());
     }
-    if (object == viewport()) //process tablet event
-    {
-        if (event->type() == QEvent::TabletPress
-                || event->type() == QEvent::TabletMove
-                || event->type() == QEvent::TabletRelease)
-        {
-            QTabletEvent *e = static_cast<QTabletEvent*>(event);
-            QTabletEvent newEvent(e->type(),
-                                  e->pointingDevice(),
-                                  proxy->mapFromScene(mapToScene(e->position().toPoint())),
-                                  e->globalPosition(),
-                                  e->pressure(),
-                                  e->xTilt(),
-                                  e->yTilt(),
-                                  e->tangentialPressure(),
-                                  e->rotation(),
-                                  e->z(),
-                                  e->modifiers(),
-                                  e->button(), e->buttons());
-            QApplication::sendEvent(proxy->widget(), &newEvent);
-            return true;
-        }
-    }
     return QGraphicsView::eventFilter(object, event);
+}
+
+void CanvasContainer::setPanning(bool enabled)
+{
+    if (panning_ == enabled) return;
+    panning_ = enabled;
+    panPressed_ = false;
+    if (enabled) viewport()->setCursor(Qt::OpenHandCursor);
+    else viewport()->unsetCursor();
+}
+
+void CanvasContainer::mouseReleaseEvent(QMouseEvent *event)
+{
+    if (event->button() == Qt::LeftButton) {
+        panPressed_ = false;
+        if (panning_) viewport()->setCursor(Qt::OpenHandCursor);
+    }
+    // Also release any scene grab left by a stroke that changed to the move tool.
+    QGraphicsView::mouseReleaseEvent(event);
 }

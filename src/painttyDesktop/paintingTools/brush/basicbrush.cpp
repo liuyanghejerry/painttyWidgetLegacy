@@ -95,7 +95,6 @@ void BasicBrush::drawPointInternal(const QPoint &p,
                                    const QImage& stencil,
                                    QPainter* painter)
 {
-    // TODO: add pressure
     bool need_delete = false;
     if(!painter) {
         painter = new QPainter;
@@ -110,19 +109,19 @@ void BasicBrush::drawPointInternal(const QPoint &p,
     }
 }
 
-void BasicBrush::drawPoint(const QPoint &p, qreal pr)
+void BasicBrush::drawPoint(const QPoint &p)
 {
+    left_ = 0;
     QPainter painter(surface_->imagePtr());
     painter.setRenderHint(QPainter::Antialiasing);
-    QImage pressure_stencil = stencil_.scaledToWidth(stencil_.width()*pr);
-    drawPointInternal(QPoint(p.x() - (pressure_stencil.width()>>1),
-                             p.y() - (pressure_stencil.height()>>1)),
-                      pressure_stencil,
+    drawPointInternal(QPoint(p.x() - (stencil_.width()>>1),
+                             p.y() - (stencil_.height()>>1)),
+                      stencil_,
                       &painter);
     last_point_ = p;
 }
 
-void BasicBrush::drawLineTo(const QPoint &end, qreal pressure)
+void BasicBrush::drawLineTo(const QPoint &end)
 {
     if(end.x() > surface_->imageConstPtr()->width() || end.x() < 0
             || end.y() > surface_->imageConstPtr()->height() || end.y() < 0) {
@@ -130,7 +129,7 @@ void BasicBrush::drawLineTo(const QPoint &end, qreal pressure)
     }
     const QPoint& start = last_point_;
     // TODO: spacing needs to be calc with thickness and hardness, too
-    const qreal spacing = width_*pressure*0.07;
+    const qreal spacing = width_*0.07;
 
     const qreal deltaX = end.x() - start.x();
     const qreal deltaY = end.y() - start.y();
@@ -149,7 +148,6 @@ void BasicBrush::drawLineTo(const QPoint &end, qreal pressure)
 
     qreal totalDistance = left_ + distance;
     // TODO
-    QImage pressure_stencil = stencil_.scaledToWidth(stencil_.width()*pressure);
 
     QPainter painter(surface_->imagePtr());
     painter.setRenderHint(QPainter::Antialiasing);
@@ -157,17 +155,17 @@ void BasicBrush::drawLineTo(const QPoint &end, qreal pressure)
         if ( left_ > 0.0 ) {
             offsetX += stepX * (spacing - left_);
             offsetY += stepY * (spacing - left_);
-            drawPointInternal(QPoint(start.x() + offsetX - (pressure_stencil.width()>>1),
-                                     start.y() + offsetY - (pressure_stencil.height()>>1)),
-                              pressure_stencil,
+            drawPointInternal(QPoint(start.x() + offsetX - (stencil_.width()>>1),
+                                     start.y() + offsetY - (stencil_.height()>>1)),
+                              stencil_,
                               &painter);
             left_ -= spacing;
         } else {
             offsetX += stepX * spacing;
             offsetY += stepY * spacing;
-            drawPointInternal(QPoint(start.x() + offsetX - (pressure_stencil.width()>>1),
-                                     start.y() + offsetY - (pressure_stencil.height()>>1)),
-                              pressure_stencil,
+            drawPointInternal(QPoint(start.x() + offsetX - (stencil_.width()>>1),
+                                     start.y() + offsetY - (stencil_.height()>>1)),
+                              stencil_,
                               &painter);
         }
         totalDistance -= spacing;

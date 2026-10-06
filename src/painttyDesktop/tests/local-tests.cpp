@@ -13,6 +13,12 @@
 #include <QScopeGuard>
 #include <QTemporaryDir>
 #include <QTimer>
+#include <QLineEdit>
+#include <QToolButton>
+#include <QTabletEvent>
+#include <QPointingDevice>
+#include <QScrollBar>
+#include "misc/singleshortcut.h"
 #include <QToolBar>
 #include <QTranslator>
 #include <QUndoStack>
@@ -60,6 +66,13 @@ PaintingProject sample()
                                i != 7, i == 8});
     project.selectedLayer = 8;
     return project;
+}
+
+QToolButton *toolButton(MainWindow &window, const QString &text)
+{
+    for (auto *button : window.findChildren<QToolButton *>())
+        if (button->defaultAction() && button->defaultAction()->text() == text) return button;
+    return nullptr;
 }
 
 void answerMessage(QMessageBox::StandardButton button)
@@ -376,8 +389,6 @@ private slots:
         window.newProject(128, 128);
         auto *canvas = canvasOf(window);
         QVERIFY(canvas);
-        canvas->setTabletEnabled(false);
-        canvas->setJitterCorrectionEnabled(false);
         canvas->setBrushColor(Qt::red);
         canvas->show();
         QTest::mouseClick(canvas, Qt::LeftButton, Qt::NoModifier, QPoint(50, 50));
@@ -393,12 +404,12 @@ private slots:
         QTest::mouseClick(canvas, Qt::LeftButton, Qt::NoModifier, QPoint(70, 70));
         QCOMPARE(canvas->projectState().layers[0].image, before);
         canvas->unlockLayer(canvas->currentLayer());
-        window.changeToBrush("BasicBrushV3");
+        window.changeToBrush("BasicBrush");
         canvas->setBrushColor(Qt::blue);
         canvas->setBrushWidth(15);
         QTest::mouseClick(canvas, Qt::LeftButton, Qt::NoModifier, QPoint(80, 80));
         QVERIFY(canvas->projectState().layers[0].image.pixelColor(80, 80).blue() > 0);
-        // A sparse stream of pointer events must still create a continuous V3 stroke.
+        // A sparse stream of pointer events must still create a continuous mouse stroke.
         QTest::mousePress(canvas, Qt::LeftButton, Qt::NoModifier, QPoint(15, 100));
         QMouseEvent move(QEvent::MouseMove, QPointF(110, 100), QPointF(110, 100),
                          Qt::NoButton, Qt::LeftButton, Qt::NoModifier);
@@ -426,7 +437,7 @@ private slots:
         QCOMPARE(canvas.count(), 11);
     }
 
-    void mouseThroughCanvasViewWithTabletEnabled()
+    void mouseThroughCanvasView()
     {
         MainWindow window;
         window.newProject(256, 256);
@@ -437,7 +448,6 @@ private slots:
         auto *view = window.findChild<CanvasContainer *>();
         QVERIFY(canvas);
         QVERIFY(view);
-        canvas->setTabletEnabled(true);
         canvas->setBrushColor(Qt::green);
         auto *proxy = canvas->graphicsProxyWidget();
         QVERIFY(proxy);
@@ -447,13 +457,332 @@ private slots:
         QVERIFY(canvas->projectState().layers[0].image.pixelColor(100, 100).green() > 0);
     }
 
+    void mouseOnlyIgnoresCompatibilityEvents_data()
+    {
+        QTest::addColumn<int>("source");
+        QTest::newRow("system") << int(Qt::MouseEventSynthesizedBySystem);
+        QTest::newRow("qt") << int(Qt::MouseEventSynthesizedByQt);
+        QTest::newRow("application") << int(Qt::MouseEventSynthesizedByApplication);
+    }
+
+    void mouseOnlyIgnoresCompatibilityEvents()
+    {
+        QFETCH(int, source);
+        MainWindow window;
+        window.newProject(128, 128);
+        auto *canvas = canvasOf(window);
+        auto send = [&](QEvent::Type type, QPoint point, Qt::MouseButton button, Qt::MouseButtons buttons) {
+            QMouseEvent event(type, point, point, point, button, buttons, Qt::NoModifier,
+                              Qt::MouseEventSource(source));
+            QApplication::sendEvent(canvas, &event);
+        };
+        send(QEvent::MouseButtonPress, {20, 20}, Qt::LeftButton, Qt::LeftButton);
+        send(QEvent::MouseMove, {80, 20}, Qt::NoButton, Qt::LeftButton);
+        send(QEvent::MouseButtonRelease, {80, 20}, Qt::LeftButton, Qt::NoButton);
+        QVERIFY(canvas->projectState().layers[0].image.isNull());
+        QVERIFY(!window.isWindowModified());
+        window.show(); QTest::qWait(20);
+        auto *view = window.findChild<CanvasContainer *>();
+        const auto *proxy = canvas->graphicsProxyWidget();
+        const QPoint point = view->mapFromScene(proxy->mapToScene(QPointF(50, 50)));
+        for (auto type : {QEvent::MouseButtonPress, QEvent::MouseButtonRelease}) {
+            QMouseEvent event(type, point, point, view->viewport()->mapToGlobal(point),
+                              Qt::LeftButton, type == QEvent::MouseButtonPress ? Qt::LeftButton : Qt::NoButton,
+                              Qt::NoModifier, Qt::MouseEventSource(source));
+            QApplication::sendEvent(view->viewport(), &event);
+        }
+        QVERIFY(canvas->projectState().layers[0].image.isNull());
+        canvas->setBrushColor(Qt::red);
+        QTest::mouseClick(canvas, Qt::LeftButton, Qt::NoModifier, QPoint(30, 30));
+        QVERIFY(canvas->projectState().layers[0].image.pixelColor(30, 30).red() > 0);
+        // Compatibility events must not terminate a real mouse stroke either.
+        QTest::mousePress(canvas, Qt::LeftButton, Qt::NoModifier, QPoint(40, 30));
+        send(QEvent::MouseButtonRelease, {80, 20}, Qt::LeftButton, Qt::NoButton);
+        QVERIFY(canvas->isDrawing());
+        QTest::mouseRelease(canvas, Qt::LeftButton, Qt::NoModifier, QPoint(70, 30));
+        QVERIFY(!canvas->isDrawing());
+    }
+
+    void penEventsDoNotDraw()
+    {
+        MainWindow window;
+        window.newProject(128, 128); window.show(); QTest::qWait(20);
+        auto *view = window.findChild<CanvasContainer *>();
+        QPointingDevice pen("Test Pen", 1, QInputDevice::DeviceType::Stylus,
+            QPointingDevice::PointerType::Pen,
+            QInputDevice::Capability::Position | QInputDevice::Capability::Pressure, 1, 3);
+        QTabletEvent press(QEvent::TabletPress, &pen, {50, 50}, {50, 50},
+                           0.8, 0, 0, 0, 0, 0, Qt::NoModifier, Qt::LeftButton, Qt::LeftButton);
+        QApplication::sendEvent(view->viewport(), &press);
+        QTabletEvent release(QEvent::TabletRelease, &pen, {50, 50}, {50, 50},
+                             0, 0, 0, 0, 0, 0, Qt::NoModifier, Qt::LeftButton, Qt::NoButton);
+        QApplication::sendEvent(view->viewport(), &release);
+        QVERIFY(canvasOf(window)->projectState().layers[0].image.isNull());
+        QVERIFY(!window.isWindowModified());
+    }
+
+    void brushesSelectPersistentlyAndRememberWidth()
+    {
+        MainWindow window;
+        window.show(); window.activateWindow(); QTest::qWait(30);
+        auto *view = window.findChild<CanvasContainer *>();
+        auto *canvas = canvasOf(window);
+        view->setFocus();
+        canvas->setBrushWidth(37);
+        QTest::keyClick(view, Qt::Key_N);
+        QCOMPARE(canvas->brushSettings()["name"].toString(), QString("basiceraser"));
+        QTest::keyPress(view, Qt::Key_N);
+        QTest::keyPress(view, Qt::Key_M);
+        QTest::keyRelease(view, Qt::Key_M);
+        QTest::keyRelease(view, Qt::Key_N);
+        QCOMPARE(canvas->brushSettings()["name"].toString(), QString("binarybrush"));
+        QTest::mousePress(canvas, Qt::LeftButton, Qt::NoModifier, QPoint(80, 80));
+        QKeyEvent repeated(QEvent::KeyPress, Qt::Key_M, Qt::NoModifier, QString(), true);
+        QApplication::sendEvent(view, &repeated);
+        QVERIFY(canvas->isDrawing());
+        QTest::mouseRelease(canvas, Qt::LeftButton, Qt::NoModifier, QPoint(90, 80));
+        QTest::keyClick(view, Qt::Key_B);
+        QCOMPARE(canvas->brushSettings()["name"].toString(), QString("basicbrush"));
+        QCOMPARE(canvas->brushSettings()["width"].toInt(), 37);
+        QTest::keyClick(view, Qt::Key_E);
+        QCOMPARE(canvas->brushSettings()["name"].toString(), QString("basiceraser"));
+        for (auto *action : window.findChildren<QAction *>())
+            QVERIFY(!action->objectName().contains("V3"));
+    }
+
+    void temporaryToolsRestoreModifiersFocusAndOverlaps()
+    {
+        MainWindow window;
+        window.show(); window.activateWindow(); QTest::qWait(30);
+        auto *view = window.findChild<CanvasContainer *>();
+        view->setFocus();
+        auto *picker = toolButton(window, "Color Picker");
+        auto *move = toolButton(window, "Move Tool");
+        QVERIFY(picker); QVERIFY(move);
+        QTest::keyPress(view, Qt::Key_V);
+        QVERIFY(picker->isChecked());
+        QTest::keyRelease(view, Qt::Key_V, Qt::ShiftModifier);
+        QVERIFY(!picker->isChecked());
+        QVERIFY(window.findChild<QAction *>("BasicBrush")->isEnabled());
+        QTest::keyPress(view, Qt::Key_V);
+        QEvent deactivated(QEvent::WindowDeactivate);
+        QApplication::sendEvent(&window, &deactivated);
+        QVERIFY(!picker->isChecked());
+        QTest::keyRelease(view, Qt::Key_V);
+        window.activateWindow(); view->setFocus(); QTest::qWait(10);
+        // A toolbar selection remains the underlying tool during temporary holds.
+        picker->click(); QVERIFY(picker->isChecked());
+        QTest::keyPress(view, Qt::Key_Space);
+        QVERIFY(move->isChecked()); QVERIFY(!picker->isChecked());
+        QTest::keyPress(view, Qt::Key_V);
+        QVERIFY(picker->isChecked()); QVERIFY(!move->isChecked());
+        QTest::keyRelease(view, Qt::Key_Space);
+        QVERIFY(picker->isChecked());
+        QTest::keyRelease(view, Qt::Key_V);
+        QVERIFY(picker->isChecked());
+        // C and Space refer to the same tool but must keep distinct hold identities.
+        QTest::keyPress(view, Qt::Key_C);
+        QTest::keyPress(view, Qt::Key_V);
+        QTest::keyPress(view, Qt::Key_Space);
+        QVERIFY(move->isChecked());
+        QTest::keyRelease(view, Qt::Key_Space);
+        QVERIFY(picker->isChecked());
+        QTest::keyRelease(view, Qt::Key_V);
+        QVERIFY(move->isChecked());
+        QTest::keyRelease(view, Qt::Key_C);
+        QVERIFY(picker->isChecked());
+        QTest::keyClick(view, Qt::Key_B);
+        QVERIFY(!picker->isChecked()); QVERIFY(!move->isChecked());
+        // Shortcut matching must let text fields handle ordinary typing.
+        auto *input = new QLineEdit(&window);
+        input->show(); input->setFocus();
+        QTest::keyClicks(input, "bnvcs");
+        QCOMPARE(input->text(), QString("bnvcs"));
+        QVERIFY(!picker->isChecked()); QVERIFY(!move->isChecked());
+        QCOMPARE(canvasOf(window)->brushSettings()["name"].toString(), QString("basicbrush"));
+    }
+
+    void destroyingWindowWithHeldTool()
+    {
+        {
+            MainWindow window;
+            window.show(); window.activateWindow(); QTest::qWait(20);
+            auto *view = window.findChild<CanvasContainer *>(); view->setFocus();
+            QTest::keyPress(view, Qt::Key_V);
+            QVERIFY(toolButton(window, "Color Picker")->isChecked());
+            // Window teardown can emit deactivation and undo-stack signals.
+        }
+        QCoreApplication::processEvents();
+    }
+
+    void modifiedTemporaryShortcutAndDisabledState()
+    {
+        QWidget window;
+        window.setFocusPolicy(Qt::StrongFocus);
+        SingleShortcut shortcut(&window);
+        shortcut.setKey(QKeySequence("Ctrl+E"));
+        QSignalSpy activated(&shortcut, &SingleShortcut::activated);
+        QSignalSpy released(&shortcut, &SingleShortcut::inactivated);
+        window.show(); window.activateWindow(); window.setFocus(); QTest::qWait(30);
+        QTest::keyPress(&window, Qt::Key_E, Qt::ControlModifier);
+        QCOMPARE(activated.count(), 1);
+        QTest::keyRelease(&window, Qt::Key_E, Qt::ShiftModifier);
+        QCOMPARE(released.count(), 1);
+        shortcut.setEnabled(false);
+        QTest::keyClick(&window, Qt::Key_E, Qt::ControlModifier);
+        QCOMPARE(activated.count(), 1);
+        shortcut.setEnabled(true);
+        QTest::keyPress(&window, Qt::Key_E, Qt::ControlModifier);
+        QCOMPARE(activated.count(), 2);
+        QEvent deactivated(QEvent::WindowDeactivate);
+        QApplication::sendEvent(&window, &deactivated);
+        QCOMPARE(released.count(), 2);
+        QTest::keyRelease(&window, Qt::Key_E);
+        QCOMPARE(released.count(), 2);
+    }
+
+    void toolChangesCommitStrokeHistory_data()
+    {
+        QTest::addColumn<int>("key");
+        QTest::newRow("picker") << int(Qt::Key_V);
+        QTest::newRow("move") << int(Qt::Key_C);
+        QTest::newRow("brush") << int(Qt::Key_N);
+    }
+
+    void toolChangesCommitStrokeHistory()
+    {
+        QFETCH(int, key);
+        MainWindow window;
+        window.newProject(128, 128);
+        window.show(); window.activateWindow(); QTest::qWait(30);
+        auto *canvas = canvasOf(window);
+        auto *view = window.findChild<CanvasContainer *>(); view->setFocus();
+        canvas->setBrushColor(Qt::red);
+        QTest::mousePress(canvas, Qt::LeftButton, Qt::NoModifier, QPoint(20, 20));
+        QMouseEvent move(QEvent::MouseMove, QPointF(40, 20), QPointF(40, 20),
+                         Qt::NoButton, Qt::LeftButton, Qt::NoModifier);
+        QApplication::sendEvent(canvas, &move);
+        QVERIFY(canvas->isDrawing());
+        QTest::keyPress(view, Qt::Key(key));
+        QVERIFY(!canvas->isDrawing());
+        QTest::mouseRelease(canvas, Qt::LeftButton, Qt::NoModifier, QPoint(80, 20));
+        QTest::keyRelease(view, Qt::Key(key));
+        const auto stroke = canvas->projectState().layers[0].image;
+        QVERIFY(!stroke.isNull());
+        auto *undo = window.findChild<QAction *>("actionUndo");
+        QVERIFY(undo->isEnabled()); undo->trigger();
+        QVERIFY(canvas->projectState().layers[0].image.isNull());
+        window.findChild<QAction *>("actionRedo")->trigger();
+        QCOMPARE(canvas->projectState().layers[0].image, stroke);
+    }
+
+    void undoDuringStrokeAndFocusLoss()
+    {
+        MainWindow window;
+        window.newProject(128, 128);
+        auto *canvas = canvasOf(window);
+        QTest::mousePress(canvas, Qt::LeftButton, Qt::NoModifier, QPoint(20, 20));
+        QVERIFY(window.findChild<QAction *>("actionUndo")->isEnabled());
+        window.findChild<QAction *>("actionUndo")->trigger();
+        QVERIFY(!canvas->isDrawing());
+        QVERIFY(canvas->projectState().layers[0].image.isNull());
+        window.findChild<QAction *>("actionRedo")->trigger();
+        QVERIFY(!canvas->projectState().layers[0].image.isNull());
+        QTest::mousePress(canvas, Qt::LeftButton, Qt::NoModifier, QPoint(40, 40));
+        QEvent deactivated(QEvent::WindowDeactivate);
+        QApplication::sendEvent(&window, &deactivated);
+        QVERIFY(!canvas->isDrawing());
+        window.findChild<QAction *>("actionUndo")->trigger();
+        QCOMPARE(canvas->projectState().layers[0].image.pixelColor(40, 40).alpha(), 0);
+    }
+
+    void mouseSamplesRenderImmediatelyAndKeepCorners()
+    {
+        MainWindow window;
+        window.newProject(160, 160);
+        auto *canvas = canvasOf(window);
+        canvas->setBrushColor(Qt::blue);
+        QTest::mousePress(canvas, Qt::LeftButton, Qt::NoModifier, QPoint(20, 20));
+        for (const QPoint point : {QPoint(40, 20), QPoint(60, 20), QPoint(80, 20),
+                                   QPoint(100, 20), QPoint(100, 100), QPoint(120, 20)}) {
+            QMouseEvent move(QEvent::MouseMove, QPointF(point), QPointF(point),
+                             Qt::NoButton, Qt::LeftButton, Qt::NoModifier);
+            QApplication::sendEvent(canvas, &move);
+            QVERIFY(canvas->projectState().layers[0].image.pixelColor(point).blue() > 0);
+        }
+        QTest::mouseRelease(canvas, Qt::LeftButton, Qt::NoModifier, QPoint(120, 20));
+        QVERIFY(canvas->projectState().layers[0].image.pixelColor(100, 100).blue() > 0);
+    }
+
+    void panTracksViewportAcrossTransforms_data()
+    {
+        QTest::addColumn<int>("rotation"); QTest::addColumn<qreal>("scale");
+        for (int rotation : {0, 45, 90, -90})
+            for (qreal scale : {0.5, 1.0, 4.0})
+                QTest::newRow(qPrintable(QString("%1deg-%2x").arg(rotation).arg(scale))) << rotation << scale;
+    }
+
+    void panTracksViewportAcrossTransforms()
+    {
+        QFETCH(int, rotation); QFETCH(qreal, scale);
+        MainWindow window;
+        window.newProject(3000, 3000); window.resize(1100, 800);
+        window.show(); window.activateWindow(); QTest::qWait(20);
+        auto *view = window.findChild<CanvasContainer *>();
+        view->setScaleFactor(scale); view->setRotation(rotation); view->setFocus();
+        auto *horizontal = view->horizontalScrollBar(); auto *vertical = view->verticalScrollBar();
+        horizontal->setValue((horizontal->minimum() + horizontal->maximum()) / 2);
+        vertical->setValue((vertical->minimum() + vertical->maximum()) / 2);
+        const QPoint scroll(horizontal->value(), vertical->value());
+        const QPoint start = view->viewport()->rect().center();
+        QTest::keyPress(view, Qt::Key_C);
+        QTest::mousePress(view->viewport(), Qt::LeftButton, Qt::NoModifier, start);
+        const auto releaseInput = qScopeGuard([&]() {
+            QTest::mouseRelease(view->viewport(), Qt::LeftButton, Qt::NoModifier, start);
+            QTest::keyRelease(view, Qt::Key_C);
+        });
+        for (QPoint delta : {QPoint(1, 0), QPoint(40, 7)}) {
+            QMouseEvent move(QEvent::MouseMove, QPointF(start + delta),
+                             QPointF(view->viewport()->mapToGlobal(start + delta)),
+                             Qt::NoButton, Qt::LeftButton, Qt::NoModifier);
+            QApplication::sendEvent(view->viewport(), &move);
+            QCOMPARE(QPoint(horizontal->value(), vertical->value()), scroll - delta);
+        }
+        QTest::mouseRelease(view->viewport(), Qt::LeftButton, Qt::NoModifier, start + QPoint(40, 7));
+        QTest::keyRelease(view, Qt::Key_C);
+        QVERIFY(canvasOf(window)->projectState().layers[0].image.isNull());
+    }
+
+    void zoomRoundTripAndReset()
+    {
+        MainWindow window;
+        window.newProject(2000, 2000); window.show(); window.activateWindow(); QTest::qWait(20);
+        auto *view = window.findChild<CanvasContainer *>(); view->setFocus();
+        QTest::keyClick(view, Qt::Key_Equal); QTest::keyClick(view, Qt::Key_Minus);
+        QVERIFY(qAbs(view->currentScaleFactor() - 1) < 0.00001);
+        const auto point = view->viewport()->rect().center();
+        for (int delta : {120, -120, 0}) {
+            QWheelEvent wheel(QPointF(point), QPointF(view->viewport()->mapToGlobal(point)), {}, {0, delta},
+                              Qt::NoButton, Qt::ControlModifier, Qt::NoScrollPhase, false);
+            QApplication::sendEvent(view->viewport(), &wheel);
+        }
+        QVERIFY(qAbs(view->currentScaleFactor() - 1) < 0.00001);
+        view->setScaleFactor(2); view->setRotation(90); view->moveBy({100, 100});
+        QTest::keyClick(view, Qt::Key_Backslash);
+        QCOMPARE(view->currentScaleFactor(), qreal(1));
+        const auto rect = view->visualRect();
+        QVERIFY(qAbs(rect.center().x() - 1000) < 2);
+        QVERIFY(qAbs(rect.center().y() - 1000) < 2);
+    }
+
     void offlinePreferences()
     {
         ConfigureDialog dialog;
         QVERIFY(!dialog.findChild<QWidget *>("serverTab"));
         QVERIFY(!dialog.findChild<QWidget *>("skip_replay"));
         QVERIFY(!dialog.findChild<QWidget *>("clearCache"));
-        QVERIFY(dialog.findChild<QWidget *>("enable_tablet")->isEnabled());
+        QVERIFY(!dialog.findChild<QWidget *>("enable_tablet"));
+        QVERIFY(!dialog.findChild<QWidget *>("experimentalTab"));
     }
 };
 

@@ -32,19 +32,22 @@ public slots:
     void setRotation(int degree);
     void rotateBy(int deg);
     void resetView();
+    void setPanning(bool enabled);
 
 private:
     QGraphicsScene *scene;
     QGraphicsProxyWidget *proxy;
     QPoint moveStartPoint;
+    bool panning_ = false;
+    bool panPressed_ = false;
     bool smoothScaleFlag;
-    qreal calculateFactor(qreal current, bool zoomIn);
     void setScaleFactorInternal(qreal factor, const QPoint scaleCenter = QPoint());
 
 protected:
     void wheelEvent(QWheelEvent *event);
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
     bool eventFilter(QObject *object, QEvent *event);
 };
 

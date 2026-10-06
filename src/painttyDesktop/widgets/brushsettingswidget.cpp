@@ -29,17 +29,6 @@ BrushSettingsWidget::BrushSettingsWidget(QWidget *parent) :
     mixinSlider = new QSlider(this);
     mixinSpinBox = new QSpinBox(this);
     
-    // 新增压感笔刷控件
-    smoothnessLabel = new QLabel(tr("Smoothness"), this);
-    smoothnessSlider = new QSlider(this);
-    smoothnessSpinBox = new QSpinBox(this);
-    pressureCurveLabel = new QLabel(tr("Pressure Curve"), this);
-    pressureCurveSlider = new QSlider(this);
-    pressureCurveSpinBox = new QSpinBox(this);
-    tiltSensitivityLabel = new QLabel(tr("Tilt Sensitivity"), this);
-    tiltSensitivitySlider = new QSlider(this);
-    tiltSensitivitySpinBox = new QSpinBox(this);
-
     widthLabel->setAlignment(Qt::AlignCenter);
     widthSlider->setSizePolicy(QSizePolicy::Preferred,
                                QSizePolicy::Fixed);
@@ -77,25 +66,6 @@ BrushSettingsWidget::BrushSettingsWidget(QWidget *parent) :
     mixinSlider->setRange(0, 100);
     mixinSpinBox->setRange(0, 100);
     
-    // 设置压感笔刷控件
-    smoothnessLabel->setAlignment(Qt::AlignCenter);
-    smoothnessSlider->setSizePolicy(QSizePolicy::Preferred,
-                                    QSizePolicy::Fixed);
-    smoothnessSlider->setRange(0, 100);
-    smoothnessSpinBox->setRange(0, 100);
-    
-    pressureCurveLabel->setAlignment(Qt::AlignCenter);
-    pressureCurveSlider->setSizePolicy(QSizePolicy::Preferred,
-                                       QSizePolicy::Fixed);
-    pressureCurveSlider->setRange(10, 200);
-    pressureCurveSpinBox->setRange(10, 200);
-    
-    tiltSensitivityLabel->setAlignment(Qt::AlignCenter);
-    tiltSensitivitySlider->setSizePolicy(QSizePolicy::Preferred,
-                                         QSizePolicy::Fixed);
-    tiltSensitivitySlider->setRange(0, 100);
-    tiltSensitivitySpinBox->setRange(0, 100);
-
     connect(widthSlider, &QSlider::valueChanged,
             this, &BrushSettingsWidget::widthChanged);
     connect(widthSlider, &QSlider::valueChanged,
@@ -144,40 +114,12 @@ BrushSettingsWidget::BrushSettingsWidget(QWidget *parent) :
             static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
             mixinSlider, &QSlider::setValue);
     
-    // 连接压感笔刷控件信号
-    connect(smoothnessSlider, &QSlider::valueChanged,
-            this, &BrushSettingsWidget::smoothnessChanged);
-    connect(smoothnessSlider, &QSlider::valueChanged,
-            smoothnessSpinBox, &QSpinBox::setValue);
-    connect(smoothnessSpinBox,
-            static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
-            smoothnessSlider, &QSlider::setValue);
-    
-    connect(pressureCurveSlider, &QSlider::valueChanged,
-            this, &BrushSettingsWidget::pressureCurveChanged);
-    connect(pressureCurveSlider, &QSlider::valueChanged,
-            pressureCurveSpinBox, &QSpinBox::setValue);
-    connect(pressureCurveSpinBox,
-            static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
-            pressureCurveSlider, &QSlider::setValue);
-    
-    connect(tiltSensitivitySlider, &QSlider::valueChanged,
-            this, &BrushSettingsWidget::tiltSensitivityChanged);
-    connect(tiltSensitivitySlider, &QSlider::valueChanged,
-            tiltSensitivitySpinBox, &QSpinBox::setValue);
-    connect(tiltSensitivitySpinBox,
-            static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
-            tiltSensitivitySlider, &QSlider::setValue);
-
     setOrientation(Qt::Horizontal);
     setHardnessEnabled(false);
     setThicknessEnabled(false);
     setWaterEnabled(false);
     setExtendEnabled(false);
     setMixinEnabled(false);
-    setSmoothnessEnabled(false);
-    setPressureCurveEnabled(false);
-    setTiltSensitivityEnabled(false);
 }
 
 BrushSettingsWidget::~BrushSettingsWidget()
@@ -220,22 +162,6 @@ int BrushSettingsWidget::mixin()
     return mixinSlider->value();
 }
 
-// 新增压感笔刷属性
-int BrushSettingsWidget::smoothness()
-{
-    return smoothnessSlider->value();
-}
-
-int BrushSettingsWidget::pressureCurve()
-{
-    return pressureCurveSlider->value();
-}
-
-int BrushSettingsWidget::tiltSensitivity()
-{
-    return tiltSensitivitySlider->value();
-}
-
 void BrushSettingsWidget::setHardness(int hardness)
 {
     if (hardness != hardnessSlider->value())
@@ -264,25 +190,6 @@ void BrushSettingsWidget::setMixin(int mixin)
 {
     if (mixin != mixinSlider->value())
         mixinSlider->setValue(mixin);
-}
-
-// 新增压感笔刷设置方法
-void BrushSettingsWidget::setSmoothness(int smoothness)
-{
-    if (smoothness != smoothnessSlider->value())
-        smoothnessSlider->setValue(smoothness);
-}
-
-void BrushSettingsWidget::setPressureCurve(int pressureCurve)
-{
-    if (pressureCurve != pressureCurveSlider->value())
-        pressureCurveSlider->setValue(pressureCurve);
-}
-
-void BrushSettingsWidget::setTiltSensitivity(int tiltSensitivity)
-{
-    if (tiltSensitivity != tiltSensitivitySlider->value())
-        tiltSensitivitySlider->setValue(tiltSensitivity);
 }
 
 void BrushSettingsWidget::widthUp()
@@ -357,43 +264,6 @@ void BrushSettingsWidget::mixinDown()
                           - mixinSlider->singleStep());
 }
 
-// 新增压感笔刷操作方法
-void BrushSettingsWidget::smoothnessUp()
-{
-    smoothnessSlider->setValue(smoothnessSlider->value()
-                               + smoothnessSlider->singleStep());
-}
-
-void BrushSettingsWidget::smoothnessDown()
-{
-    smoothnessSlider->setValue(smoothnessSlider->value()
-                               - smoothnessSlider->singleStep());
-}
-
-void BrushSettingsWidget::pressureCurveUp()
-{
-    pressureCurveSlider->setValue(pressureCurveSlider->value()
-                                  + pressureCurveSlider->singleStep());
-}
-
-void BrushSettingsWidget::pressureCurveDown()
-{
-    pressureCurveSlider->setValue(pressureCurveSlider->value()
-                                  - pressureCurveSlider->singleStep());
-}
-
-void BrushSettingsWidget::tiltSensitivityUp()
-{
-    tiltSensitivitySlider->setValue(tiltSensitivitySlider->value()
-                                    + tiltSensitivitySlider->singleStep());
-}
-
-void BrushSettingsWidget::tiltSensitivityDown()
-{
-    tiltSensitivitySlider->setValue(tiltSensitivitySlider->value()
-                                    - tiltSensitivitySlider->singleStep());
-}
-
 void BrushSettingsWidget::setHardnessEnabled(bool on)
 {
     hardnessLabel->setVisible(on);
@@ -429,28 +299,6 @@ void BrushSettingsWidget::setMixinEnabled(bool on)
     mixinSlider->setVisible(on);
 }
 
-// 新增压感笔刷启用/禁用方法
-void BrushSettingsWidget::setSmoothnessEnabled(bool on)
-{
-    smoothnessLabel->setVisible(on);
-    smoothnessSpinBox->setVisible(on);
-    smoothnessSlider->setVisible(on);
-}
-
-void BrushSettingsWidget::setPressureCurveEnabled(bool on)
-{
-    pressureCurveLabel->setVisible(on);
-    pressureCurveSpinBox->setVisible(on);
-    pressureCurveSlider->setVisible(on);
-}
-
-void BrushSettingsWidget::setTiltSensitivityEnabled(bool on)
-{
-    tiltSensitivityLabel->setVisible(on);
-    tiltSensitivitySpinBox->setVisible(on);
-    tiltSensitivitySlider->setVisible(on);
-}
-
 void BrushSettingsWidget::setOrientation(Qt::Orientation ori)
 {
     if(layout_){
@@ -484,26 +332,12 @@ void BrushSettingsWidget::setOrientation(Qt::Orientation ori)
     layout_->addWidget(mixinLabel);
     layout_->addWidget(mixinSlider);
     layout_->addWidget(mixinSpinBox);
-    
-    // 添加压感笔刷控件到布局
-    layout_->addWidget(smoothnessLabel);
-    layout_->addWidget(smoothnessSlider);
-    layout_->addWidget(smoothnessSpinBox);
-    layout_->addWidget(pressureCurveLabel);
-    layout_->addWidget(pressureCurveSlider);
-    layout_->addWidget(pressureCurveSpinBox);
-    layout_->addWidget(tiltSensitivityLabel);
-    layout_->addWidget(tiltSensitivitySlider);
-    layout_->addWidget(tiltSensitivitySpinBox);
-    
+
     widthSlider->setOrientation(ori);
     hardnessSlider->setOrientation(ori);
     thicknessSlider->setOrientation(ori);
     waterSlider->setOrientation(ori);
     extendSlider->setOrientation(ori);
     mixinSlider->setOrientation(ori);
-    smoothnessSlider->setOrientation(ori);
-    pressureCurveSlider->setOrientation(ori);
-    tiltSensitivitySlider->setOrientation(ori);
     setLayout(layout_);
 }

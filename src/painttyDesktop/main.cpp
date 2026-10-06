@@ -54,6 +54,7 @@ void initSettings()
                 settings.setValue(key, legacy.value(key));
         }
     }
+    settings.remove("canvas/enable_tablet");
     settings.sync();
 }
 

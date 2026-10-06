@@ -11,8 +11,8 @@ class BasicEraser : public AbstractBrush
 public:
     BasicEraser();
 
-    void drawPoint(const QPoint& p, qreal pressure=1) Q_DECL_OVERRIDE;
-    void drawLineTo(const QPoint& end, qreal pressure=1) Q_DECL_OVERRIDE;
+    void drawPoint(const QPoint& p) Q_DECL_OVERRIDE;
+    void drawLineTo(const QPoint& end) Q_DECL_OVERRIDE;
     AbstractBrush* createBrush() Q_DECL_OVERRIDE;
 protected:
     QBrush brush_;

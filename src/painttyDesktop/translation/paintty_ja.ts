@@ -46,21 +46,6 @@
         <source>Mixin</source>
         <translation>混色</translation>
     </message>
-    <message>
-        <location filename="../widgets/brushsettingswidget.cpp" line="33"/>
-        <source>Smoothness</source>
-        <translation>滑らかさ</translation>
-    </message>
-    <message>
-        <location filename="../widgets/brushsettingswidget.cpp" line="36"/>
-        <source>Pressure Curve</source>
-        <translation>筆圧カーブ</translation>
-    </message>
-    <message>
-        <location filename="../widgets/brushsettingswidget.cpp" line="39"/>
-        <source>Tilt Sensitivity</source>
-        <translation>傾き感度</translation>
-    </message>
 </context>
 <context>
     <name>ColorBox</name>
@@ -189,8 +174,8 @@
     </message>
     <message>
         <location filename="../widgets/configuredialog.ui" line="91"/>
-        <source>Type</source>
-        <translation>種類</translation>
+        <source>Behavior</source>
+        <translation>動作</translation>
     </message>
     <message>
         <location filename="../widgets/configuredialog.ui" line="99"/>
@@ -198,47 +183,42 @@
         <translation>変更するショートカットをダブルクリックし、割り当てるキーを押してください。</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.ui" line="110"/>
-        <source>Drawing</source>
-        <translation>描画</translation>
-    </message>
-    <message>
-        <location filename="../widgets/configuredialog.ui" line="116"/>
-        <source>Enable Tablet Support</source>
-        <translation>ペンタブレットを有効にする</translation>
-    </message>
-    <message>
         <location filename="../widgets/configuredialog.ui" line="57"/>
         <source>Disable IME when painting (Windows exclusive)</source>
         <translation>描画中は IME を無効にする（Windows のみ）</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.cpp" line="55"/>
+        <location filename="../widgets/configuredialog.cpp" line="54"/>
         <source>System Default</source>
         <translation>システムの既定</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.cpp" line="76"/>
+        <location filename="../widgets/configuredialog.cpp" line="75"/>
         <source>Brushes</source>
         <translation>ブラシ</translation>
     </message>
     <message>
         <location filename="../widgets/configuredialog.cpp" line="92"/>
-        <source>Immediately</source>
-        <translation>すぐに実行</translation>
+        <source>Hold to use</source>
+        <translation>押している間使用</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.cpp" line="94"/>
-        <source>When Release</source>
-        <translation>キーを離したときに実行</translation>
+        <location filename="../widgets/configuredialog.cpp" line="95"/>
+        <source>Select tool</source>
+        <translation>ツールを選択</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.cpp" line="194"/>
+        <location filename="../widgets/configuredialog.cpp" line="97"/>
+        <source>Repeat</source>
+        <translation>連続調整</translation>
+    </message>
+    <message>
+        <location filename="../widgets/configuredialog.cpp" line="185"/>
         <source>Preferences</source>
         <translation>環境設定</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.cpp" line="195"/>
+        <location filename="../widgets/configuredialog.cpp" line="186"/>
         <source>Language, font and shortcut changes will apply the next time you start Mr.Paint.</source>
         <translation>言語、フォント、ショートカットの変更は、次回 Mr.Paint を起動したときに適用されます。</translation>
     </message>
@@ -292,8 +272,8 @@
     </message>
     <message>
         <location filename="../widgets/mainwindow.ui" line="81"/>
-        <location filename="../widgets/mainwindow.cpp" line="426"/>
-        <location filename="../widgets/mainwindow.cpp" line="658"/>
+        <location filename="../widgets/mainwindow.cpp" line="370"/>
+        <location filename="../widgets/mainwindow.cpp" line="545"/>
         <source>Layers</source>
         <translation>レイヤー</translation>
     </message>
@@ -318,7 +298,7 @@
         <translation>表示(&amp;V)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="706"/>
+        <location filename="../widgets/mainwindow.cpp" line="593"/>
         <source>Clear Canvas</source>
         <translation>キャンバスをクリア</translation>
     </message>
@@ -413,303 +393,308 @@
         <translation>名前を付けて保存(&amp;A)...</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="214"/>
+        <location filename="../widgets/mainwindow.cpp" line="208"/>
         <source>Brushes</source>
         <translation>ブラシ</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="251"/>
-        <location filename="../widgets/mainwindow.cpp" line="281"/>
-        <location filename="../widgets/mainwindow.cpp" line="313"/>
-        <location filename="../widgets/mainwindow.cpp" line="343"/>
+        <location filename="../widgets/mainwindow.cpp" line="231"/>
         <source>%1
 Shortcut: %2</source>
         <translation>%1
 ショートカットキー: %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="290"/>
+        <location filename="../widgets/mainwindow.cpp" line="242"/>
         <source>Color Picker</source>
         <translation>スポイト</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="320"/>
+        <location filename="../widgets/mainwindow.cpp" line="259"/>
+        <location filename="../widgets/mainwindow.cpp" line="280"/>
+        <source>%1
+Hold: %2</source>
+        <translation>%1
+長押し: %2</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="263"/>
         <source>Move Tool</source>
         <translation>移動ツール</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="349"/>
+        <location filename="../widgets/mainwindow.cpp" line="283"/>
         <source>Brush Settings</source>
         <translation>ブラシ設定</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="398"/>
+        <location filename="../widgets/mainwindow.cpp" line="331"/>
         <source>Undo</source>
         <translation>元に戻す</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="401"/>
+        <location filename="../widgets/mainwindow.cpp" line="334"/>
         <source>Redo</source>
         <translation>やり直す</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="411"/>
+        <location filename="../widgets/mainwindow.cpp" line="355"/>
         <source>Open Recent</source>
         <translation>最近使ったプロジェクトを開く</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="414"/>
+        <location filename="../widgets/mainwindow.cpp" line="358"/>
         <source>Import Image as Layer…</source>
         <translation>画像をレイヤーとして読み込む…</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="418"/>
+        <location filename="../widgets/mainwindow.cpp" line="362"/>
         <source>Open Legacy Project Folder…</source>
         <translation>旧形式のプロジェクトフォルダーを開く…</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="421"/>
+        <location filename="../widgets/mainwindow.cpp" line="365"/>
         <source>Open Legacy Project</source>
         <translation>旧形式のプロジェクトを開く</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="424"/>
+        <location filename="../widgets/mainwindow.cpp" line="368"/>
         <source>&amp;Layer</source>
         <translation>レイヤー(&amp;L)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="439"/>
+        <location filename="../widgets/mainwindow.cpp" line="383"/>
         <source>Add</source>
         <translation>追加</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="440"/>
+        <location filename="../widgets/mainwindow.cpp" line="384"/>
         <source>Delete</source>
         <translation>削除</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="441"/>
+        <location filename="../widgets/mainwindow.cpp" line="385"/>
         <source>Up</source>
         <translation>上へ</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="444"/>
+        <location filename="../widgets/mainwindow.cpp" line="388"/>
         <source>Down</source>
         <translation>下へ</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="447"/>
+        <location filename="../widgets/mainwindow.cpp" line="391"/>
         <source>Clear Selected Layer</source>
         <translation>選択したレイヤーをクリア</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="450"/>
+        <location filename="../widgets/mainwindow.cpp" line="394"/>
         <source>Rename Layer</source>
         <translation>レイヤー名を変更</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="450"/>
+        <location filename="../widgets/mainwindow.cpp" line="394"/>
         <source>Choose a unique layer name of 1–256 characters.</source>
         <translation>他のレイヤーと重複しない、1～256 文字のレイヤー名を入力してください。</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="658"/>
+        <location filename="../widgets/mainwindow.cpp" line="545"/>
         <source>The maximum number of layers is 256.</source>
         <translation>レイヤーは最大 256 枚まで作成できます。</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="668"/>
+        <location filename="../widgets/mainwindow.cpp" line="555"/>
         <source>Layer %1</source>
         <translation>レイヤー %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="683"/>
+        <location filename="../widgets/mainwindow.cpp" line="570"/>
         <source>Keep at least one layer in the project.</source>
         <translation>プロジェクトには少なくとも 1 枚のレイヤーを残してください。</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="688"/>
+        <location filename="../widgets/mainwindow.cpp" line="575"/>
         <source>Unlock the layer before deleting it.</source>
         <translation>削除する前にレイヤーのロックを解除してください。</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="692"/>
+        <location filename="../widgets/mainwindow.cpp" line="579"/>
         <source>Delete Layer</source>
         <translation>レイヤーを削除</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="692"/>
+        <location filename="../widgets/mainwindow.cpp" line="579"/>
         <source>Delete layer “%1”?</source>
         <translation>レイヤー「%1」を削除しますか？</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="699"/>
+        <location filename="../widgets/mainwindow.cpp" line="586"/>
         <source>Clear Layer</source>
         <translation>レイヤーをクリア</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="699"/>
+        <location filename="../widgets/mainwindow.cpp" line="586"/>
         <source>Clear layer “%1”?</source>
         <translation>レイヤー「%1」をクリアしますか？</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="706"/>
+        <location filename="../widgets/mainwindow.cpp" line="593"/>
         <source>Clear all unlocked layers?</source>
         <translation>ロックされていないすべてのレイヤーをクリアしますか？</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="726"/>
+        <location filename="../widgets/mainwindow.cpp" line="613"/>
         <source>Export all to file</source>
         <translation>すべてのレイヤーをファイルに書き出す</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="728"/>
-        <location filename="../widgets/mainwindow.cpp" line="749"/>
+        <location filename="../widgets/mainwindow.cpp" line="615"/>
+        <location filename="../widgets/mainwindow.cpp" line="636"/>
         <source>Images (*.png)</source>
         <translation>画像 (*.png)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="740"/>
-        <location filename="../widgets/mainwindow.cpp" line="761"/>
-        <location filename="../widgets/mainwindow.cpp" line="784"/>
+        <location filename="../widgets/mainwindow.cpp" line="627"/>
+        <location filename="../widgets/mainwindow.cpp" line="648"/>
+        <location filename="../widgets/mainwindow.cpp" line="671"/>
         <source>Export Failed</source>
         <translation>書き出しに失敗</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="740"/>
-        <location filename="../widgets/mainwindow.cpp" line="761"/>
+        <location filename="../widgets/mainwindow.cpp" line="627"/>
+        <location filename="../widgets/mainwindow.cpp" line="648"/>
         <source>Could not write the image:
 %1</source>
         <translation>画像を書き込めませんでした:
 %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="747"/>
+        <location filename="../widgets/mainwindow.cpp" line="634"/>
         <source>Export visible part to file</source>
         <translation>表示レイヤーをファイルに書き出す</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="768"/>
+        <location filename="../widgets/mainwindow.cpp" line="655"/>
         <source>Export contents to psd file</source>
         <translation>PSD ファイルに書き出す</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="770"/>
+        <location filename="../widgets/mainwindow.cpp" line="657"/>
         <source>Photoshop Images (*.psd)</source>
         <translation>Photoshop 画像 (*.psd)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="784"/>
+        <location filename="../widgets/mainwindow.cpp" line="671"/>
         <source>Could not write the PSD file:
 %1</source>
         <translation>PSD ファイルを書き込めませんでした:
 %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="824"/>
+        <location filename="../widgets/mainwindow.cpp" line="711"/>
         <source>Layer 1</source>
         <translation>レイヤー 1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="839"/>
+        <location filename="../widgets/mainwindow.cpp" line="728"/>
         <source>Open Project</source>
         <translation>プロジェクトを開く</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="840"/>
-        <location filename="../widgets/mainwindow.cpp" line="883"/>
+        <location filename="../widgets/mainwindow.cpp" line="729"/>
+        <location filename="../widgets/mainwindow.cpp" line="774"/>
         <source>Mr.Paint Projects (*.paintty)</source>
         <translation>Mr.Paint プロジェクト (*.paintty)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="849"/>
+        <location filename="../widgets/mainwindow.cpp" line="738"/>
         <source>Open Failed</source>
         <translation>読み込みに失敗</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="849"/>
+        <location filename="../widgets/mainwindow.cpp" line="738"/>
         <source>Could not open the project:
 %1</source>
         <translation>プロジェクトを開けませんでした:
 %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="865"/>
+        <location filename="../widgets/mainwindow.cpp" line="756"/>
         <source>Project opened</source>
         <translation>プロジェクトを開きました</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="881"/>
+        <location filename="../widgets/mainwindow.cpp" line="772"/>
         <source>Untitled.paintty</source>
         <translation>無題.paintty</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="883"/>
+        <location filename="../widgets/mainwindow.cpp" line="774"/>
         <source>Save Project As</source>
         <translation>名前を付けてプロジェクトを保存</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="894"/>
+        <location filename="../widgets/mainwindow.cpp" line="786"/>
         <source>Save Failed</source>
         <translation>保存に失敗</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="894"/>
+        <location filename="../widgets/mainwindow.cpp" line="786"/>
         <source>Could not save the project:
 %1</source>
         <translation>プロジェクトを保存できませんでした:
 %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="902"/>
+        <location filename="../widgets/mainwindow.cpp" line="794"/>
         <source>Project saved</source>
         <translation>プロジェクトを保存しました</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="909"/>
+        <location filename="../widgets/mainwindow.cpp" line="801"/>
         <source>Unsaved Changes</source>
         <translation>未保存の変更</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="910"/>
+        <location filename="../widgets/mainwindow.cpp" line="802"/>
         <source>Save changes to %1 before continuing?</source>
         <translation>続行する前に「%1」の変更を保存しますか？</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="910"/>
-        <location filename="../widgets/mainwindow.cpp" line="919"/>
-        <location filename="../widgets/mainwindow.cpp" line="934"/>
+        <location filename="../widgets/mainwindow.cpp" line="802"/>
+        <location filename="../widgets/mainwindow.cpp" line="811"/>
+        <location filename="../widgets/mainwindow.cpp" line="826"/>
         <source>Untitled</source>
         <translation>無題</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="919"/>
+        <location filename="../widgets/mainwindow.cpp" line="811"/>
         <source>%1[*] — Mr.Paint</source>
         <translation>%1[*] — Mr.Paint</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="923"/>
+        <location filename="../widgets/mainwindow.cpp" line="815"/>
         <source>%1 × %2 px · %3 layers</source>
         <translation>%1 × %2 px · %3 レイヤー</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="965"/>
+        <location filename="../widgets/mainwindow.cpp" line="857"/>
         <source>Import Image as Layer</source>
         <translation>画像をレイヤーとして読み込む</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="966"/>
+        <location filename="../widgets/mainwindow.cpp" line="858"/>
         <source>Images (*.png *.jpg *.jpeg *.bmp *.webp)</source>
         <translation>画像 (*.png *.jpg *.jpeg *.bmp *.webp)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="973"/>
-        <location filename="../widgets/mainwindow.cpp" line="977"/>
+        <location filename="../widgets/mainwindow.cpp" line="865"/>
+        <location filename="../widgets/mainwindow.cpp" line="869"/>
         <source>Import Failed</source>
         <translation>読み込みに失敗</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="973"/>
+        <location filename="../widgets/mainwindow.cpp" line="865"/>
         <source>The image dimensions are unsupported.</source>
         <translation>この画像のサイズには対応していません。</translation>
     </message>
@@ -913,34 +898,14 @@ Shortcut: %2</source>
         <translation>スケッチブラシ</translation>
     </message>
     <message>
-        <location filename="../main.cpp" line="184"/>
+        <location filename="../main.cpp" line="185"/>
         <source>Mr.Paint — offline digital painting</source>
         <translation>Mr.Paint — オフラインのデジタルペイント</translation>
     </message>
     <message>
-        <location filename="../main.cpp" line="187"/>
+        <location filename="../main.cpp" line="188"/>
         <source>Local .paintty file or legacy project folder to open.</source>
         <translation>開くローカルの .paintty ファイルまたは旧形式のプロジェクトフォルダー。</translation>
-    </message>
-    <message>
-        <location filename="../paintingTools/brush/basicbrushv3.cpp" line="8"/>
-        <source>Pressure Brush</source>
-        <translation>筆圧ブラシ</translation>
-    </message>
-</context>
-<context>
-    <name>ShortcutDelegate</name>
-    <message>
-        <location filename="../widgets/configuredialog.cpp" line="230"/>
-        <location filename="../widgets/configuredialog.cpp" line="249"/>
-        <source>Immediately</source>
-        <translation>すぐに実行</translation>
-    </message>
-    <message>
-        <location filename="../widgets/configuredialog.cpp" line="232"/>
-        <location filename="../widgets/configuredialog.cpp" line="251"/>
-        <source>When Release</source>
-        <translation>キーを離したときに実行</translation>
     </message>
 </context>
 <context>

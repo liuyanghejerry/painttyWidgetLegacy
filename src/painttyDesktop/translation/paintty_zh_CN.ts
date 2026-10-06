@@ -49,21 +49,6 @@
         <source>Mixin</source>
         <translation>混色</translation>
     </message>
-    <message>
-        <location filename="../widgets/brushsettingswidget.cpp" line="33"/>
-        <source>Smoothness</source>
-        <translation>平滑度</translation>
-    </message>
-    <message>
-        <location filename="../widgets/brushsettingswidget.cpp" line="36"/>
-        <source>Pressure Curve</source>
-        <translation>压感曲线</translation>
-    </message>
-    <message>
-        <location filename="../widgets/brushsettingswidget.cpp" line="39"/>
-        <source>Tilt Sensitivity</source>
-        <translation>倾角灵敏度</translation>
-    </message>
 </context>
 <context>
     <name>ColorBox</name>
@@ -206,8 +191,8 @@
     </message>
     <message>
         <location filename="../widgets/configuredialog.ui" line="91"/>
-        <source>Type</source>
-        <translation>类型</translation>
+        <source>Behavior</source>
+        <translation>行为</translation>
     </message>
     <message>
         <location filename="../widgets/configuredialog.ui" line="99"/>
@@ -215,47 +200,42 @@
         <translation>双击要修改的快捷键，然后按下要设置的按键。</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.ui" line="110"/>
-        <source>Drawing</source>
-        <translation>绘画</translation>
-    </message>
-    <message>
-        <location filename="../widgets/configuredialog.ui" line="116"/>
-        <source>Enable Tablet Support</source>
-        <translation>启用数位板支持</translation>
-    </message>
-    <message>
         <location filename="../widgets/configuredialog.ui" line="57"/>
         <source>Disable IME when painting (Windows exclusive)</source>
         <translation>绘画时禁用输入法（仅 Windows）</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.cpp" line="55"/>
+        <location filename="../widgets/configuredialog.cpp" line="54"/>
         <source>System Default</source>
         <translation>系统默认</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.cpp" line="76"/>
+        <location filename="../widgets/configuredialog.cpp" line="75"/>
         <source>Brushes</source>
         <translation>画笔</translation>
     </message>
     <message>
         <location filename="../widgets/configuredialog.cpp" line="92"/>
-        <source>Immediately</source>
-        <translation>立即触发</translation>
+        <source>Hold to use</source>
+        <translation>按住使用</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.cpp" line="94"/>
-        <source>When Release</source>
-        <translation>松开后触发</translation>
+        <location filename="../widgets/configuredialog.cpp" line="95"/>
+        <source>Select tool</source>
+        <translation>选择工具</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.cpp" line="194"/>
+        <location filename="../widgets/configuredialog.cpp" line="97"/>
+        <source>Repeat</source>
+        <translation>连续调整</translation>
+    </message>
+    <message>
+        <location filename="../widgets/configuredialog.cpp" line="185"/>
         <source>Preferences</source>
         <translation>偏好设置</translation>
     </message>
     <message>
-        <location filename="../widgets/configuredialog.cpp" line="195"/>
+        <location filename="../widgets/configuredialog.cpp" line="186"/>
         <source>Language, font and shortcut changes will apply the next time you start Mr.Paint.</source>
         <translation>语言、字体和快捷键的更改将在下次启动 Mr.Paint 时生效。</translation>
     </message>
@@ -312,8 +292,8 @@
     </message>
     <message>
         <location filename="../widgets/mainwindow.ui" line="81"/>
-        <location filename="../widgets/mainwindow.cpp" line="426"/>
-        <location filename="../widgets/mainwindow.cpp" line="658"/>
+        <location filename="../widgets/mainwindow.cpp" line="370"/>
+        <location filename="../widgets/mainwindow.cpp" line="545"/>
         <source>Layers</source>
         <translatorcomment>レイヤー</translatorcomment>
         <translation>图层</translation>
@@ -343,7 +323,7 @@
         <translation>视图(&amp;V)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="706"/>
+        <location filename="../widgets/mainwindow.cpp" line="593"/>
         <source>Clear Canvas</source>
         <translatorcomment>全消し</translatorcomment>
         <translation>清空画布</translation>
@@ -449,16 +429,13 @@
         <translation>另存为(&amp;A)...</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="214"/>
+        <location filename="../widgets/mainwindow.cpp" line="208"/>
         <source>Brushes</source>
         <translatorcomment>ブラシ</translatorcomment>
         <translation>画笔</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="251"/>
-        <location filename="../widgets/mainwindow.cpp" line="281"/>
-        <location filename="../widgets/mainwindow.cpp" line="313"/>
-        <location filename="../widgets/mainwindow.cpp" line="343"/>
+        <location filename="../widgets/mainwindow.cpp" line="231"/>
         <source>%1
 Shortcut: %2</source>
         <translatorcomment>%1
@@ -467,293 +444,301 @@ Shortcut: %2</source>
 快捷键：%2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="290"/>
+        <location filename="../widgets/mainwindow.cpp" line="242"/>
         <source>Color Picker</source>
         <translatorcomment>スポイト</translatorcomment>
         <translation>吸管工具</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="320"/>
+        <location filename="../widgets/mainwindow.cpp" line="259"/>
+        <location filename="../widgets/mainwindow.cpp" line="280"/>
+        <source>%1
+Hold: %2</source>
+        <translation>%1
+按住：%2</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="263"/>
         <source>Move Tool</source>
         <translation>移动工具</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="349"/>
+        <location filename="../widgets/mainwindow.cpp" line="283"/>
         <source>Brush Settings</source>
         <translatorcomment>ブラシ設定</translatorcomment>
         <translation>画笔设置</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="398"/>
+        <location filename="../widgets/mainwindow.cpp" line="331"/>
         <source>Undo</source>
         <translation>撤销</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="401"/>
+        <location filename="../widgets/mainwindow.cpp" line="334"/>
         <source>Redo</source>
         <translation>重做</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="411"/>
+        <location filename="../widgets/mainwindow.cpp" line="355"/>
         <source>Open Recent</source>
         <translation>打开最近项目</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="414"/>
+        <location filename="../widgets/mainwindow.cpp" line="358"/>
         <source>Import Image as Layer…</source>
         <translation>导入图片为图层…</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="418"/>
+        <location filename="../widgets/mainwindow.cpp" line="362"/>
         <source>Open Legacy Project Folder…</source>
         <translation>打开旧版项目文件夹…</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="421"/>
+        <location filename="../widgets/mainwindow.cpp" line="365"/>
         <source>Open Legacy Project</source>
         <translation>打开旧版项目</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="424"/>
+        <location filename="../widgets/mainwindow.cpp" line="368"/>
         <source>&amp;Layer</source>
         <translation>图层(&amp;L)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="439"/>
+        <location filename="../widgets/mainwindow.cpp" line="383"/>
         <source>Add</source>
         <translation>添加</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="440"/>
+        <location filename="../widgets/mainwindow.cpp" line="384"/>
         <source>Delete</source>
         <translation>删除</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="441"/>
+        <location filename="../widgets/mainwindow.cpp" line="385"/>
         <source>Up</source>
         <translation>上移</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="444"/>
+        <location filename="../widgets/mainwindow.cpp" line="388"/>
         <source>Down</source>
         <translation>下移</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="447"/>
+        <location filename="../widgets/mainwindow.cpp" line="391"/>
         <source>Clear Selected Layer</source>
         <translation>清空选中图层</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="450"/>
+        <location filename="../widgets/mainwindow.cpp" line="394"/>
         <source>Rename Layer</source>
         <translation>重命名图层</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="450"/>
+        <location filename="../widgets/mainwindow.cpp" line="394"/>
         <source>Choose a unique layer name of 1–256 characters.</source>
         <translation>请输入 1–256 个字符的图层名称，且不能与其他图层重名。</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="658"/>
+        <location filename="../widgets/mainwindow.cpp" line="545"/>
         <source>The maximum number of layers is 256.</source>
         <translation>最多可创建 256 个图层。</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="668"/>
+        <location filename="../widgets/mainwindow.cpp" line="555"/>
         <source>Layer %1</source>
         <translation>图层 %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="683"/>
+        <location filename="../widgets/mainwindow.cpp" line="570"/>
         <source>Keep at least one layer in the project.</source>
         <translation>项目中至少需要保留一个图层。</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="688"/>
+        <location filename="../widgets/mainwindow.cpp" line="575"/>
         <source>Unlock the layer before deleting it.</source>
         <translation>请先解锁图层，再将其删除。</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="692"/>
+        <location filename="../widgets/mainwindow.cpp" line="579"/>
         <source>Delete Layer</source>
         <translation>删除图层</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="692"/>
+        <location filename="../widgets/mainwindow.cpp" line="579"/>
         <source>Delete layer “%1”?</source>
         <translation>删除图层“%1”？</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="699"/>
+        <location filename="../widgets/mainwindow.cpp" line="586"/>
         <source>Clear Layer</source>
         <translation>清空图层</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="699"/>
+        <location filename="../widgets/mainwindow.cpp" line="586"/>
         <source>Clear layer “%1”?</source>
         <translation>清空图层“%1”？</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="706"/>
+        <location filename="../widgets/mainwindow.cpp" line="593"/>
         <source>Clear all unlocked layers?</source>
         <translation>清空所有未锁定的图层？</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="726"/>
+        <location filename="../widgets/mainwindow.cpp" line="613"/>
         <source>Export all to file</source>
         <translatorcomment>全てのレイヤー画像を書き出し</translatorcomment>
         <translation>导出所有图层至文件</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="728"/>
-        <location filename="../widgets/mainwindow.cpp" line="749"/>
+        <location filename="../widgets/mainwindow.cpp" line="615"/>
+        <location filename="../widgets/mainwindow.cpp" line="636"/>
         <source>Images (*.png)</source>
         <translatorcomment>画像 (*.png)</translatorcomment>
         <translation>图片 (*.png)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="740"/>
-        <location filename="../widgets/mainwindow.cpp" line="761"/>
-        <location filename="../widgets/mainwindow.cpp" line="784"/>
+        <location filename="../widgets/mainwindow.cpp" line="627"/>
+        <location filename="../widgets/mainwindow.cpp" line="648"/>
+        <location filename="../widgets/mainwindow.cpp" line="671"/>
         <source>Export Failed</source>
         <translation>导出失败</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="740"/>
-        <location filename="../widgets/mainwindow.cpp" line="761"/>
+        <location filename="../widgets/mainwindow.cpp" line="627"/>
+        <location filename="../widgets/mainwindow.cpp" line="648"/>
         <source>Could not write the image:
 %1</source>
         <translation>无法写入图片：
 %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="747"/>
+        <location filename="../widgets/mainwindow.cpp" line="634"/>
         <source>Export visible part to file</source>
         <translatorcomment>表示レイヤーを書き出し</translatorcomment>
         <translation>导出可见图层至文件</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="768"/>
+        <location filename="../widgets/mainwindow.cpp" line="655"/>
         <source>Export contents to psd file</source>
         <translation>导出为 PSD 文件</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="770"/>
+        <location filename="../widgets/mainwindow.cpp" line="657"/>
         <source>Photoshop Images (*.psd)</source>
         <translation>Photoshop 图像 (*.psd)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="784"/>
+        <location filename="../widgets/mainwindow.cpp" line="671"/>
         <source>Could not write the PSD file:
 %1</source>
         <translation>无法写入 PSD 文件：
 %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="824"/>
+        <location filename="../widgets/mainwindow.cpp" line="711"/>
         <source>Layer 1</source>
         <translation>图层 1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="839"/>
+        <location filename="../widgets/mainwindow.cpp" line="728"/>
         <source>Open Project</source>
         <translation>打开项目</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="840"/>
-        <location filename="../widgets/mainwindow.cpp" line="883"/>
+        <location filename="../widgets/mainwindow.cpp" line="729"/>
+        <location filename="../widgets/mainwindow.cpp" line="774"/>
         <source>Mr.Paint Projects (*.paintty)</source>
         <translation>Mr.Paint 项目 (*.paintty)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="849"/>
+        <location filename="../widgets/mainwindow.cpp" line="738"/>
         <source>Open Failed</source>
         <translation>打开失败</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="849"/>
+        <location filename="../widgets/mainwindow.cpp" line="738"/>
         <source>Could not open the project:
 %1</source>
         <translation>无法打开项目：
 %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="865"/>
+        <location filename="../widgets/mainwindow.cpp" line="756"/>
         <source>Project opened</source>
         <translation>项目已打开</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="881"/>
+        <location filename="../widgets/mainwindow.cpp" line="772"/>
         <source>Untitled.paintty</source>
         <translation>未命名.paintty</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="883"/>
+        <location filename="../widgets/mainwindow.cpp" line="774"/>
         <source>Save Project As</source>
         <translation>项目另存为</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="894"/>
+        <location filename="../widgets/mainwindow.cpp" line="786"/>
         <source>Save Failed</source>
         <translation>保存失败</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="894"/>
+        <location filename="../widgets/mainwindow.cpp" line="786"/>
         <source>Could not save the project:
 %1</source>
         <translation>无法保存项目：
 %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="902"/>
+        <location filename="../widgets/mainwindow.cpp" line="794"/>
         <source>Project saved</source>
         <translation>项目已保存</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="909"/>
+        <location filename="../widgets/mainwindow.cpp" line="801"/>
         <source>Unsaved Changes</source>
         <translation>未保存的更改</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="910"/>
+        <location filename="../widgets/mainwindow.cpp" line="802"/>
         <source>Save changes to %1 before continuing?</source>
         <translation>是否在继续之前保存对“%1”的更改？</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="910"/>
-        <location filename="../widgets/mainwindow.cpp" line="919"/>
-        <location filename="../widgets/mainwindow.cpp" line="934"/>
+        <location filename="../widgets/mainwindow.cpp" line="802"/>
+        <location filename="../widgets/mainwindow.cpp" line="811"/>
+        <location filename="../widgets/mainwindow.cpp" line="826"/>
         <source>Untitled</source>
         <translation>未命名</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="919"/>
+        <location filename="../widgets/mainwindow.cpp" line="811"/>
         <source>%1[*] — Mr.Paint</source>
         <translation>%1[*] — Mr.Paint</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="923"/>
+        <location filename="../widgets/mainwindow.cpp" line="815"/>
         <source>%1 × %2 px · %3 layers</source>
         <translation>%1 × %2 像素 · %3 个图层</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="965"/>
+        <location filename="../widgets/mainwindow.cpp" line="857"/>
         <source>Import Image as Layer</source>
         <translation>导入图片为图层</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="966"/>
+        <location filename="../widgets/mainwindow.cpp" line="858"/>
         <source>Images (*.png *.jpg *.jpeg *.bmp *.webp)</source>
         <translation>图片 (*.png *.jpg *.jpeg *.bmp *.webp)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="973"/>
-        <location filename="../widgets/mainwindow.cpp" line="977"/>
+        <location filename="../widgets/mainwindow.cpp" line="865"/>
+        <location filename="../widgets/mainwindow.cpp" line="869"/>
         <source>Import Failed</source>
         <translation>导入失败</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="973"/>
+        <location filename="../widgets/mainwindow.cpp" line="865"/>
         <source>The image dimensions are unsupported.</source>
         <translation>不支持此图片的尺寸。</translation>
     </message>
@@ -957,34 +942,14 @@ Shortcut: %2</source>
         <translation>素描笔</translation>
     </message>
     <message>
-        <location filename="../main.cpp" line="184"/>
+        <location filename="../main.cpp" line="185"/>
         <source>Mr.Paint — offline digital painting</source>
         <translation>Mr.Paint — 离线数字绘画</translation>
     </message>
     <message>
-        <location filename="../main.cpp" line="187"/>
+        <location filename="../main.cpp" line="188"/>
         <source>Local .paintty file or legacy project folder to open.</source>
         <translation>要打开的本地 .paintty 文件或旧版项目文件夹。</translation>
-    </message>
-    <message>
-        <location filename="../paintingTools/brush/basicbrushv3.cpp" line="8"/>
-        <source>Pressure Brush</source>
-        <translation>压感画笔</translation>
-    </message>
-</context>
-<context>
-    <name>ShortcutDelegate</name>
-    <message>
-        <location filename="../widgets/configuredialog.cpp" line="230"/>
-        <location filename="../widgets/configuredialog.cpp" line="249"/>
-        <source>Immediately</source>
-        <translation>立即触发</translation>
-    </message>
-    <message>
-        <location filename="../widgets/configuredialog.cpp" line="232"/>
-        <location filename="../widgets/configuredialog.cpp" line="251"/>
-        <source>When Release</source>
-        <translation>松开后触发</translation>
     </message>
 </context>
 <context>

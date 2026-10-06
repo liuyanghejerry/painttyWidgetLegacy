@@ -88,7 +88,7 @@
          </column>
          <column>
           <property name="text">
-           <string>Type</string>
+           <string>Behavior</string>
           </property>
          </column>
         </widget>
@@ -105,33 +105,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="experimentalTab">
-      <attribute name="title">
-       <string>Drawing</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <item>
-        <widget class="QCheckBox" name="enable_tablet">
-         <property name="text">
-          <string>Enable Tablet Support</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </widget>
+
     </widget>
    </item>
    <item>

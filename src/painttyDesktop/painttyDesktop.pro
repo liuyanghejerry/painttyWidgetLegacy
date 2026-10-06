@@ -83,19 +83,12 @@ SOURCES += main.cpp\
     widgets/easycopylineedit.cpp \
     widgets/gradualbox.cpp \
     paintingTools/brush/abstractbrush.cpp \
-    paintingTools/brush/abstractbrushv3.cpp \
-    paintingTools/brush/basic-stamp.cpp \
-    paintingTools/brush/basic-trail.cpp \
-    paintingTools/brush/basic-color-system.cpp \
     paintingTools/brush/basicbrush.cpp \
     paintingTools/brush/basiceraser.cpp \
     paintingTools/brush/binarybrush.cpp \
     paintingTools/brush/brushfeature.cpp \
     paintingTools/brush/maskbased.cpp \
     paintingTools/brush/sketchbrush.cpp \
-    paintingTools/brush/basicbrushv3.cpp \
-    paintingTools/brush/basicbrushv3-simd.cpp \
-    paintingTools/brush/basic-stamp-simd.cpp \
     widgets/panoramarotator.cpp \
     misc/projectfile.cpp \
     misc/psdexport.cpp
@@ -136,10 +129,6 @@ HEADERS  += widgets/mainwindow.h \
     widgets/gradualbox.h \
     paintingTools/brush/brushmanager.h \
     paintingTools/brush/abstractbrush.h \
-    paintingTools/brush/abstractbrushv3.h \
-    paintingTools/brush/basic-stamp.h \
-    paintingTools/brush/basic-trail.h \
-    paintingTools/brush/basic-color-system.h \
     paintingTools/brush/basicbrush.h \
     paintingTools/brush/basiceraser.h \
     paintingTools/brush/binarybrush.h \
@@ -147,9 +136,6 @@ HEADERS  += widgets/mainwindow.h \
     paintingTools/brush/brushsettings.h \
     paintingTools/brush/maskbased.h \
     paintingTools/brush/sketchbrush.h \
-    paintingTools/brush/basicbrushv3.h \
-    paintingTools/brush/basicbrushv3-simd.h \
-    paintingTools/brush/basic-stamp-simd.h \
     widgets/panoramarotator.h \
     misc/projectfile.h \
     misc/psdexport.h

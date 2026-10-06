@@ -3,17 +3,10 @@
 
 #include <QWidget>
 #include "../paintingTools/brush/abstractbrush.h"
-#include "../paintingTools/brush/abstractbrushv3.h"
 #include "../misc/layermanager.h"
 #include "../misc/projectfile.h"
 
 typedef QSharedPointer<AbstractBrush> BrushPointer;
-typedef QSharedPointer<AbstractBrushV3> BrushPointerV3;
-
-// 辅助函数：判断当前是否为V3笔刷
-inline bool isV3Brush(const BrushPointerV3 &brush) {
-    return brush != nullptr;
-}
 
 class Canvas : public QWidget
 {
@@ -29,9 +22,6 @@ public:
     int layerNum() const{return layerNameCounter;}
     QImage currentCanvas();
     QImage allCanvas();
-    int jitterCorrectionLevel() const;
-    bool isJitterCorrectionEnabled() const;
-    bool tabletEnabled() const {return m_tabletEnabled; }
     QSize canvasSize() const { return canvasSize_; }
     void setCanvasSize(const QSize &size);
     PaintingProject projectState() const;
@@ -44,10 +34,8 @@ public:
     virtual QSize minimumSizeHint () const;
 
 public slots:
-    void setTabletEnabled(bool enabled) { m_tabletEnabled = enabled; }
-    void setJitterCorrectionEnabled(bool correct);
-    void setJitterCorrectionLevel(int value);
     void setShareColor(bool b);
+    void finishStroke();
     void setBrushColor(const QColor &newColor);
     void setBrushWidth(int newWidth);
     void setBrushHardness(int h);
@@ -72,13 +60,8 @@ public slots:
     void onColorPicker(bool in);
     void onMoveTool(bool in);
     QList<QImage> layerImages() const;
-    void changeBrushV3(const QString &name);
-    BrushPointerV3 brushV3Factory(const QString &name);
-    bool isCurrentBrushV3() const;
 
 signals:
-    void contentMovedBy(const QPoint&);
-    void canvasToolComplete();
     void newBrushSettings(const QVariantMap &map);
     void documentChanged();
 protected:
@@ -87,20 +70,16 @@ protected:
     void mouseReleaseEvent(QMouseEvent *event);
     void paintEvent(QPaintEvent *event);
     void resizeEvent(QResizeEvent *event);
-    void tabletEvent(QTabletEvent *event);
     void focusInEvent(QFocusEvent * event);
     void focusOutEvent(QFocusEvent * event);
 
 private:
-    void drawLineTo(const QPoint &endPoint, qreal pressure=1.0);
-    void drawPoint(const QPoint &point, qreal pressure=1.0);
+    void drawLineTo(const QPoint &endPoint);
+    void drawPoint(const QPoint &point);
     void pickColor(const QPoint &point);
     void updateCursor();
-    void tryJitterCorrection();
     BrushPointer brushFactory(const QString &name);
     void setBrushFeature(const QString& key, const QVariant& value);
-    void updateBrushV3StrokesOnGoing();
-    void updateBrushV3StrokesOnDone();
 
     enum CONTROL_MODE {
         UNKNOWN = -1,
@@ -110,22 +89,13 @@ private:
         MOVING
     };
 
-    bool m_tabletEnabled;
     CONTROL_MODE control_mode_;
     QSize canvasSize_;
     LayerManager layers;
     QImage image;
-    QPoint lastPoint;
-    QList<QPoint> stackPoints;
     int layerNameCounter;
     BrushPointer brush_;
-    BrushPointerV3 brushV3_;
-    QImage v3StrokeBase_;
-    bool useV3Brush_;
     bool shareColor_;
-    bool jitterCorrection_;
-    int jitterCorrectionLevel_;
-    qreal jitterCorrectionLevel_internal_;
     QHash<QString, BrushPointer> localBrush;
 
 };

@@ -3,7 +3,6 @@
 #include <QSharedPointer>
 #include <QStyleOption>
 #include <QMouseEvent>
-#include <QTabletEvent>
 #include <QSettings>
 #include <QApplication>
 #include <QTimer>
@@ -16,8 +15,6 @@
 #include "../paintingTools/brush/basiceraser.h"
 #include "../paintingTools/brush/binarybrush.h"
 #include "../paintingTools/brush/maskbased.h"
-#include "../paintingTools/brush/basicbrushv3.h"
-#include "../paintingTools/brush/basicbrushv3-simd.h"
 #include "../misc/platformextend.h"
 #include "../misc/singleton.h"
 
@@ -27,17 +24,12 @@
 
 Canvas::Canvas(QWidget *parent) :
     QWidget(parent),
-    m_tabletEnabled(false),
     control_mode_(UNKNOWN),
     canvasSize_(QSize(720, 480)),
     layers(canvasSize_),
     image(canvasSize_, QImage::Format_ARGB32_Premultiplied),
     layerNameCounter(0),
-    useV3Brush_(false),
-    shareColor_(true),
-    jitterCorrection_(true),
-    jitterCorrectionLevel_(10),
-    jitterCorrectionLevel_internal_(0)
+    shareColor_(true)
 {
     brush_ = BrushPointer(new BasicBrush);
     brush_->setSettings(brush_->defaultSettings());
@@ -63,13 +55,7 @@ Canvas::Canvas(QWidget *parent) :
     brush_manager.addBrush(p3);
     brush_manager.addBrush(p4);
     brush_manager.addBrush(p5);
-    BrushPointerV3 pressureBrush(new BasicBrushV3);
-    pressureBrush->setSettings(pressureBrush->defaultSettings());
-    brush_manager.addBrushV3(pressureBrush);
 
-    setJitterCorrectionLevel(5);
-    QSettings settings(GlobalDef::settingsPath(), QSettings::IniFormat);
-    m_tabletEnabled = settings.value("canvas/enable_tablet", true).toBool();
 }
 
 Canvas::~Canvas() = default;
@@ -96,83 +82,10 @@ QImage Canvas::allCanvas()
     return exp;
 }
 
-int Canvas::jitterCorrectionLevel() const
-{
-    return jitterCorrectionLevel_;
-}
-
-bool Canvas::isJitterCorrectionEnabled() const
-{
-    return jitterCorrection_;
-}
-
-void Canvas::setJitterCorrectionEnabled(bool correct)
-{
-    jitterCorrection_ = correct;
-}
-
-void Canvas::setJitterCorrectionLevel(int value)
-{
-    jitterCorrectionLevel_ = qBound(0, value, 10);
-    jitterCorrectionLevel_internal_ = jitterCorrectionLevel_ * 0.5;
-}
-
-void Canvas::tryJitterCorrection()
-{
-    if(stackPoints.length() < qBound(3, jitterCorrectionLevel_, 10) )
-        return;
-
-    int amount = stackPoints.length();
-    int redudent = amount;
-
-    auto should_correct = [this](const QPoint& p1,
-            const QPoint& p2,
-            const QPoint& p3) -> bool
-    {
-        QLine l1(p1, p2);
-        QLine l2(p2, p3);
-        QLine l3(p3, p1);
-
-        qreal A = 1.0;
-        if(l3.dx() != l1.dx()){
-            A = (l1.dy() - l3.dy()) / (l3.dx() - l1.dx());
-        }
-        qreal B = 1.0;
-        qreal C = l1.dx() * (-A) - l1.dy();
-
-        qreal distance_up = A*l2.dx() + B*l2.dy() + C;
-        qreal distance_down = qSqrt(A*A+B*B);
-        if(qFuzzyCompare(distance_down, 0.0)){
-            return false;
-        }
-
-        qreal distance = qAbs(distance_up / distance_down);
-
-        if(distance <= jitterCorrectionLevel_internal_ ){
-            return true;
-        }else{
-            return false;
-        }
-
-    };
-
-    int basePos = 0;
-    while((stackPoints.length() >= 3) && (basePos < stackPoints.length() - 3)){
-        if(should_correct(stackPoints[basePos],
-                          stackPoints[basePos+1],
-                          stackPoints[basePos+2])){
-            stackPoints.removeAt(basePos+1);
-            redudent--;
-        }else{
-            basePos++;
-        }
-    }
-}
-
 QVariantMap Canvas::brushSettings() const
 {
-    auto m = isCurrentBrushV3() ? brushV3_->settings() : brush_->settings();
-    m.insert("name", isCurrentBrushV3() ? brushV3_->name().toLower() : brush_->name().toLower());
+    auto m = brush_->settings();
+    m.insert("name", brush_->name().toLower());
     return m;
 }
 
@@ -188,8 +101,7 @@ void Canvas::setShareColor(bool b)
 
 void Canvas::setBrushColor(const QColor &newColor)
 {
-    if (isCurrentBrushV3()) brushV3_->setColor(newColor);
-    else brush_->setColor(newColor);
+    brush_->setColor(newColor);
 }
 
 void Canvas::setBrushWidth(int newWidth)
@@ -225,8 +137,7 @@ void Canvas::setBrushMixin(int e)
 
 void Canvas::setBrushSettings(const QVariantMap &settings)
 {
-    if (isCurrentBrushV3()) brushV3_->setSettings(settings);
-    else brush_->setSettings(settings);
+    brush_->setSettings(settings);
 }
 
 BrushPointer Canvas::brushFactory(const QString &name)
@@ -266,9 +177,6 @@ PaintingProject Canvas::projectState() const
 void Canvas::setProjectState(const PaintingProject &project)
 {
     control_mode_ = NONE;
-    stackPoints.clear();
-    if (brushV3_) brushV3_->clearAllPaths();
-    v3StrokeBase_ = QImage();
     for (auto &brush : localBrush) brush->setSurface(LayerPointer());
     brush_->setSurface(LayerPointer());
     layers.reset();
@@ -288,6 +196,7 @@ void Canvas::setProjectState(const PaintingProject &project)
 
 bool Canvas::renameLayer(const QString &oldName, const QString &newName)
 {
+    finishStroke();
     if (newName.trimmed().isEmpty() || newName.size() > 256 || !layers.exists(oldName)
             || layers.exists(newName)) return false;
     layers.rename(oldName, newName);
@@ -303,8 +212,8 @@ bool Canvas::canDraw() const
 
 void Canvas::changeBrush(const QString &name)
 {
-    const auto color = isCurrentBrushV3() ? brushV3_->settings().value("color").value<QColor>() : brush_->color();
-    useV3Brush_ = false;
+    finishStroke();
+    const auto color = brush_->color();
     QVariantMap currentSettings;
     LayerPointer sur = brush_->surface();
     QVariantMap colorMap{{"red", color.red()}, {"green", color.green()}, {"blue", color.blue()}};
@@ -330,40 +239,9 @@ void Canvas::changeBrush(const QString &name)
     emit newBrushSettings(currentSettings);
 }
 
-void Canvas::changeBrushV3(const QString &name)
-{
-    QVariantMap currentSettings;
-
-    const auto legacyColor = brush_->settings().value("color").toMap();
-    const QColor color = isCurrentBrushV3() ? brushV3_->settings().value("color").value<QColor>()
-        : QColor(legacyColor.value("red").toInt(), legacyColor.value("green").toInt(), legacyColor.value("blue").toInt());
-    useV3Brush_ = true;
-
-    QString brushName = name;
-    brushV3_ = brushV3Factory(brushName);
-
-    if (brushV3_) {
-        currentSettings = brushV3_->defaultSettings();
-        if (shareColor_) currentSettings["color"] = color;
-        brushV3_->setSettings(currentSettings);
-    }
-
-    updateCursor();
-    emit newBrushSettings(currentSettings);
-}
-
-BrushPointerV3 Canvas::brushV3Factory(const QString &name)
-{
-    return Singleton<BrushManager>::instance().makeBrushV3(name);
-}
-
-bool Canvas::isCurrentBrushV3() const
-{
-    return useV3Brush_ && brushV3_;
-}
-
 void Canvas::onColorPicker(bool in)
 {
+    finishStroke();
     if(in){
         control_mode_ = PICKING;
         QPixmap icon = QPixmap(":/iconset/ui/picker-cursor.png");
@@ -371,12 +249,12 @@ void Canvas::onColorPicker(bool in)
     }else{
         control_mode_ = NONE;
         updateCursor();
-        emit canvasToolComplete();
     }
 }
 
 void Canvas::onMoveTool(bool in)
 {
+    finishStroke();
     if(in){
         control_mode_ = MOVING;
         QPixmap icon = QPixmap(":/iconset/ui/brush/move-cursor.png");
@@ -384,11 +262,10 @@ void Canvas::onMoveTool(bool in)
     }else{
         control_mode_ = NONE;
         updateCursor();
-        emit canvasToolComplete();
     }
 }
 
-void Canvas::drawLineTo(const QPoint &endPoint, qreal pressure)
+void Canvas::drawLineTo(const QPoint &endPoint)
 {
     LayerPointer l = layers.selectedLayer();
     if(l.isNull() || l->isLocked() || l->isHided()){
@@ -397,14 +274,14 @@ void Canvas::drawLineTo(const QPoint &endPoint, qreal pressure)
     }
     updateCursor();
     brush_->setSurface(l);
-    brush_->drawLineTo(endPoint, pressure);
+    brush_->drawLineTo(endPoint);
 
     update();
 
     emit documentChanged();
 }
 
-void Canvas::drawPoint(const QPoint &point, qreal pressure)
+void Canvas::drawPoint(const QPoint &point)
 {
     LayerPointer l = layers.selectedLayer();
     if(l.isNull() || l->isLocked() || l->isHided()){
@@ -413,10 +290,10 @@ void Canvas::drawPoint(const QPoint &point, qreal pressure)
     }
     updateCursor();
     brush_->setSurface(l);
-    brush_->drawPoint(point, pressure);
+    brush_->drawPoint(point);
 
     int rad = (brush_->width() / 2) + 2;
-    update(QRect(lastPoint, point).normalized()
+    update(QRect(point, point).normalized()
            .adjusted(-rad, -rad, +rad, +rad));
 
     emit documentChanged();
@@ -430,15 +307,6 @@ void Canvas::pickColor(const QPoint &point)
     emit newBrushSettings(brushSettings());
 }
 
-void Canvas::updateCursor()
-{
-    if (isCurrentBrushV3()) {
-        this->setCursor(QCursor(brushV3_->cursor()));
-    } else {
-        this->setCursor(brush_->cursor());
-    }
-}
-
 QString Canvas::currentLayer()
 {
     const auto selected = layers.selectedLayer();
@@ -447,6 +315,7 @@ QString Canvas::currentLayer()
 
 void Canvas::addLayer(const QString &name)
 {
+    finishStroke();
     if (layers.appendLayer(name)) {
         layerNameCounter++;
         layers.select(name);
@@ -456,6 +325,7 @@ void Canvas::addLayer(const QString &name)
 
 bool Canvas::deleteLayer(const QString &name)
 {
+    finishStroke();
     if (!layers.exists(name) || layers.count() <= 1 || layers.layerFrom(name)->isLocked())
         return false;
 
@@ -467,6 +337,7 @@ bool Canvas::deleteLayer(const QString &name)
 
 void Canvas::clearLayer(const QString &name)
 {
+    finishStroke();
     if (!layers.exists(name) || layers.layerFrom(name)->isLocked()) return;
     layers.clearLayer(name);
     emit documentChanged();
@@ -475,6 +346,7 @@ void Canvas::clearLayer(const QString &name)
 
 void Canvas::clearAllLayer()
 {
+    finishStroke();
     layers.clearAllLayer();
     emit documentChanged();
     update();
@@ -482,6 +354,7 @@ void Canvas::clearAllLayer()
 
 void Canvas::setLayerContent(int index, const QImage &image)
 {
+    finishStroke();
     LayerPointer layer = layers.layerFrom(index);
     if (layer.isNull() || image.isNull())
         return;
@@ -496,6 +369,7 @@ void Canvas::setLayerContent(int index, const QImage &image)
 
 void Canvas::lockLayer(const QString &name)
 {
+    finishStroke();
     if (!layers.exists(name)) return;
     layers.layerFrom(name)->lock();
     emit documentChanged();
@@ -503,6 +377,7 @@ void Canvas::lockLayer(const QString &name)
 
 void Canvas::unlockLayer(const QString &name)
 {
+    finishStroke();
     if (!layers.exists(name)) return;
     layers.layerFrom(name)->unlock();
     emit documentChanged();
@@ -510,6 +385,7 @@ void Canvas::unlockLayer(const QString &name)
 
 void Canvas::hideLayer(const QString &name)
 {
+    finishStroke();
     if (!layers.exists(name)) return;
     layers.layerFrom(name)->hide();
     emit documentChanged();
@@ -518,6 +394,7 @@ void Canvas::hideLayer(const QString &name)
 
 void Canvas::showLayer(const QString &name)
 {
+    finishStroke();
     if (!layers.exists(name)) return;
     layers.layerFrom(name)->show();
     emit documentChanged();
@@ -526,6 +403,7 @@ void Canvas::showLayer(const QString &name)
 
 void Canvas::moveLayerUp(const QString &name)
 {
+    finishStroke();
     layers.moveUp(name);
     emit documentChanged();
     update();
@@ -533,6 +411,7 @@ void Canvas::moveLayerUp(const QString &name)
 
 void Canvas::moveLayerDown(const QString &name)
 {
+    finishStroke();
     layers.moveDown(name);
     emit documentChanged();
     update();
@@ -540,181 +419,11 @@ void Canvas::moveLayerDown(const QString &name)
 
 void Canvas::layerSelected(const QString &name)
 {
+    finishStroke();
     layers.select(name);
 }
 
 /* Event control */
-void Canvas::tabletEvent(QTabletEvent *event)
-{
-    if (!m_tabletEnabled)
-        return;
-
-    if (event->type() == QEvent::TabletPress && control_mode_ != PICKING && control_mode_ != MOVING
-            && !canDraw()) { event->accept(); return; }
-
-    if (isCurrentBrushV3()) {
-        switch(event->type()){
-        case QEvent::TabletPress:
-            if (event->deviceType() != QInputDevice::DeviceType::Stylus || qFuzzyCompare(event->pressure(), 0.0))
-                break;
-            lastPoint = event->position().toPoint();
-            switch(control_mode_) {
-            case PICKING:
-                pickColor(event->position().toPoint());
-                break;
-            case MOVING:
-                break;
-            default:
-            case NONE:
-                control_mode_ = DRAWING;
-                brushV3_->clearAllPaths();
-                v3StrokeBase_ = *layers.selectedLayer()->imageConstPtr();
-            case DRAWING:
-                PressurePoint pt(
-                    event->position(),
-                    event->pressure(),
-                    event->xTilt() / 60.0,
-                    event->yTilt() / 60.0
-                );
-                brushV3_->addPointToCurrentPath(pt);
-                updateBrushV3StrokesOnGoing();
-                update();
-            }
-            break;
-        case QEvent::TabletMove:
-            if (event->deviceType() != QInputDevice::DeviceType::Stylus)
-                break;
-            switch(control_mode_) {
-            case PICKING:
-                pickColor(event->position().toPoint());
-                break;
-            case MOVING:
-            {
-                auto p(lastPoint - event->position().toPoint());
-                if(p.manhattanLength() > 10){
-                    emit contentMovedBy(p);
-                }
-            }
-                break;
-            case DRAWING:
-            {
-                PressurePoint pt(
-                    event->position(),
-                    event->pressure(),
-                    event->xTilt() / 60.0,
-                    event->yTilt() / 60.0
-                );
-                brushV3_->addPointToCurrentPath(pt);
-                updateBrushV3StrokesOnGoing();
-                update();
-            }
-                break;
-            default:
-                break;
-            }
-            break;
-        case QEvent::TabletRelease:
-            switch(control_mode_) {
-            case PICKING:
-                break;
-            case MOVING:
-                break;
-            default:
-                break;
-            case DRAWING:
-                updateBrushV3StrokesOnGoing();
-                brushV3_->endStroke();
-                updateBrushV3StrokesOnDone();
-                update();
-                control_mode_ = NONE;
-                emit documentChanged();
-            }
-            break;
-        default:
-            break;
-        }
-        event->accept();
-        return;
-    }
-
-    switch(event->type()){
-    case QEvent::TabletPress:
-        if (event->deviceType() != QInputDevice::DeviceType::Stylus || qFuzzyCompare(event->pressure(), 0.0))
-            break;
-        lastPoint = event->position().toPoint();
-        switch(control_mode_) {
-        case PICKING:
-            pickColor(event->position().toPoint());
-            break;
-        case MOVING:
-            break;
-        default:
-        case NONE:
-            control_mode_ = DRAWING;
-        case DRAWING:
-            stackPoints.push_back(lastPoint);
-            drawPoint(lastPoint, event->pressure());
-        }
-        break;
-    case QEvent::TabletMove:
-        if (event->deviceType() != QInputDevice::DeviceType::Stylus)
-            break;
-        switch(control_mode_) {
-        case PICKING:
-            pickColor(event->position().toPoint());
-            break;
-        case MOVING:
-        {
-            auto p(lastPoint - event->position().toPoint());
-            if(p.manhattanLength() > 10){
-                emit contentMovedBy(p);
-            }
-        }
-            break;
-        case DRAWING:
-            if(jitterCorrection_){
-                if(stackPoints.length() < qBound(3, jitterCorrectionLevel_, 10)){
-                    stackPoints.push_back(event->position().toPoint());
-                }else{
-                    tryJitterCorrection();
-                    for(auto &p: stackPoints){
-                        drawLineTo(p, event->pressure());
-                        lastPoint = p;
-                    }
-                    stackPoints.clear();
-                }
-                            }else{
-                drawLineTo(event->position().toPoint(), event->pressure());
-                lastPoint = event->position().toPoint();
-            }
-            break;
-        default:
-            break;
-        }
-        break;
-    case QEvent::TabletRelease:
-        switch(control_mode_) {
-        case PICKING:
-            break;
-        case MOVING:
-            break;
-        default:
-            break;
-        case DRAWING:
-            for (const auto &point : stackPoints) drawLineTo(point, event->pressure());
-            stackPoints.clear();
-            updateCursor();
-            control_mode_ = NONE;
-            if (brush_) brush_->endStroke();
-            emit documentChanged();
-        }
-        break;
-    default:
-        break;
-    }
-    event->accept();
-}
-
 void Canvas::focusInEvent(QFocusEvent *)
 {
     QSettings settings(GlobalDef::settingsPath(),
@@ -727,151 +436,13 @@ void Canvas::focusInEvent(QFocusEvent *)
 
 void Canvas::focusOutEvent(QFocusEvent *)
 {
+    finishStroke();
     QSettings settings(GlobalDef::settingsPath(),
                        QSettings::defaultFormat(),
                        qApp);
     bool disable_ime = settings.value("canvas/auto_disable_ime", true).toBool();
     if(disable_ime)
         PlatformExtend::setIMEState(this, true);
-}
-
-void Canvas::mousePressEvent(QMouseEvent *event)
-{
-    if (event->button() == Qt::LeftButton && (!m_tabletEnabled || event->source() == Qt::MouseEventNotSynthesized)) {
-        if (control_mode_ != PICKING && control_mode_ != MOVING && !canDraw()) return;
-        lastPoint = event->position().toPoint();
-        switch(control_mode_) {
-        case PICKING:
-            pickColor(event->position().toPoint());
-            break;
-        case MOVING:
-            break;
-        default:
-        case NONE:
-            control_mode_ = DRAWING;
-            if (isCurrentBrushV3()) {
-                brushV3_->clearAllPaths();
-                v3StrokeBase_ = *layers.selectedLayer()->imageConstPtr();
-            }
-        case DRAWING:
-            if(isCurrentBrushV3()) {
-                PressurePoint pt(
-                    event->position()
-                );
-                brushV3_->addPointToCurrentPath(pt);
-                updateBrushV3StrokesOnGoing();
-            } else {
-                stackPoints.push_back(lastPoint);
-                drawPoint(lastPoint);
-            }
-        }
-    }
-}
-
-void Canvas::mouseMoveEvent(QMouseEvent *event)
-{
-    if ((event->buttons() & Qt::LeftButton && (!m_tabletEnabled || event->source() == Qt::MouseEventNotSynthesized))){
-        switch(control_mode_) {
-        case PICKING:
-            pickColor(event->position().toPoint());
-            break;
-        case MOVING:
-        {
-            auto p(lastPoint - event->position().toPoint());
-            if(p.manhattanLength() > 10){
-                emit contentMovedBy(p);
-            }
-        }
-            break;
-        case DRAWING:
-            if(isCurrentBrushV3()) {
-                PressurePoint pt(
-                    event->position()
-                );
-                brushV3_->addPointToCurrentPath(pt);
-                updateBrushV3StrokesOnGoing();
-                update();
-            } else {
-                if(jitterCorrection_){
-                    if(stackPoints.length() < qBound(3, jitterCorrectionLevel_, 10)){
-                        stackPoints.push_back(event->position().toPoint());
-                    }else{
-                        tryJitterCorrection();
-                        for(auto &p: stackPoints){
-                            drawLineTo(p);
-                            lastPoint = p;
-                        }
-                        stackPoints.clear();
-                    }
-                }else{
-                    drawLineTo(event->position().toPoint());
-                    lastPoint = event->position().toPoint();
-                }
-            }
-            break;
-        default:
-            break;
-        }
-    }
-}
-
-void Canvas::mouseReleaseEvent(QMouseEvent *event)
-{
-    if (event->button() == Qt::LeftButton && (!m_tabletEnabled || event->source() == Qt::MouseEventNotSynthesized)) {
-        switch(control_mode_) {
-        case PICKING:
-            break;
-        case MOVING:
-            break;
-        default:
-            break;
-        case DRAWING:
-            if (isCurrentBrushV3() && brushV3_) {
-                updateBrushV3StrokesOnGoing();
-                brushV3_->endStroke();
-                updateBrushV3StrokesOnDone();
-                updateCursor();
-                control_mode_ = NONE;
-                emit documentChanged();
-            } else {
-                for (const auto &point : stackPoints) drawLineTo(point);
-                drawLineTo(event->position().toPoint());
-                stackPoints.clear();
-                if (brush_) brush_->endStroke();
-                updateCursor();
-                control_mode_ = NONE;
-                emit documentChanged();
-            }
-        }
-    }
-
-}
-
-void Canvas::updateBrushV3StrokesOnDone()
-{
-    if(!isCurrentBrushV3()){
-        return;
-    }
-    brushV3_->clearAllPaths();
-    v3StrokeBase_ = QImage();
-}
-
-void Canvas::updateBrushV3StrokesOnGoing()
-{
-    if(!isCurrentBrushV3()){
-        return;
-    }
-
-    LayerPointer currentLayer = layers.selectedLayer();
-    if (!canDraw()) { brushV3_->clearAllPaths(); return; }
-    QImage preview = v3StrokeBase_;
-    if (preview.isNull()) return;
-    {
-        QPainter imagePainter(&preview);
-        brushV3_->drawCurrentPath(&imagePainter);
-    }
-    *currentLayer->imagePtr() = preview;
-    emit documentChanged();
 }
 
 void Canvas::paintEvent(QPaintEvent *event)
@@ -882,7 +453,6 @@ void Canvas::paintEvent(QPaintEvent *event)
 
     layers.combineLayers(&image, dirtyRect);
     painter.drawImage(dirtyRect, image, dirtyRect);
-
 
     QStyleOption opt;
     opt.initFrom(this);
@@ -936,4 +506,67 @@ QSize Canvas::sizeHint() const
 QSize Canvas::minimumSizeHint() const
 {
     return canvasSize_;
+}
+
+void Canvas::updateCursor()
+{
+    setCursor(brush_->cursor());
+}
+
+void Canvas::mousePressEvent(QMouseEvent *event)
+{
+    if (event->button() != Qt::LeftButton || event->source() != Qt::MouseEventNotSynthesized)
+        return;
+    if (control_mode_ != PICKING && control_mode_ != MOVING && !canDraw()) {
+        setCursor(Qt::ForbiddenCursor);
+        return;
+    }
+    switch (control_mode_) {
+    case PICKING:
+        pickColor(event->position().toPoint());
+        break;
+    case MOVING:
+        break;
+    default:
+        control_mode_ = DRAWING;
+        drawPoint(event->position().toPoint());
+        break;
+    }
+}
+
+void Canvas::mouseMoveEvent(QMouseEvent *event)
+{
+    if (!(event->buttons() & Qt::LeftButton) || event->source() != Qt::MouseEventNotSynthesized)
+        return;
+    switch (control_mode_) {
+    case PICKING:
+        pickColor(event->position().toPoint());
+        break;
+    case MOVING:
+        break;
+    case DRAWING:
+        // Render every sample immediately; batching used to drop the flush sample.
+        drawLineTo(event->position().toPoint());
+        break;
+    default:
+        break;
+    }
+}
+
+void Canvas::mouseReleaseEvent(QMouseEvent *event)
+{
+    if (event->button() != Qt::LeftButton || event->source() != Qt::MouseEventNotSynthesized)
+        return;
+    if (control_mode_ != DRAWING) return;
+    drawLineTo(event->position().toPoint());
+    finishStroke();
+}
+
+void Canvas::finishStroke()
+{
+    if (control_mode_ != DRAWING) return;
+    brush_->endStroke();
+    control_mode_ = NONE;
+    updateCursor();
+    emit documentChanged();
 }

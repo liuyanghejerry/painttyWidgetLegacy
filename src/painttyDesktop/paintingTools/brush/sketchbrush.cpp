@@ -27,7 +27,7 @@ void SketchBrush::setColor(const QColor &c)
     preparePen();
 }
 
-void SketchBrush::drawPoint(const QPoint &p, qreal )
+void SketchBrush::drawPoint(const QPoint &p)
 {
 //    preparePen();
     points.clear();
@@ -35,10 +35,10 @@ void SketchBrush::drawPoint(const QPoint &p, qreal )
     last_point_ = p;
 }
 
-void SketchBrush::drawLineTo(const QPoint &end, qreal pressure)
+void SketchBrush::drawLineTo(const QPoint &end)
 {
     if(last_point_.isNull()){
-        drawPoint(end, pressure);
+        drawPoint(end);
         return;
     }
     points.push_back(end);

@@ -4,11 +4,14 @@
 #include <QObject>
 #include <QKeySequence>
 
+class QShortcut;
+class QWidget;
+
 class SingleShortcut : public QObject
 {
     Q_OBJECT
 public:
-    explicit SingleShortcut(QObject *parent = 0);
+    explicit SingleShortcut(QWidget *parent);
     void setKey(int k);
     void setKey(QKeySequence ks);
     QKeySequence key();
@@ -23,7 +26,10 @@ public slots:
 private:
     Q_DISABLE_COPY(SingleShortcut)
     QKeySequence key_;
-    bool enabled_;
+    QShortcut *shortcut_;
+    QWidget *window_;
+    bool active_ = false;
+    void release();
     
 };
 

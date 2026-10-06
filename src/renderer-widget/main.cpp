@@ -8,7 +8,6 @@
 #include <QPushButton>
 #include <QTabWidget>
 #include <QMouseEvent>
-#include <QTabletEvent>
 #include <QPainter>
 #include <QPainterPath>
 #include <QDebug>
@@ -90,9 +89,9 @@ protected:
 
     void mousePressEvent(QMouseEvent* event) override
     {
-        if (event->button() == Qt::LeftButton && brush_) {
+        if (event->button() == Qt::LeftButton && event->source() == Qt::MouseEventNotSynthesized && brush_) {
             brush_->clearCurrentPath();
-            PressurePoint pt(event->pos(), 0.5);
+            PressurePoint pt(event->pos());
             brush_->addPointToCurrentPath(pt);
             // 只更新显示，不更新缓存图像
             update();
@@ -101,8 +100,8 @@ protected:
 
     void mouseMoveEvent(QMouseEvent* event) override
     {
-        if ((event->buttons() & Qt::LeftButton) && brush_) {
-            PressurePoint pt(event->pos(), 0.8);
+        if ((event->buttons() & Qt::LeftButton) && event->source() == Qt::MouseEventNotSynthesized && brush_) {
+            PressurePoint pt(event->pos());
             brush_->addPointToCurrentPath(pt);
             // 只更新显示，不更新缓存图像
             update();
@@ -111,67 +110,12 @@ protected:
 
     void mouseReleaseEvent(QMouseEvent* event) override
     {
-        if (event->button() == Qt::LeftButton && brush_) {
+        if (event->button() == Qt::LeftButton && event->source() == Qt::MouseEventNotSynthesized && brush_) {
             brush_->endStroke();
             // 结束笔画时更新缓存图像
             updateCanvasImageOnStrokeEnd();
             update();
         }
-    }
-
-    // Tablet事件处理
-    void tabletEvent(QTabletEvent* event) override
-    {
-        // qDebug() << "tabletEvent" << event->type() << event->pressure();
-        switch (event->type()) {
-            case QEvent::TabletPress:
-                if (event->button() == Qt::LeftButton) {
-                    brush_->clearCurrentPath();
-                    PressurePoint pt(
-                        event->position(),
-                        event->pressure(),
-                        event->xTilt() / 60.0,
-                        event->yTilt() / 60.0
-                    );
-                    brush_->addPointToCurrentPath(pt);
-                    // 只更新显示，不更新缓存图像
-                    updateStatus(event);
-                    update();
-                }
-                break;
-
-            case QEvent::TabletMove:
-                if (event->buttons() & Qt::LeftButton) {
-                    PressurePoint pt(
-                        event->position(),
-                        event->pressure(),
-                        event->xTilt() / 60.0,
-                        event->yTilt() / 60.0
-                    );
-                    brush_->addPointToCurrentPath(pt);
-                    // 只更新显示，不更新缓存图像
-                    updateStatus(event);
-                    update();
-                }
-                break;
-
-            case QEvent::TabletRelease:
-                if (event->button() == Qt::LeftButton) {
-                    brush_->endStroke();
-                    // 结束笔画时更新缓存图像
-                    updateCanvasImageOnStrokeEnd();
-                    if (statusLabel_) {
-                        statusLabel_->setText("状态: 等待输入");
-                    }
-                    update();
-                }
-                break;
-
-            default:
-                break;
-        }
-
-        event->accept();
     }
 
     // 处理窗口大小变化
@@ -185,17 +129,6 @@ protected:
     }
 
 private:
-    void updateStatus(QTabletEvent* event)
-    {
-        if (statusLabel_) {
-            QString status = QString("压感: %1 倾斜: (%2, %3)")
-                .arg(event->pressure(), 0, 'f', 2)
-                .arg(event->xTilt())
-                .arg(event->yTilt());
-            statusLabel_->setText("状态: " + status);
-        }
-    }
-
     void updateCanvasImage()
     {
         // 如果缓存图像为空或大小不匹配，重新创建并绘制所有路径
@@ -714,7 +647,7 @@ private slots:
         canvas_ = new CanvasWidget();
         canvas_->setStatusLabel(statusLabel_);
 
-        QLabel* infoLabel = new QLabel("在此区域绘制测试笔迹（支持压感笔）");
+        QLabel* infoLabel = new QLabel("在此区域使用鼠标绘制测试笔迹");
         infoLabel->setAlignment(Qt::AlignCenter);
         infoLabel->setMaximumHeight(50);
         infoLabel->setStyleSheet("QLabel { color: #666; font-style: italic; }");

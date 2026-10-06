@@ -12,8 +12,8 @@ public:
     void setColor(const QColor &color) Q_DECL_OVERRIDE;
     void setThickness(int thickness) Q_DECL_OVERRIDE;
 
-    void drawPoint(const QPoint& p, qreal pressure=1) Q_DECL_OVERRIDE;
-    void drawLineTo(const QPoint& end, qreal pressure=1) Q_DECL_OVERRIDE;
+    void drawPoint(const QPoint& p) Q_DECL_OVERRIDE;
+    void drawLineTo(const QPoint& end) Q_DECL_OVERRIDE;
 
     AbstractBrush* createBrush() Q_DECL_OVERRIDE;
 

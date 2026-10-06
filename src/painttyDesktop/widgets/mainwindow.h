@@ -2,11 +2,13 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QPair>
 
 #include "../misc/shortcutmanager.h"
 #include "../misc/projectfile.h"
 
 class QToolButton;
+class SingleShortcut;
 class BrushSettingsWidget;
 class QActionGroup;
 class QMenu;
@@ -26,14 +28,10 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    template<typename T, typename U>
-    bool regShortcut(const QString& name, T func, U func2);
     template<typename T>
-    bool regShortcut(const QString& name, T func);
-    template<typename T, typename U>
-    bool regShortcut(const QKeySequence& k, T func, U func2);
+    bool regShortcut(const QString& name, T func, bool autoRepeat = true);
     template<typename T>
-    bool regShortcut(const QKeySequence& k, T func);
+    bool regShortcut(const QKeySequence& k, T func, bool autoRepeat = true);
 
 public slots:
     void exportAllToFile();
@@ -43,7 +41,6 @@ public slots:
     void exportToPSD();
     void resetView();
     void about();
-    void onCanvasToolComplete();
     void changeToBrush(const QString& brushName);
 
     /* project management */
@@ -63,6 +60,7 @@ public slots:
 signals:
     void brushColorChange(const QColor &color);
 protected:
+    bool event(QEvent *event) override;
     void closeEvent( QCloseEvent * event ) ;
 private:
     void init();
@@ -75,6 +73,7 @@ private:
     void refreshRecentProjects();
     void importImage();
     void recordDocumentChange();
+    void updateHistoryActions();
     void restoreDocument(const PaintingProject &project);
     void colorGridInit();
     void viewInit();
@@ -88,12 +87,15 @@ private:
     ShortcutManager* shortcutManager_;
 
     QByteArray defaultView;
-    QAction *lastBrushAction;
     BrushSettingsWidget *brushSettingControl_;
     QToolBar *toolbar_;
     QActionGroup *brushActionGroup_;
     QToolButton *colorPickerButton_;
     QToolButton *moveToolButton_;
+    QToolButton *persistentTool_ = nullptr;
+    QList<QPair<SingleShortcut *, QToolButton *>> heldTools_;
+    void updateActiveTool();
+    void registerTemporaryTool(const QKeySequence &key, QToolButton *button);
     QHash<QString, bool> keyMap_;
     QString currentProjectPath_;
 

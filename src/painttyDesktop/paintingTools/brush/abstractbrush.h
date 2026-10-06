@@ -44,10 +44,10 @@ public:
     virtual bool support(const BrushFeature::FEATURE &f);
     virtual BrushFeature features();
 
-    virtual void drawPoint(const QPoint& p, qreal pressure=1)=0;
-    virtual void drawLineTo(const QPoint& end, qreal pressure=1)=0;
+    virtual void drawPoint(const QPoint& p)=0;
+    virtual void drawLineTo(const QPoint& end)=0;
 
-    // 新增：抬笔事件接口，默认空实现
+    // Finish a mouse stroke; brushes may override this to reset stroke state.
     virtual void endStroke() {}
 
     virtual BrushSettings settings() const;

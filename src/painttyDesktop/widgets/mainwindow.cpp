@@ -69,7 +69,6 @@ private:
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    lastBrushAction(nullptr),
     brushSettingControl_(nullptr),
     toolbar_(nullptr),
     brushActionGroup_(nullptr),
@@ -83,8 +82,16 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     qDebug() << "MainWindow::~MainWindow";
-
+    // Child destruction can deactivate the window after our member lists are gone.
+    for (auto *shortcut : findChildren<SingleShortcut *>()) {
+        disconnect(shortcut, nullptr, this, nullptr);
+        shortcut->setEnabled(false);
+        qApp->removeEventFilter(shortcut);
+    }
+    disconnect(undoStack_, nullptr, this, nullptr);
+    disconnect(ui->canvas, nullptr, this, nullptr);
     delete ui;
+    ui = nullptr;
 }
 
 void MainWindow::stylize()
@@ -110,11 +117,6 @@ void MainWindow::init()
     shortcutManager_ = new ShortcutManager(this);
 
     ui->centralWidget->setBackgroundRole(QPalette::Dark);
-
-    connect(ui->canvas, &Canvas::contentMovedBy,
-            [this](const QPoint& p){
-        ui->centralWidget->moveBy(p * ui->centralWidget->currentScaleFactor());
-    });
 
     connect(ui->panorama, &PanoramaWidget::scaled,
             ui->centralWidget, &CanvasContainer::setScaleFactor);
@@ -143,8 +145,6 @@ void MainWindow::init()
             this, &MainWindow::brushColorChange);
     connect(this, &MainWindow::brushColorChange,
             ui->canvas, &Canvas::setBrushColor);
-    connect(ui->canvas, &Canvas::canvasToolComplete,
-            this, &MainWindow::onCanvasToolComplete);
 
     connect(ui->colorGrid,
             static_cast<void (ColorGrid::*)(const int&)>
@@ -177,6 +177,7 @@ void MainWindow::init()
             setWindowModified(true);
             if (!ui->canvas->isDrawing()) recordDocumentChange();
         }
+        updateHistoryActions();
     });
     newProject(1280, 720);
 }
@@ -216,15 +217,7 @@ void MainWindow::toolbarInit()
     this->addToolBar(Qt::TopToolBarArea, toolbar_);
     brushActionGroup_ = new QActionGroup(this);
 
-    // always remember last action
-    auto restoreAction =  [this](){
-        if(lastBrushAction){
-            lastBrushAction->trigger();
-        }
-    };
-
     auto brushes = Singleton<BrushManager>::instance().allBrushes();
-    auto brushesV3 = Singleton<BrushManager>::instance().allBrushesV3();
     std::sort(brushes.begin(), brushes.end(), [](const auto &a, const auto &b) { return a->name() < b->name(); });
 
     // 添加v1笔刷
@@ -239,13 +232,7 @@ void MainWindow::toolbarInit()
         action->setAutoRepeat(false);
         brushActionGroup_->addAction(action);
 
-        // set shortcut for the brush
-        regShortcut<>(item->shortcut(),
-                      [this, action](){
-            lastBrushAction = brushActionGroup_->checkedAction();
-            action->trigger();
-        },
-        restoreAction);
+        regShortcut<>(item->shortcut(), [action]() { action->trigger(); }, false);
 
         action->setToolTip(
                     tr("%1\n"
@@ -256,34 +243,6 @@ void MainWindow::toolbarInit()
             action->trigger();
         }
     }
-
-    // 添加v3笔刷
-    for(auto &item: brushesV3){
-        // create action on tool bar
-        QAction * action = toolbar_->addAction(item->icon(),
-                                               item->displayName());
-        action->setObjectName(item->name());
-        connect(action, &QAction::triggered,
-                this, &MainWindow::onBrushTypeChange);
-        action->setCheckable(true);
-        action->setAutoRepeat(false);
-        brushActionGroup_->addAction(action);
-
-        // set shortcut for the brush
-        regShortcut<>(item->shortcut(),
-                      [this, action](){
-            lastBrushAction = brushActionGroup_->checkedAction();
-            action->trigger();
-        },
-        restoreAction);
-
-        action->setToolTip(
-                    tr("%1\n"
-                       "Shortcut: %2")
-                    .arg(item->displayName())
-                    .arg(item->shortcut().toString()));
-    }
-
 
     // doing hacking to color picker
     QIcon colorpickerIcon(":/iconset/ui/brush/colorpicker.png");
@@ -303,17 +262,8 @@ void MainWindow::toolbarInit()
 
     auto colorpicker_key = Singleton<ShortcutManager>::instance()
             .shortcut("colorpicker")["key"].toString();
-    SingleShortcut *pickerShortcut = new SingleShortcut(this);
-    pickerShortcut->setKey(colorpicker_key);
-    connect(pickerShortcut, &SingleShortcut::activated,
-            colorPickerButton_, &QToolButton::click);
-    connect(pickerShortcut, &SingleShortcut::inactivated,
-            colorPickerButton_, &QToolButton::click);
-    colorpicker->setToolTip(
-                tr("%1\n"
-                   "Shortcut: %2")
-                .arg(colorpicker->text())
-                .arg(colorpicker_key));
+    registerTemporaryTool(QKeySequence(colorpicker_key), colorPickerButton_);
+    colorpicker->setToolTip(tr("%1\nHold: %2").arg(colorpicker->text(), colorpicker_key));
 
     // doing hacking for move tool
     QIcon moveIcon(":/iconset/ui/brush/move.png");
@@ -333,17 +283,8 @@ void MainWindow::toolbarInit()
     
     auto movetool_key = Singleton<ShortcutManager>::instance()
             .shortcut("movetool")["key"].toString();
-    SingleShortcut *moveToolShortcut = new SingleShortcut(this);
-    moveToolShortcut->setKey(movetool_key);
-    connect(moveToolShortcut, &SingleShortcut::activated,
-            moveToolButton_, &QToolButton::click);
-    connect(moveToolShortcut, &SingleShortcut::inactivated,
-            moveToolButton_, &QToolButton::click);
-    moveTool->setToolTip(
-                tr("%1\n"
-                   "Shortcut: %2")
-                .arg(moveTool->text())
-                .arg(movetool_key));
+    registerTemporaryTool(QKeySequence(movetool_key), moveToolButton_);
+    moveTool->setToolTip(tr("%1\nHold: %2").arg(moveTool->text(), movetool_key));
 
     // for brush width
     QToolBar *brushSettingToolbar = new QToolBar(tr("Brush Settings"), this);
@@ -364,7 +305,6 @@ void MainWindow::toolbarInit()
             ui->canvas, &Canvas::setBrushMixin);
     connect(brushSettingToolbar, &QToolBar::orientationChanged,
             brushSettingWidget, &BrushSettingsWidget::setOrientation);
-
 
     //    ShortcutManager &stctmgr = Singleton<ShortcutManager>::instance();
     regShortcut<>("subwidth",
@@ -395,12 +335,23 @@ void MainWindow::statusBarInit()
 
 void MainWindow::shortcutInit()
 {
-    auto *undo = undoStack_->createUndoAction(this, tr("Undo"));
+    auto *undo = new QAction(tr("Undo"), this);
     undo->setObjectName("actionUndo");
     undo->setShortcut(QKeySequence::Undo);
-    auto *redo = undoStack_->createRedoAction(this, tr("Redo"));
+    auto *redo = new QAction(tr("Redo"), this);
     redo->setObjectName("actionRedo");
     redo->setShortcuts(QKeySequence::Redo);
+    connect(undo, &QAction::triggered, this, [this]() {
+        ui->canvas->finishStroke();
+        undoStack_->undo();
+    });
+    connect(redo, &QAction::triggered, this, [this]() {
+        ui->canvas->finishStroke();
+        undoStack_->redo();
+    });
+    connect(undoStack_, &QUndoStack::canUndoChanged, this, &MainWindow::updateHistoryActions);
+    connect(undoStack_, &QUndoStack::canRedoChanged, this, &MainWindow::updateHistoryActions);
+    updateHistoryActions();
     ui->menu_Edit->insertAction(ui->actionClear_All_Layers, undo);
     ui->menu_Edit->insertAction(ui->actionClear_All_Layers, redo);
     ui->actionNew->setShortcut(QKeySequence::New);
@@ -482,17 +433,14 @@ void MainWindow::shortcutInit()
     connect(ui->actionConfiguration, &QAction::triggered,
             [this](){
         ConfigureDialog conf_dialog(this);
-        if (conf_dialog.exec() == QDialog::Accepted) {
-            QSettings settings(GlobalDef::settingsPath(), QSettings::IniFormat);
-            ui->canvas->setTabletEnabled(settings.value("canvas/enable_tablet", true).toBool());
-        }
+        conf_dialog.exec();
     });
 
     regShortcut<>("zoomin", [this](){
         this->ui->centralWidget->scaleBy(1.2);
     });
     regShortcut<>("zoomout", [this](){
-        this->ui->centralWidget->scaleBy(0.8);
+        this->ui->centralWidget->scaleBy(1.0 / 1.2);
     });
     regShortcut<>("rotateclock", [this](){
         this->ui->centralWidget->rotateBy(10);
@@ -501,9 +449,12 @@ void MainWindow::shortcutInit()
         this->ui->centralWidget->rotateBy(-10);
     });
     regShortcut<>("canvasreset", [this](){
-        this->ui->centralWidget->setRotation(0);
-        this->ui->centralWidget->setScaleFactor(1);
+        this->ui->centralWidget->resetView();
     });
+    if (shortcutManager_->shortcut("movetool")["key"].toString() == "C")
+        registerTemporaryTool(QKeySequence(Qt::Key_Space), moveToolButton_);
+    if (shortcutManager_->shortcut("basiceraser")["key"].toString() == "N")
+        regShortcut<>(QKeySequence("E"), [this]() { changeToBrush("BasicEraser"); }, false);
 }
 
 void MainWindow::onColorGridDroped(int id)
@@ -562,73 +513,16 @@ void MainWindow::onPanoramaRefresh()
                                 ui->centralWidget->visualRect().toRect());
 }
 
-void MainWindow::onMoveToolPressed(bool c)
+void MainWindow::onMoveToolPressed(bool checked)
 {
-    ui->canvas->onMoveTool(c);
-    if(brushActionGroup_){
-        brushActionGroup_->setDisabled(c);
-    }
-    if(colorPickerButton_){
-        colorPickerButton_->setDisabled(c);
-    }
+    persistentTool_ = checked ? moveToolButton_ : nullptr;
+    updateActiveTool();
 }
 
-void MainWindow::onColorPickerPressed(bool c)
+void MainWindow::onColorPickerPressed(bool checked)
 {
-    ui->canvas->onColorPicker(c);
-    if(brushActionGroup_){
-        brushActionGroup_->setDisabled(c);
-    }
-    if(moveToolButton_){
-        moveToolButton_->setDisabled(c);
-    }
-}
-
-void MainWindow::onCanvasToolComplete()
-{
-    if(brushActionGroup_){
-        brushActionGroup_->setDisabled(false);
-    }
-    if(colorPickerButton_){
-        colorPickerButton_->setChecked(false);
-    }
-    if(moveToolButton_){
-        moveToolButton_->setChecked(false);
-    }
-}
-
-
-
-void MainWindow::changeToBrush(const QString &brushName)
-{
-    for (auto *action : brushActionGroup_->actions()) {
-        if (action->objectName().compare(brushName, Qt::CaseInsensitive) == 0) action->setChecked(true);
-    }
-    // 检查是否为v3笔刷
-    if (Singleton<BrushManager>::instance().isV3Brush(brushName)) {
-        ui->canvas->changeBrushV3(brushName);
-        // v3笔刷暂时不支持所有设置，禁用相关控件
-        if (this->brushSettingControl_) {
-            this->brushSettingControl_->setHardnessEnabled(false);
-            this->brushSettingControl_->setThicknessEnabled(false);
-            this->brushSettingControl_->setWaterEnabled(false);
-            this->brushSettingControl_->setExtendEnabled(false);
-            this->brushSettingControl_->setMixinEnabled(false);
-        }
-    } else {
-        ui->canvas->changeBrush(brushName);
-        auto f = ui->canvas->brushFeatures();
-        if(!this->brushSettingControl_){
-            return;
-        }
-        this->brushSettingControl_->setHardnessEnabled(f.support(BrushFeature::HARDNESS));
-        this->brushSettingControl_->setThicknessEnabled(f.support(BrushFeature::THICKNESS));
-        this->brushSettingControl_->setWaterEnabled(f.support(BrushFeature::WATER));
-        this->brushSettingControl_->setExtendEnabled(f.support(BrushFeature::EXTEND));
-        this->brushSettingControl_->setMixinEnabled(f.support(BrushFeature::MIXIN));
-    }
-
-    onBrushSettingsChanged(ui->canvas->brushSettings());
+    persistentTool_ = checked ? colorPickerButton_ : nullptr;
+    updateActiveTool();
 }
 
 void MainWindow::rebuildLayerList()
@@ -832,6 +726,8 @@ void MainWindow::newProject(int width, int height)
     updateProjectTitle();
     ui->centralWidget->resetView();
     onPanoramaRefresh();
+    updateActiveTool();
+    updateHistoryActions();
 }
 
 void MainWindow::onOpenProject()
@@ -862,6 +758,8 @@ bool MainWindow::openProject(const QString &filePath)
     rememberProject(currentProjectPath_);
     ui->centralWidget->resetView();
     onPanoramaRefresh();
+    updateActiveTool();
+    updateHistoryActions();
     ui->statusBar->showMessage(tr("Project opened"), 3000);
     return true;
 }
@@ -889,6 +787,7 @@ bool MainWindow::saveProjectAs()
 
 bool MainWindow::saveProjectTo(const QString &path)
 {
+    ui->canvas->finishStroke();
     QString error;
     if (!ProjectFile::save(path, ui->canvas->projectState(), &error)) {
         QMessageBox::critical(this, tr("Save Failed"), tr("Could not save the project:\n%1").arg(error));
@@ -1025,48 +924,89 @@ void MainWindow::restoreDocument(const PaintingProject &project)
     rebuildLayerList();
     lastProjectState_ = project;
     onPanoramaRefresh();
-}
-
-template<typename T, typename U>
-bool MainWindow::regShortcut(const QString& name, T func, U func2)
-{
-    //    auto shortcut_type = (ShT)config["type"].toInt();
-    return regShortcut<>(QKeySequence(shortcutManager_->shortcut(name)["key"].toString()),
-            func, func2);
+    updateActiveTool();
+    updateHistoryActions();
+    updateHistoryActions();
 }
 
 template<typename T>
-bool MainWindow::regShortcut(const QString& name, T func)
+bool MainWindow::regShortcut(const QString& name, T func, bool autoRepeat)
 {
-    return regShortcut<>(QKeySequence(shortcutManager_->shortcut(name)["key"].toString()), func);
-}
-
-template<typename T, typename U>
-bool MainWindow::regShortcut(const QKeySequence& k, T func, U func2)
-{
-    if(keyMap_.contains(k.toString())){
-        return false;
-    }
-    keyMap_.insert(k.toString(), true);
-
-    SingleShortcut *shortcut = new SingleShortcut(this);
-    shortcut->setKey(k);
-    connect(shortcut, &SingleShortcut::activated,
-            func);
-    connect(shortcut, &SingleShortcut::inactivated,
-            func2);
-    return true;
+    return regShortcut<>(QKeySequence(shortcutManager_->shortcut(name)["key"].toString()), func, autoRepeat);
 }
 
 template<typename T>
-bool MainWindow::regShortcut(const QKeySequence& k, T func)
+bool MainWindow::regShortcut(const QKeySequence& k, T func, bool autoRepeat)
 {
-    if(keyMap_.contains(k.toString())){
+    if(k.isEmpty() || keyMap_.contains(k.toString())){
         return false;
     }
     keyMap_.insert(k.toString(), true);
     QShortcut* shortcut = new QShortcut(k, this);
+    shortcut->setAutoRepeat(autoRepeat);
     connect(shortcut, &QShortcut::activated,
             func);
     return true;
+}
+
+void MainWindow::changeToBrush(const QString &brushName)
+{
+    persistentTool_ = nullptr;
+    for (auto *action : brushActionGroup_->actions()) {
+        if (action->objectName().compare(brushName, Qt::CaseInsensitive) == 0) action->setChecked(true);
+    }
+    ui->canvas->changeBrush(brushName);
+    if (!brushSettingControl_) return;
+    auto f = ui->canvas->brushFeatures();
+    brushSettingControl_->setHardnessEnabled(f.support(BrushFeature::HARDNESS));
+    brushSettingControl_->setThicknessEnabled(f.support(BrushFeature::THICKNESS));
+    brushSettingControl_->setWaterEnabled(f.support(BrushFeature::WATER));
+    brushSettingControl_->setExtendEnabled(f.support(BrushFeature::EXTEND));
+    brushSettingControl_->setMixinEnabled(f.support(BrushFeature::MIXIN));
+    onBrushSettingsChanged(ui->canvas->brushSettings());
+    updateActiveTool();
+}
+
+void MainWindow::updateActiveTool()
+{
+    if (!ui || !colorPickerButton_ || !moveToolButton_) return;
+    const auto *tool = heldTools_.isEmpty() ? persistentTool_ : heldTools_.last().second;
+    ui->centralWidget->setPanning(tool == moveToolButton_);
+    colorPickerButton_->setChecked(tool == colorPickerButton_);
+    moveToolButton_->setChecked(tool == moveToolButton_);
+    if (tool == colorPickerButton_) ui->canvas->onColorPicker(true);
+    else if (tool == moveToolButton_) ui->canvas->onMoveTool(true);
+    else ui->canvas->onColorPicker(false);
+}
+
+void MainWindow::registerTemporaryTool(const QKeySequence &key, QToolButton *button)
+{
+    if (key.isEmpty() || keyMap_.contains(key.toString())) return;
+    keyMap_.insert(key.toString(), true);
+    auto *shortcut = new SingleShortcut(this);
+    shortcut->setKey(key);
+    connect(shortcut, &SingleShortcut::activated, this, [this, shortcut, button]() {
+        heldTools_.append(qMakePair(shortcut, button));
+        updateActiveTool();
+    });
+    connect(shortcut, &SingleShortcut::inactivated, this, [this, shortcut, button]() {
+        heldTools_.removeAll(qMakePair(shortcut, button));
+        updateActiveTool();
+    });
+}
+
+void MainWindow::updateHistoryActions()
+{
+    if (!ui) return;
+    if (auto *undo = findChild<QAction *>("actionUndo"))
+        undo->setEnabled(ui->canvas->isDrawing() || undoStack_->canUndo());
+    if (auto *redo = findChild<QAction *>("actionRedo"))
+        redo->setEnabled(!ui->canvas->isDrawing() && undoStack_->canRedo());
+}
+
+bool MainWindow::event(QEvent *event)
+{
+    if (event->type() == QEvent::WindowDeactivate && ui && ui->canvas)
+        ui->canvas->finishStroke();
+    return QMainWindow::event(event);
 }
