@@ -3,7 +3,7 @@
 set -euo pipefail
 
 if [[ ${1:-} == --help ]]; then
-    echo 'Usage: QTDIR=/path/to/Qt/6.6.3/macos ./scripts/package-macos.sh [v1.0.1|dev-local]'
+    echo 'Usage: QTDIR=/path/to/Qt/6.6.3/macos ./scripts/package-macos.sh [version-tag|dev-local]'
     echo 'Optional overrides: PROJECT_DIR, BUILD_DIR, OUTPUT_DIR.'
     exit 0
 fi

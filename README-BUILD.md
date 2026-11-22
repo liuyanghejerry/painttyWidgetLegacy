@@ -144,22 +144,22 @@ Pull Request 上构建、测试并打包 Windows x64 版本，也支持手动运
 推送版本标签后，Linux、macOS、Windows CI 全部成功才自动发布 GitHub Release：
 
 应用版本统一维护在根目录 `VERSION`，用于命令行、“关于”窗口和 Windows EXE 版本信息。
-发行标签须与该文件一致（例如 `VERSION` 为 `1.0.0` 时使用 `v1.0.0`）。
+发行标签须与该文件一致（例如 `VERSION` 为 `1.0.2` 时使用 `v1.0.2`）。
 
 ```bash
 # 在需要发行的提交上创建版本标签，例如：
-git tag v1.0.0
-git push origin v1.0.0
+git tag v1.0.2
+git push origin v1.0.2
 ```
 
-发行附件为 `MrPaint-v1.0.0-windows-x64.zip` 和 `.zip.sha256`。含连字符的版本标签
-（例如 `v1.0.0-beta.1`）会标记为预发行。工作流核对校验值、创建草稿并上传附件，
+发行附件为 `MrPaint-v1.0.2-windows-x64.zip` 和 `.zip.sha256`。含连字符的版本标签
+（例如 `v1.0.2-beta.1`）会标记为预发行。工作流核对校验值、创建草稿并上传附件，
 完成后才公开；重跑同一标签的工作流会更新附件。只有标签发布任务拥有仓库写入权限。
 若使用手动触发，需要此工作流先存在于仓库默认分支。
 
 ## macOS 构建与发行包
 
-Release 中的 `MrPaint-v1.0.1-macos-universal.zip` 支持 macOS 11 及以上，
+Release 中的 `MrPaint-v1.0.2-macos-universal.zip` 支持 macOS 11 及以上，
 包含 Apple Silicon（arm64）和 Intel（x86_64）代码、Qt 运行库及许可文本。
 解压后将 `MrPaint.app` 拖到“应用程序”即可，无需安装 Qt；另附 SHA-256 校验文件。
 此包使用临时签名校验完整性，尚未使用 Apple Developer ID 签名和公证。
@@ -186,7 +186,7 @@ sudo softwareupdate --install-rosetta --agree-to-license
 Intel Mac 需要使用 Apple Silicon Mac 或 CI 执行包含 arm64 启动验证的打包步骤。
 
 `.github/workflows/release-macos.yml` 在标签的 CI Build 成功后补充 macOS 发行附件。
-也可在 Actions 的 **macOS Release → Run workflow** 中输入已有标签（如 `v1.0.1`）
+也可在 Actions 的 **macOS Release → Run workflow** 中输入已有标签（如 `v1.0.2`）
 补打包：工具来自工作流版本，应用源码严格来自发行标签，不会修改标签。
 只有打包、回归测试及两种架构的启动检查全部成功，发布任务才上传到已有 Release。
 Actions 同时保留 `macos-universal` 和 `macos-test-results` 产物 30 天。
