@@ -1,9 +1,10 @@
 #ifndef PSDEXPORT_H
 #define PSDEXPORT_H
 
-#include <QByteArray>
-#include <QImage>
+#include "projectfile.h"
 
-QByteArray imagesToPSD(const QList<QImage> &imageList, const QImage &preview);
+class QIODevice;
+
+bool writePsd(QIODevice &file, const QList<ProjectLayer> &layers, const QImage &composite);
 
 #endif // PSDEXPORT_H

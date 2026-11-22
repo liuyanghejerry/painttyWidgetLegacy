@@ -26,7 +26,7 @@ jobs:
       (github.event.workflow_run.event == 'push' &&
        github.event.workflow_run.conclusion == 'success' &&
        startsWith(github.event.workflow_run.head_branch, 'v'))
-    runs-on: macos-14
+    runs-on: macos-15
     timeout-minutes: 30
     env:
       RELEASE_TAG: ${{ inputs.release_tag || github.event.workflow_run.head_branch }}
@@ -49,7 +49,7 @@ jobs:
         run: |
           python3 -m venv /tmp/qt-venv
           /tmp/qt-venv/bin/pip install aqtinstall==3.3.0
-          /tmp/qt-venv/bin/aqt install-qt mac desktop 6.6.3 clang_64 -O /tmp/Qt --archives qtbase qttools qtsvg
+          /tmp/qt-venv/bin/aqt install-qt mac desktop 6.6.3 clang_64 -O /tmp/Qt -m qtimageformats --archives qtbase qttools qtsvg
       - name: Enable Intel runtime smoke checks on Apple Silicon
         run: sudo softwareupdate --install-rosetta --agree-to-license
       - name: Build universal application and run regression tests

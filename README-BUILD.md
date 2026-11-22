@@ -35,9 +35,9 @@ QTDIR="$HOME/develop/Qt/6.6.3/gcc_64" ./scripts/build-linux.sh --debug --jobs 8
 - **图层**：添加、删除、上移、下移、清空，以及双击名称重命名。
   点击显示和锁定图标切换状态；锁定或隐藏图层不能绘画，清空全部时跳过锁定图层。
 - **导入图片**：文件菜单“Import Image as Layer…”将图片放入新的图层，保持原始大小，
-  超出画布的部分会被裁切。
+  超出画布的部分会被裁切。文件选择器列出当前 Qt 运行时可读取的格式，WebP 由 Qt Image Formats 插件提供。
 - **导出**：PNG、PSD 和剪贴板。Visible 导出合成当前显示的图层，All 导出包含隐藏图层。
-  `.paintty` 项目是完整保留图层属性的编辑格式；PSD 导出沿用旧版的图像图层导出器。
+  PSD 导出包含全部图层、图层名称和合成图像。`.paintty` 项目保留完整的编辑状态。
 - **最近项目**：文件菜单“Open Recent”保留最近 10 个本地项目。
 - **鼠标绘画**：仅接受鼠标输入，保留基础画笔、橡皮、二值画笔、蜡笔和素描笔；
   不提供数位板、压感或倾角控制。鼠标移动逐点即时绘制；取色、平移、换笔或切出窗口
@@ -112,7 +112,7 @@ Windows x64 使用 Qt 6.6.3 的 `win64_mingw` 和 MinGW 11.2.0，与 Windows 11
 
 ```powershell
 python -m pip install aqtinstall==3.3.0
-python -m aqt install-qt windows desktop 6.6.3 win64_mingw -O C:\Qt --archives qtbase qttools qttranslations qtsvg MinGW d3dcompiler_47 opengl32sw
+python -m aqt install-qt windows desktop 6.6.3 win64_mingw -O C:\Qt -m qtimageformats --archives qtbase qttools qttranslations qtsvg MinGW d3dcompiler_47 opengl32sw
 python -m aqt install-tool windows desktop tools_mingw90 qt.tools.win64_mingw900 -O C:\Qt
 
 ./scripts/build-windows.ps1 -QtDirectory C:\Qt\6.6.3\mingw_64
@@ -171,7 +171,7 @@ Release 中的 `MrPaint-v1.0.1-macos-universal.zip` 支持 macOS 11 及以上，
 ```bash
 python3 -m venv /tmp/qt-venv
 /tmp/qt-venv/bin/pip install aqtinstall==3.3.0
-/tmp/qt-venv/bin/aqt install-qt mac desktop 6.6.3 clang_64 -O /tmp/Qt --archives qtbase qttools qtsvg
+/tmp/qt-venv/bin/aqt install-qt mac desktop 6.6.3 clang_64 -O /tmp/Qt -m qtimageformats --archives qtbase qttools qtsvg
 export QTDIR=/tmp/Qt/6.6.3/macos
 # Apple Silicon 上启用 Intel 版启动验证所需的 Rosetta：
 sudo softwareupdate --install-rosetta --agree-to-license
