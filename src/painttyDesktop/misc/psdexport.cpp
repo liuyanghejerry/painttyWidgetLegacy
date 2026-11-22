@@ -1,184 +1,123 @@
 #include "psdexport.h"
-#include <QList>
+
 #include <QDataStream>
 #include <QIODevice>
-#include <QDebug>
+#include <array>
+#include <limits>
 
-static QByteArray imageToLayerData(const QList<QImage> &imageList);
-static QByteArray imageToChannelData(const QImage &image, bool imageData, int *alphaSize = 0,
-                                     int *redSize = 0, int *greenSize = 0, int *blueSize = 0);
+namespace {
+constexpr std::array<qint16, 4> ChannelIds{0, 1, 2, -1}; // RGBA, with -1 for layer transparency.
+using ChannelOffsets = std::array<qint64, ChannelIds.size()>;
 
-#define P_BYTE_ORDER QDataStream::BigEndian
-
-//File Header Section
-#define SIGNATURE quint32(0x38425053) //"8BPS"
-#define VERSION quint16(1)
-#define RESERVED_P1 quint16(0)
-#define RESERVED_P2 quint16(0)
-#define RESERVED_P3 quint16(0) //total of 6 bytes of zero
-#define IMAGE_CHANNEL_NUMBER quint16(4)
-#define IMAGE_HEIGHT(h) quint32(h)
-#define IMAGE_WIDTH(w) quint32(w)
-#define DEPTH quint16(8)
-#define COLOR_MODE quint16(3)
-
-//Color Mode Data Section
-#define COLOR_MODE_SIZE_AND_DATA quint32(0)
-
-//Image Resources Section
-#define IMAGE_RESOURCES_SIZE_AND_DATA quint32(0)
-
-//Layer and Mask Information Section
-#define LAYER_CHANNEL_COUNT quint16(4)
-#define ALPHA_CHANNEL_ID qint16(-1)
-#define RED_CHANNEL_ID qint16(0)
-#define GREEN_CHANNEL_ID qint16(1)
-#define BLUE_CHANNEL_ID qint16(2)
-#define BLEND_MODE_SIGNATURE quint32(0x3842494D) //"8BIM"
-#define BLEND_MODE_KEY quint32(0x6E6F726D) //"norm"
-#define OPACITY quint8(255)
-#define CLIPPING quint8(0)
-#define FLAGS quint8(8)
-#define FILTER quint8(0)
-
-QByteArray imagesToPSD(const QList<QImage> &imageList, const QImage &preview)
+QByteArray channelPlane(const QImage &rgba, int channel)
 {
-    QByteArray psdData;
-    QDataStream psdDataStream(&psdData, QIODevice::WriteOnly);
-    psdDataStream.setByteOrder(P_BYTE_ORDER);
-    psdDataStream << SIGNATURE << VERSION << RESERVED_P1 << RESERVED_P2 << RESERVED_P3;
-    psdDataStream << IMAGE_CHANNEL_NUMBER;
-    psdDataStream << IMAGE_HEIGHT(imageList.at(0).height())
-                  << IMAGE_WIDTH(imageList.at(0).width());
-    psdDataStream << DEPTH << COLOR_MODE;
-    psdDataStream << COLOR_MODE_SIZE_AND_DATA << IMAGE_RESOURCES_SIZE_AND_DATA;
-
-    QByteArray layerAndMaskInfoSection;
-    QDataStream layerAndMaskInfoSectionStream(&layerAndMaskInfoSection, QIODevice::WriteOnly);
-    layerAndMaskInfoSectionStream.setByteOrder(P_BYTE_ORDER);
-    layerAndMaskInfoSectionStream << quint32(0);
-    layerAndMaskInfoSection.append(imageToLayerData(imageList));
-    layerAndMaskInfoSectionStream.device()->seek(0);
-    layerAndMaskInfoSectionStream << quint32(layerAndMaskInfoSection.size() - 4);
-    psdData.append(layerAndMaskInfoSection);
-    psdData.append(imageToChannelData(preview, true));
-    return psdData;
-}
-
-QByteArray imageToLayerData(const QList<QImage> &imageList)
-{
-    QByteArray layerRecord;
-    QByteArray channelImageData;
-    QDataStream layerRecordStream(&layerRecord, QIODevice::WriteOnly);
-    QDataStream channelImageDataStream(&channelImageData, QIODevice::WriteOnly);
-    layerRecordStream.setByteOrder(P_BYTE_ORDER);
-    channelImageDataStream.setByteOrder(P_BYTE_ORDER);
-
-    foreach (const QImage &image, imageList)
-    {
-        int a, r, g, b;
-        QByteArray channelData = imageToChannelData(image, false, &a, &r, &g, &b);
-        layerRecordStream << quint32(0) << quint32(0) //top, left
-                          << IMAGE_HEIGHT(image.height()) //bottom
-                          << IMAGE_WIDTH(image.width()); //right
-        layerRecordStream << LAYER_CHANNEL_COUNT;
-        //        layerRecordStream << ALPHA_CHANNEL_ID << quint32(channelData.size() / 4);
-        //        layerRecordStream << RED_CHANNEL_ID << quint32(channelData.size() / 4);
-        //        layerRecordStream << GREEN_CHANNEL_ID << quint32(channelData.size() / 4);
-        //        layerRecordStream << BLUE_CHANNEL_ID << quint32(channelData.size() / 4);
-        layerRecordStream << ALPHA_CHANNEL_ID << quint32(a);
-        layerRecordStream << RED_CHANNEL_ID << quint32(r);
-        layerRecordStream << GREEN_CHANNEL_ID << quint32(g);
-        layerRecordStream << BLUE_CHANNEL_ID << quint32(b);
-        layerRecordStream << BLEND_MODE_SIGNATURE << BLEND_MODE_KEY;
-        layerRecordStream << OPACITY << CLIPPING << FLAGS << FILTER
-                          << quint32(4) << quint32(0); //extra data field to empty
-        channelImageDataStream.writeRawData(channelData.constData(), channelData.size());
+    QByteArray plane(qsizetype(rgba.width()) * rgba.height(), Qt::Uninitialized);
+    char *dst = plane.data();
+    for (int y = 0; y < rgba.height(); ++y) {
+        const uchar *row = rgba.constScanLine(y);
+        for (int x = 0; x < rgba.width(); ++x)
+            *dst++ = char(row[4 * x + channel]);
     }
-
-    QByteArray layerInfo;
-    QDataStream layerInfoStream(&layerInfo, QIODevice::WriteOnly);
-    layerInfoStream.setByteOrder(P_BYTE_ORDER);
-    layerInfoStream << quint32(0); //Length of the layers info section, rounded up to a multiple of 2
-    layerInfoStream << qint16(-imageList.count()); //Layer count
-    layerInfoStream.writeRawData(layerRecord.constData(), layerRecord.size());
-    layerInfoStream.writeRawData(channelImageData.constData(), channelImageData.size());
-    if (layerInfo.size() & 1)
-        layerInfoStream << quint8(0);
-    layerInfoStream.device()->seek(0);
-    layerInfoStream << quint32(layerInfo.size() - 4);
-    return layerInfo;
+    return plane;
 }
 
-QByteArray imageToChannelData(const QImage &image, bool imageData, int *alphaSize, int *redSize, int *greenSize, int *blueSize)
+QByteArray layerExtraData(const QString &name)
 {
-    if (image.format() != QImage::Format_ARGB32)
-        return imageToChannelData(image.convertToFormat(QImage::Format_ARGB32), imageData,
-                                  alphaSize, redSize, greenSize, blueSize);
+    QByteArray extra;
+    QDataStream out(&extra, QIODevice::WriteOnly);
+    out << quint32(0) << quint32(0); // Layer mask and blending ranges.
 
-    int pixelCount = image.width() * image.height();
-    QByteArray alphaChannel;
-    QByteArray redChannel;
-    QByteArray greenChannel;
-    QByteArray blueChannel;
-    alphaChannel.reserve(pixelCount + 2);
-    redChannel.reserve(pixelCount + 2);
-    greenChannel.reserve(pixelCount + 2);
-    blueChannel.reserve(pixelCount + 2);
+    const QByteArray legacyName = name.toLatin1().left(255);
+    out << quint8(legacyName.size());
+    out.writeRawData(legacyName.constData(), legacyName.size());
+    while (extra.size() % 4) out << quint8(0);
 
-    //    alphaChannel.append(char(0));
-    //    alphaChannel.append(char(0));
-    //    redChannel.append(char(0));
-    //    redChannel.append(char(0));
-    //    greenChannel.append(char(0));
-    //    greenChannel.append(char(0));
-    //    blueChannel.append(char(0));
-    //    blueChannel.append(char(0));
+    out.writeRawData("8BIMluni", 8);
+    out << quint32(4 + 2 * name.size()) << quint32(name.size());
+    for (QChar ch : name) out << quint16(ch.unicode());
+    return extra;
+}
 
-    for (int line = 0; line < image.height(); line++)
-    {
-        const QRgb *lineData = (const QRgb*)image.constScanLine(line);
-        for (int col = 0; col < image.width(); col++)
-        {
-            alphaChannel.append(qAlpha(lineData[col]));
-            redChannel.append(qRed(lineData[col]));
-            greenChannel.append(qGreen(lineData[col]));
-            blueChannel.append(qBlue(lineData[col]));
+ChannelOffsets writeLayerRecord(QDataStream &out, const ProjectLayer &layer)
+{
+    // A transparent pixel keeps an empty layer editable in readers that skip zero-area records.
+    const QSize size = layer.image.isNull() ? QSize(1, 1) : layer.image.size();
+    out << qint32(0) << qint32(0) << qint32(size.height()) << qint32(size.width());
+    out << quint16(ChannelIds.size());
+    ChannelOffsets offsets;
+    for (size_t i = 0; i < ChannelIds.size(); ++i) {
+        out << ChannelIds[i];
+        offsets[i] = out.device()->pos();
+        out << quint32(0); // Filled in after writing the channel.
+    }
+    out.writeRawData("8BIMnorm", 8);
+    out << quint8(255) << quint8(0) << quint8(0) << quint8(0);
+    const QByteArray extra = layerExtraData(layer.name);
+    out << quint32(extra.size());
+    out.writeRawData(extra.constData(), extra.size());
+    return offsets;
+}
+
+bool setLength(QDataStream &out, qint64 field, qint64 length)
+{
+    auto *file = out.device();
+    const qint64 end = file->pos();
+    if (length < 0 || length > std::numeric_limits<quint32>::max() || !file->seek(field))
+        return false;
+    out << quint32(length);
+    return out.status() == QDataStream::Ok && file->seek(end);
+}
+}
+
+bool writePsd(QIODevice &file, const QList<ProjectLayer> &layers, const QImage &composite)
+{
+    if (layers.isEmpty() || layers.size() > ProjectFile::MaxLayers || composite.isNull()) return false;
+    QDataStream out(&file); // PSD uses big-endian integers.
+    out.writeRawData("8BPS", 4);
+    out << quint16(1) << quint32(0) << quint16(0); // Version and six reserved bytes.
+    out << quint16(ChannelIds.size()) << quint32(composite.height()) << quint32(composite.width());
+    out << quint16(8) << quint16(3); // Eight-bit RGB.
+    out << quint32(0) << quint32(0); // Color mode data and image resources.
+
+    const qint64 maskLengthField = file.pos();
+    out << quint32(0);
+    const qint64 layersLengthField = file.pos();
+    out << quint32(0) << qint16(-layers.size()); // The merged image includes transparency.
+    QList<ChannelOffsets> offsets;
+    for (const auto &layer : layers) offsets.append(writeLayerRecord(out, layer));
+
+    QImage transparentPixel(1, 1, QImage::Format_RGBA8888);
+    transparentPixel.fill(Qt::transparent);
+    for (qsizetype i = 0; i < layers.size(); ++i) {
+        const QImage rgba = layers[i].image.isNull() ? transparentPixel
+                                                     : layers[i].image.convertToFormat(QImage::Format_RGBA8888);
+        if (rgba.isNull()) return false;
+        for (int channel = 0; channel < int(ChannelIds.size()); ++channel) {
+            const qint64 start = file.pos();
+            const QByteArray plane = channelPlane(rgba, channel);
+            const QByteArray compressed = qCompress(plane);
+            // qCompress prefixes its zlib stream with a four-byte uncompressed length.
+            if (compressed.size() > 4 && compressed.size() - 4 < plane.size()) {
+                out << quint16(2);
+                out.writeRawData(compressed.constData() + 4, compressed.size() - 4);
+            } else {
+                out << quint16(0);
+                out.writeRawData(plane.constData(), plane.size());
+            }
+            if (!setLength(out, offsets[i][channel], file.pos() - start)) return false;
         }
     }
-    if (!imageData)
-    {
-        alphaChannel = qCompress(alphaChannel);
-        alphaChannel.remove(0, 2);
-        alphaChannel[0] = 0;
-        alphaChannel[1] = 2;
-        *alphaSize = alphaChannel.size();
-        redChannel = qCompress(redChannel);
-        redChannel.remove(0, 2);
-        redChannel[0] = 0;
-        redChannel[1] = 2;
-        *redSize = redChannel.size();
-        greenChannel = qCompress(greenChannel);
-        greenChannel.remove(0, 2);
-        greenChannel[0] = 0;
-        greenChannel[1] = 2;
-        *greenSize = greenChannel.size();
-        blueChannel = qCompress(blueChannel);
-        blueChannel.remove(0, 2);
-        blueChannel[0] = 0;
-        blueChannel[1] = 2;
-        *blueSize = blueChannel.size();
-        return alphaChannel + redChannel + greenChannel + blueChannel;
+    if ((file.pos() - layersLengthField - 4) % 2) out << quint8(0);
+    if (!setLength(out, layersLengthField, file.pos() - layersLengthField - 4)) return false;
+    out << quint32(0); // Global layer mask.
+    if (!setLength(out, maskLengthField, file.pos() - maskLengthField - 4)) return false;
+
+    const QImage rgba = composite.convertToFormat(QImage::Format_RGBA8888);
+    if (rgba.isNull()) return false;
+    out << quint16(0); // Raw merged image, in red, green, blue, alpha plane order.
+    for (int channel = 0; channel < int(ChannelIds.size()); ++channel) {
+        const QByteArray plane = channelPlane(rgba, channel);
+        out.writeRawData(plane.constData(), plane.size());
     }
-    else
-    {
-        //        alphaChannel = qCompress(alphaChannel + redChannel + greenChannel + blueChannel);
-        //        alphaChannel.remove(0, 2);
-        //        alphaChannel[0] = 0;
-        //        alphaChannel[1] = 2;
-        alphaChannel = alphaChannel + redChannel + greenChannel + blueChannel;
-        alphaChannel.prepend(char(0));
-        alphaChannel.prepend(char(0));
-        return alphaChannel;
-    }
+    return out.status() == QDataStream::Ok;
 }

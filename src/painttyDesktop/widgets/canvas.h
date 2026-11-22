@@ -59,7 +59,6 @@ public slots:
     void changeBrush(const QString &name);
     void onColorPicker(bool in);
     void onMoveTool(bool in);
-    QList<QImage> layerImages() const;
 
 signals:
     void newBrushSettings(const QVariantMap &map);

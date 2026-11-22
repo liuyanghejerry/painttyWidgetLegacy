@@ -728,8 +728,8 @@ Hold: %2</source>
     </message>
     <message>
         <location filename="../widgets/mainwindow.cpp" line="858"/>
-        <source>Images (*.png *.jpg *.jpeg *.bmp *.webp)</source>
-        <translation>图片 (*.png *.jpg *.jpeg *.bmp *.webp)</translation>
+        <source>Images (%1)</source>
+        <translation>图片 (%1)</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.cpp" line="865"/>

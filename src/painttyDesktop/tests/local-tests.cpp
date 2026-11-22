@@ -2,9 +2,12 @@
 #include <QAction>
 #include <QApplication>
 #include <QCloseEvent>
+#include <QDataStream>
 #include <QFile>
 #include <QFileDialog>
+#include <QFileInfo>
 #include <QDrag>
+#include <QImageReader>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMessageBox>
@@ -83,6 +86,30 @@ void answerMessage(QMessageBox::StandardButton button)
                 if (auto *answer = box->button(button)) answer->click();
             }
         }
+    });
+}
+
+void chooseFile(MainWindow &window, const QString &path, QString *filter = nullptr)
+{
+    QTimer::singleShot(0, &window, [&window, path, filter]() {
+        auto *dialog = qobject_cast<QFileDialog *>(QApplication::activeModalWidget());
+        QVERIFY(dialog);
+        if (filter) *filter = dialog->selectedNameFilter();
+        dialog->setDirectory(QFileInfo(path).absolutePath());
+        auto *edit = dialog->findChild<QLineEdit *>("fileNameEdit");
+        if (!edit) {
+            dialog->reject();
+            QFAIL("File dialog has no name field");
+        }
+        edit->setText(QFileInfo(path).fileName());
+        static_cast<QDialog *>(dialog)->accept();
+        QTimer::singleShot(0, &window, []() {
+            if (auto *error = qobject_cast<QMessageBox *>(QApplication::activeModalWidget())) {
+                const auto message = error->text();
+                error->reject();
+                QFAIL(qPrintable(message));
+            }
+        });
     });
 }
 }
@@ -381,6 +408,127 @@ private slots:
         QCloseEvent discard;
         QApplication::sendEvent(&window, &discard);
         QVERIFY(discard.isAccepted());
+    }
+
+    void reopenCurrentProjectAfterSaving()
+    {
+        QTemporaryDir directory;
+        const auto path = directory.filePath("current.paintty");
+        MainWindow window;
+        window.newProject(3, 2);
+        QVERIFY(window.saveProjectTo(path));
+        window.addLayer("Latest edit");
+        const QImage blue = image(QSize(3, 2), Qt::blue);
+        auto *canvas = canvasOf(window);
+        canvas->setLayerContent(1, blue);
+
+        answerMessage(QMessageBox::Cancel);
+        QVERIFY(!window.openProject(path));
+        QVERIFY(window.isWindowModified());
+        answerMessage(QMessageBox::Save);
+        QVERIFY(window.openProject(path));
+        QCOMPARE(canvas->count(), 2);
+        QCOMPARE(canvas->projectState().layers.last().image, blue);
+        QVERIFY(!window.isWindowModified());
+
+        QVERIFY(window.saveProject());
+        PaintingProject disk;
+        QString error;
+        QVERIFY2(ProjectFile::load(path, &disk, &error), qPrintable(error));
+        QCOMPARE(disk.layers.size(), 2);
+        QCOMPARE(disk.layers.last().name, QString("Latest edit"));
+        QCOMPARE(disk.layers.last().image, blue);
+    }
+
+    void psdExportKeepsPixelsAndEmptyLayers()
+    {
+        QTemporaryDir directory;
+        MainWindow window;
+        window.newProject(2, 1);
+        window.addLayer("墨");
+        auto *canvas = canvasOf(window);
+        QImage strip = image(QSize(2, 1), Qt::blue);
+        strip.setPixelColor(1, 0, QColor(255, 0, 0, 128));
+        canvas->setLayerContent(1, strip);
+        window.addLayer("Empty");
+        const auto projectPath = directory.filePath("original.paintty");
+        QVERIFY(window.saveProjectTo(projectPath));
+        QFile projectFile(projectPath);
+        QVERIFY(projectFile.open(QIODevice::ReadOnly));
+        const auto before = projectFile.readAll();
+        projectFile.close();
+
+        const auto path = directory.filePath("drawing.psd");
+        chooseFile(window, path);
+        window.exportToPSD();
+        const auto state = canvas->projectState();
+        QVERIFY(state.layers.first().image.isNull());
+        QCOMPARE(state.layers[1].image, strip);
+        QVERIFY(state.layers.last().image.isNull());
+        QCOMPARE(state.selectedLayer, 2);
+        QVERIFY(!window.isWindowModified());
+        QVERIFY(window.saveProject());
+        QVERIFY(projectFile.open(QIODevice::ReadOnly));
+        QCOMPARE(projectFile.readAll(), before);
+
+        QFile psd(path);
+        QVERIFY(psd.open(QIODevice::ReadOnly));
+        QCOMPARE(psd.read(4), QByteArray("8BPS"));
+        QDataStream stream(&psd);
+        stream.skipRawData(22); // Rest of the fixed PSD header.
+        quint32 size;
+        for (int i = 0; i < 2; ++i) { // Color mode data and image resources.
+            stream >> size;
+            QVERIFY(psd.seek(psd.pos() + size));
+        }
+        stream >> size;
+        const qint64 compositeOffset = psd.pos() + size;
+        qint16 layerCount;
+        stream >> size >> layerCount;
+        QCOMPARE(layerCount, -3);
+        stream.skipRawData(16); // First layer bounds.
+        quint16 channels;
+        stream >> channels;
+        QCOMPARE(channels, 4);
+        stream.skipRawData(6 * channels + 12); // Channel descriptors and blend settings.
+        stream >> size;
+        QVERIFY(size >= 12); // Mask length, blending ranges length, padded Pascal name.
+        QCOMPARE(stream.status(), QDataStream::Ok);
+        QVERIFY(psd.seek(compositeOffset));
+        // Raw compression, followed by two pixels in separate R, G, B and A planes.
+        QCOMPARE(psd.readAll(), QByteArray::fromHex("0000 00ff 007f ff7f ffff"));
+    }
+
+    void importWebpAsLayer_data()
+    {
+        QTest::addColumn<QByteArray>("bytes");
+        // Independently encoded 3-by-2 lossless images, both with a blue bottom-right pixel.
+        QTest::newRow("36-byte solid image") << QByteArray::fromBase64(
+            "UklGRhwAAABXRUJQVlA4TA8AAAAvAkAAAAcQ0f/+ByKi/wEA");
+        QTest::newRow("multicolor image") << QByteArray::fromBase64(
+            "UklGRkYAAABXRUJQVlA4TDoAAAAvAkAAAC9AJmCxnTLSP4YcCtlGgC5HecYn8akoaNuG6WFeiMWzM/8BvqTL6pHHUhAIkCHaHIjof+QA");
+    }
+
+    void importWebpAsLayer()
+    {
+        QFETCH(QByteArray, bytes);
+        QVERIFY2(QImageReader::supportedImageFormats().contains("webp"), "Install the Qt Image Formats WebP plugin");
+        QTemporaryDir directory;
+        QFile webp(directory.filePath("blue.webp"));
+        QVERIFY(webp.open(QIODevice::WriteOnly));
+        QCOMPARE(webp.write(bytes), bytes.size());
+        webp.close();
+
+        MainWindow window;
+        window.newProject(4, 3);
+        QString filter;
+        chooseFile(window, webp.fileName(), &filter);
+        window.findChild<QAction *>("actionImportImage")->trigger();
+        QVERIFY(filter.contains("*.webp"));
+        const auto state = canvasOf(window)->projectState();
+        QCOMPARE(state.layers.size(), 2);
+        QCOMPARE(state.layers.last().image.pixelColor(2, 1), QColor(Qt::blue));
+        QCOMPARE(state.layers.last().image.pixelColor(3, 2).alpha(), 0);
     }
 
     void brushStrokesAndLockedLayers()
@@ -790,6 +938,7 @@ int main(int argc, char **argv)
 {
     QTemporaryDir settings;
     qputenv("XDG_CONFIG_HOME", settings.path().toUtf8());
+    QApplication::setAttribute(Qt::AA_DontUseNativeDialogs);
     QApplication app(argc, argv);
     app.setOrganizationName("PainttyTest");
     app.setApplicationName("LocalTests");

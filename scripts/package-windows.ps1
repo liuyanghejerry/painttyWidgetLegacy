@@ -47,7 +47,7 @@ if ($deploymentExitCode -ne 0) { throw "windeployqt failed with exit code $deplo
 Copy-Item (Join-Path $QtDirectory 'plugins/platforms/qoffscreen.dll') (Join-Path $stagingDirectory 'platforms/qoffscreen.dll')
 "[Paths]`nPrefix=.`nPlugins=.`n" | Set-Content (Join-Path $stagingDirectory 'qt.conf') -Encoding ascii
 foreach ($file in @('Qt6Core.dll', 'Qt6Gui.dll', 'Qt6Widgets.dll', 'platforms/qwindows.dll',
-                    'libgcc_s_seh-1.dll', 'libstdc++-6.dll', 'libwinpthread-1.dll')) {
+                    'imageformats/qwebp.dll', 'libgcc_s_seh-1.dll', 'libstdc++-6.dll', 'libwinpthread-1.dll')) {
     if (-not (Test-Path (Join-Path $stagingDirectory $file) -PathType Leaf)) { throw "Missing runtime dependency: $file" }
 }
 
@@ -120,6 +120,13 @@ try {
         throw "Packaged application failed ($($process.ExitCode)): $errorOutput"
     }
     if ($versionOutput.Trim() -ne "MrPaint $applicationVersion") { throw "Unexpected --version output: $versionOutput" }
+
+    # Run the import test beside the extracted Qt libraries and plugins.
+    $smokeTest = Join-Path $smokeDirectory 'local-tests.exe'
+    Copy-Item (Join-Path $BuildDirectory 'local-tests/bin/local-tests.exe') $smokeTest
+    Copy-Item (Join-Path $QtDirectory 'bin/Qt6Test.dll') $smokeDirectory
+    & $smokeTest importWebpAsLayer -o "$(Join-Path $BuildDirectory 'package-smoke-webp.txt'),txt"
+    if ($LASTEXITCODE -ne 0) { throw 'WebP import failed using the extracted Windows package.' }
 } finally {
     if ($process) { $process.Dispose() }
     foreach ($name in $variables) { [Environment]::SetEnvironmentVariable($name, $previousEnvironment[$name], 'Process') }

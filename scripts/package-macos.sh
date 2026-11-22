@@ -34,13 +34,18 @@ ditto "$QTDIR/plugins/platforms/libqoffscreen.dylib" "$APP/Contents/PlugIns/plat
 # Deploy dependencies of the explicitly included offscreen plugin too.
 "$QTDIR/bin/macdeployqt" "$APP" -always-overwrite -verbose=2
 
+[[ -f "$APP/Contents/PlugIns/imageformats/libqwebp.dylib" ]] || {
+    echo 'Missing WebP image plugin in the bundle. Install the Qt Image Formats module.' >&2
+    exit 1
+}
+
 RESOURCES="$APP/Contents/Resources"
 mkdir -p "$RESOURCES/licenses"
 cp "$PROJECT_DIR/src/painttyDesktop/LICENSE" "$RESOURCES/licenses/Paintty-LGPL-2.1.txt"
 cp "$PROJECT_DIR/src/painttyDesktop/COPYING" "$RESOURCES/licenses/Paintty-COPYING.txt"
 cp "$PROJECT_DIR/src/painttyDesktop/fonts/LICENSE_FOR_FONT" "$RESOURCES/licenses/Droid-font-Apache-2.0.txt"
-cp "$PROJECT_DIR/packaging/windows/licenses/"*.txt "$RESOURCES/licenses/"
 TOOLS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+cp "$TOOLS_DIR/packaging/windows/licenses/"*.txt "$RESOURCES/licenses/"
 cp "$TOOLS_DIR/packaging/macos/README.txt" "$STAGING_DIR/README.txt"
 python3 - "$APP" "$VERSION_TAG" "$APP_VERSION" "$SOURCE_COMMIT" <<'PY'
 import json, pathlib, plistlib, re, subprocess, sys

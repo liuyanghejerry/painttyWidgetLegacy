@@ -18,61 +18,55 @@ concurrency:
 jobs:
   build-linux:
     runs-on: ubuntu-22.04
-    container:
-      image: stateoftheartio/qt6:6.6-gcc-aqt
-      options: --user root
     steps:
-      - name: Fix container permissions
-        run: chown -R 1001:1001 /__w && chmod -R 755 /__w
-
       - uses: actions/checkout@v4
 
-      - name: Install build dependencies
-        run: |
-          apt update
-          apt install -y build-essential libgl1-mesa-dev libxkbcommon-x11-0 \
-            libxcb-icccm4 libxcb-image0 libxcb-keysyms1 \
-            libxcb-render-util0 libxcb-xinerama0 libxcb-xinput0 libxcb-xfixes0
+      - name: Install Qt with WebP support
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.6.3'
+          arch: gcc_64
+          modules: qtimageformats
+          archives: qtbase icu
+          cache: true
 
-      - name: Build
+      - name: Build and run regression tests
         run: |
-          mkdir -p build && cd build
-          qmake ../painttyWidget.pro
-          make -j$(nproc)
-
-      - name: Verify build
-        run: |
-          echo "=== Build output ==="
-          ls -la build/
-          find build/ -type f -executable -ls 2>/dev/null || true
+          export QTDIR="$QT_ROOT_DIR"
+          ./scripts/build-linux.sh --jobs 4
+          JOBS=4 ./scripts/test-linux.sh
 
   build-macos:
-    strategy:
-      matrix:
-        os: [macos-14]
-    runs-on: ${{ matrix.os }}
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Qt6 (pinned to 6.6.0)
-        run: |
-          python3 -m venv /tmp/qt-venv
-          source /tmp/qt-venv/bin/activate
-          pip install aqtinstall
-          aqt install-qt mac desktop 6.6.0 clang_64 -O /tmp/Qt
-          echo "/tmp/Qt/6.6.0/macos/bin" >> $GITHUB_PATH
+      - name: Install Qt with WebP support
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.6.3'
+          arch: clang_64
+          modules: qtimageformats
+          archives: qtbase qttools qtsvg
+          cache: true
 
-      - name: Build
+      - name: Build universal applications
         run: |
           mkdir -p build && cd build
-          qmake ../painttyWidget.pro
+          qmake -r ../painttyWidget.pro 'QMAKE_APPLE_DEVICE_ARCHS=x86_64 arm64'
           make -j$(sysctl -n hw.logicalcpu)
 
-      - name: Verify build
+      - name: Run regression tests
         run: |
-          echo "=== Build output ==="
-          ls -la build/
-          find build/ -type f -executable -ls 2>/dev/null || true
+          mkdir -p build/local-tests && cd build/local-tests
+          qmake ../../src/painttyDesktop/local-tests.pro CONFIG-=app_bundle
+          make -j$(sysctl -n hw.logicalcpu)
+          QT_QPA_PLATFORM=offscreen ./bin/local-tests
+
+      - name: Verify the portable macOS package
+        run: |
+          sudo softwareupdate --install-rosetta --agree-to-license
+          QTDIR="$QT_ROOT_DIR" BUILD_DIR="$PWD/build" ./scripts/package-macos.sh dev-ci
 
   build-windows:
     runs-on: windows-2022
@@ -93,6 +87,7 @@ jobs:
         with:
           version: '6.6.3'
           arch: win64_mingw
+          modules: qtimageformats
           archives: qtbase qttools qttranslations qtsvg MinGW d3dcompiler_47 opengl32sw
           tools: tools_mingw90,qt.tools.win64_mingw900
           aqtversion: '==3.3.0'

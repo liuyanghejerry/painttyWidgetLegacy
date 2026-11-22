@@ -152,15 +152,6 @@ void Canvas::setBrushFeature(const QString &key, const QVariant &value)
     setBrushSettings(settings);
 }
 
-QList<QImage> Canvas::layerImages() const
-{
-    QList<QImage> lists;
-    for(int i=0;i<layers.count();++i){
-        lists.append(*(layers.layerFrom(i)->imageConstPtr()));
-    }
-    return lists;
-}
-
 PaintingProject Canvas::projectState() const
 {
     PaintingProject project;

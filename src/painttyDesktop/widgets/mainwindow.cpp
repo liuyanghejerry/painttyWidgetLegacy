@@ -19,6 +19,8 @@
 #include <QInputDialog>
 #include <QImageReader>
 #include <QImageWriter>
+#include <QBuffer>
+#include <QtEndian>
 #include <QSaveFile>
 #include <QScopedValueRollback>
 #include <QMenu>
@@ -670,11 +672,10 @@ void MainWindow::exportToPSD()
         fileName = fileName + ".psd";
     }
 
-    // save all layers into psd
-
-    const QByteArray data = imagesToPSD(ui->canvas->layerImages(), ui->canvas->allCanvas());
     QSaveFile file(fileName);
-    if (data.isEmpty() || !file.open(QIODevice::WriteOnly) || file.write(data) != data.size() || !file.commit())
+    if (!file.open(QIODevice::WriteOnly)
+            || !writePsd(file, ui->canvas->projectState().layers, ui->canvas->allCanvas())
+            || !file.commit())
         QMessageBox::critical(this, tr("Export Failed"), tr("Could not write the PSD file:\n%1").arg(file.errorString()));
 }
 
@@ -739,13 +740,14 @@ void MainWindow::onOpenProject()
 
 bool MainWindow::openProject(const QString &filePath)
 {
+    // Saving (including Save As) may replace the very file we are opening.
+    if (!promptSaveIfDirty()) return false;
     PaintingProject project;
     QString error;
     if (!ProjectFile::load(filePath, &project, &error)) {
         QMessageBox::critical(this, tr("Open Failed"), tr("Could not open the project:\n%1").arg(error));
         return false;
     }
-    if (!promptSaveIfDirty()) return false;
     QScopedValueRollback<bool> resetting(resettingDocument_, true);
     ui->canvas->setProjectState(project);
     rebuildLayerList();
@@ -861,12 +863,35 @@ void MainWindow::refreshRecentProjects()
 
 void MainWindow::importImage()
 {
+    QStringList patterns;
+    const auto formats = QImageReader::supportedImageFormats();
+    for (const auto *format : {"png", "jpg", "jpeg", "bmp", "webp"}) {
+        if (formats.contains(format)) patterns.append(QStringLiteral("*.") + QLatin1String(format));
+    }
     const QString path = QFileDialog::getOpenFileName(this, tr("Import Image as Layer"), lastProjectDirectory(),
-                                                     tr("Images (*.png *.jpg *.jpeg *.bmp *.webp)"));
+                                                     tr("Images (%1)").arg(patterns.join(' ')));
     if (path.isEmpty()) return;
     if (ui->canvas->count() >= ProjectFile::MaxLayers) return;
     QImageReader::setAllocationLimit(256);
-    QImageReader reader(path);
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly)) {
+        QMessageBox::warning(this, tr("Import Failed"), file.errorString());
+        return;
+    }
+    QBuffer paddedWebp;
+    QImageReader reader(&file);
+    // Qt 6.6 probes 40 bytes even for shorter, complete lossless WebP files.
+    // Keep the RIFF length intact so the decoder sees only the original payload.
+    constexpr int webpProbeSize = 40;
+    if (file.size() < webpProbeSize) {
+        const auto bytes = file.peek(webpProbeSize);
+        if (bytes.startsWith("RIFF") && bytes.mid(8, 4) == "WEBP"
+                && qFromLittleEndian<quint32>(bytes.constData() + 4) == bytes.size() - 8) {
+            paddedWebp.setData(bytes.leftJustified(webpProbeSize, '\0'));
+            paddedWebp.open(QIODevice::ReadOnly);
+            reader.setDevice(&paddedWebp);
+        }
+    }
     reader.setAutoTransform(true);
     if (!ProjectFile::validSize(reader.size())) {
         QMessageBox::warning(this, tr("Import Failed"), tr("The image dimensions are unsupported."));
